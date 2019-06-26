@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.MainActivity">
+
+    <TextView
+        android:id="@+id/hello_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notify will appear here!"
+        android:textColor="@color/FocusYellowColor"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/notification_text_view"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/notification_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hello_text_view"
+        android:textColor="@color/FocusColorTwo"
+        android:textSize="14sp"
+        tools:text="This is a notification text"
+        android:gravity="center"
+        android:layout_marginTop="8dp"/>
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/end_button"
+        android:layout_marginStart="16dp"
+        android:text="Start New Service"
+        android:background="@drawable/background_sign_in"
+        android:textColor="@color/FlatWhite"
+        android:layout_marginBottom="16dp"/>
+    <Button
+        android:id="@+id/end_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/FlatWhite"
+        app:layout_constraintBottom_toBottomOf="@id/start_button"
+        app:layout_constraintStart_toEndOf="@id/start_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/background_sign_up_border"
+        android:text="Finish Service"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

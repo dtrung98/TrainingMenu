@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Service Training</string>
+    <string name="accessibility_overflow">Accessibility Overflow</string>
+    <string name="notification_chanel_name">Service Training Channel</string>
+    <string name="notification_chanel_description">Timer listening service created by Service Training</string>
+
+</resources>
