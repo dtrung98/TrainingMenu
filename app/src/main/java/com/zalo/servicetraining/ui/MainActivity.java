@@ -46,11 +46,12 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.start_button)
     void clickOnStartButton() {
         startServiceWithNormalWay();
+        checkStatus();
     }
 
     @OnClick(R.id.end_button)
     void clickOnEndButton(){
-
+        checkStatus();
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 mStartButton.setText("RUNNING");
                 break;
         }
+
     }
 
     private void startServiceWithNormalWay() {

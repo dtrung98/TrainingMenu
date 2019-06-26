@@ -39,7 +39,8 @@ public class TimeTrackRemote {
         if(manager==null) return null;
         for (ActivityManager.RunningServiceInfo service :
                 manager.getRunningServices(Integer.MAX_VALUE)) {
-            if("TimeTrackService".equals(service.service.getClassName())) return true;
+            String serviceClassName = service.service.getClassName();
+            if("com.zalo.servicetraining.service.TimeTrackService".equals(serviceClassName)) return true;
         }
         return false;
     }
