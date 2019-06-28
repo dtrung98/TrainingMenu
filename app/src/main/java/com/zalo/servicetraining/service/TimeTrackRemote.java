@@ -8,9 +8,13 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
+
+import java.util.WeakHashMap;
 
 public class TimeTrackRemote {
     private static TimeTrackService mService;
+    private static final WeakHashMap<Context, RemoteServiceBinder> mConnectionMap = new WeakHashMap<>();
 
     public static void startThenBindService(Context context, ServiceConnection callback) {
         Activity realActivity = ((Activity)context).getParent();
@@ -25,7 +29,7 @@ public class TimeTrackRemote {
 
         if(contextWrapper.bindService(new Intent().setClass(contextWrapper,TimeTrackService.class),binder,Context.BIND_AUTO_CREATE));
         {
-
+            mConnectionMap.put(contextWrapper, binder);
         }
     }
 
@@ -45,8 +49,26 @@ public class TimeTrackRemote {
         return false;
     }
 
+    public static void unBind(Context context) {
+        Activity realActivity = ((Activity)context).getParent();
+        if(realActivity ==null) {
+            realActivity  = (Activity)context;
+        }
+
+        final ContextWrapper contextWrapper = new ContextWrapper(realActivity);
+
+        RemoteServiceBinder mBinder = mConnectionMap.remove(contextWrapper);
+
+        if(mBinder!=null)
+        contextWrapper.unbindService(mBinder);
+
+       // if(mService!=null)
+      //      mService.stopForegroundThenStop();
+    }
+
 
     public static class RemoteServiceBinder implements ServiceConnection {
+        public static final String TAG = "RemoteServiceBinder";
 
         private final ServiceConnection mCallback;
 
@@ -57,6 +79,8 @@ public class TimeTrackRemote {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(TAG, "onServiceConnected: ");
+            
             TimeTrackService.TimeTrackBinder binder = (TimeTrackService.TimeTrackBinder) iBinder;
             mService = binder.getService();
 
@@ -67,6 +91,7 @@ public class TimeTrackRemote {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(TAG, "onServiceDisconnected: ");
 
             if(mCallback != null) {
                 mCallback.onServiceDisconnected(componentName);

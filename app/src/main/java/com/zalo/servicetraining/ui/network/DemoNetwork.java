@@ -1,8 +1,10 @@
-package com.zalo.servicetraining.ui;
+package com.zalo.servicetraining.ui.network;
 
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -11,22 +13,35 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.Item;
-import com.zalo.servicetraining.ui.contentprovider.ContentProviderDemoActivity;
-import com.zalo.servicetraining.ui.network.DemoNetwork;
+import com.zalo.servicetraining.ui.MenuAdapter;
+import com.zalo.servicetraining.ui.contentprovider.DemoNoteApp;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import es.dmoral.toasty.Toasty;
 
-public class MainActivity extends AppCompatActivity implements MenuAdapter.OnItemClickListener {
-    public static final String TAG = "MainActivity";
+public class DemoNetwork extends AppCompatActivity implements MenuAdapter.OnItemClickListener {
+    private static final String TAG = "ContentProviderDemoActivity";
 
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefresh;
+
+    @BindView(R.id.title)
+    TextView mTitle;
+
+    @BindView(R.id.back_button)
+    View mBackButton;
+
+    @OnClick(R.id.back_button)
+    void back() {
+        finish();
+    }
 
     MenuAdapter mAdapter;
 
@@ -36,22 +51,27 @@ public class MainActivity extends AppCompatActivity implements MenuAdapter.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         ButterKnife.bind(this);
+        init();
+
+        refreshData();
+    }
+    private void init() {
+        mBackButton.setVisibility(View.VISIBLE);
+        mTitle.setText(R.string.network);
         mAdapter = new MenuAdapter();
         mAdapter.setListener(this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this,2,RecyclerView.VERTICAL,false));
-        refreshData();
         mSwipeRefresh.setOnRefreshListener(this::refreshData);
+
     }
 
     ArrayList<Item> mList = new ArrayList<>();
 
     private void refreshData() {
        mList.clear();
-       mList.add(new Item().setTitle("Service").setDescription("Create a simple foreground service."));
-       mList.add(new Item().setTitle("Content Provider").setDescription("A note app using SQLite to store data"));
-       mList.add(new Item().setTitle("Network").setDescription("A weather app fetching data from internet"));
-
+       mList.add(new Item().setTitle("Weather"));
+       mList.add(new Item().setTitle("Other"));
        mAdapter.setData(mList);
        mSwipeRefresh.setRefreshing(false);
     }
@@ -59,15 +79,10 @@ public class MainActivity extends AppCompatActivity implements MenuAdapter.OnIte
     @Override
     public void onEventItemClick(Item item) {
         switch (item.getTitle()) {
-            case "Service" :
-                startActivity(new Intent(this, ServiceDemoActivity.class));
-                break;
-            case "Content Provider" :
-                startActivity(new Intent(this, ContentProviderDemoActivity.class));
-                break;
-            case "Network":
-                startActivity(new Intent(this, DemoNetwork.class));
-                break;
+            case "Weather" :
+                startActivity(new Intent(this, DemoWeatherApp   .class)); break;
+            case "Other" :
+                Toasty.info(this,"Coming soon!").show(); break;
         }
     }
 

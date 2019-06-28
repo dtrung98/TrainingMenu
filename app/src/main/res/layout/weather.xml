@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+   >
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/circle_background_support_touch"
+        app:srcCompat="@drawable/ic_arrow_back_24dp"
+        android:tint="@color/FocusYellowColor"
+        android:layout_marginTop="24dp"
+        android:padding="12dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,5 +3,9 @@
     <string name="accessibility_overflow">Accessibility Overflow</string>
     <string name="notification_chanel_name">Service Training Channel</string>
     <string name="notification_chanel_description">Timer listening service created by Service Training</string>
+    <string name="content_provider">Content Provider</string>
+    <string name="notes">Notes</string>
+    <string name="weather">Weather</string>
+    <string name="network">Network</string>
 
 </resources>

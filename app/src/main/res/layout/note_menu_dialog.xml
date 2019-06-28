@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_card_item"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/detail"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf= "parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Detail"
+        android:background="@drawable/background_item_menu_top"
+        android:gravity="center_vertical"
+        android:textColor="#FAF3DD"
+        android:paddingStart="24dp"
+        android:textSize="16sp"
+        android:paddingEnd="24dp" />
+    <TextView
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf= "parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/detail"
+        android:text="Edit"
+        android:background="@drawable/background_item_menu_middle"
+        android:gravity="center_vertical"
+        android:textColor="#FAF3DD"
+        android:paddingStart="24dp"
+        android:textSize="16sp"
+        android:paddingEnd="24dp" />
+    <TextView
+        android:id="@+id/delete"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:background="@drawable/background_item_menu_bottom"
+        app:layout_constraintStart_toStartOf= "parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit"
+        android:text="Delete"
+        android:gravity="center_vertical"
+        android:textColor="#FAF3DD"
+        android:paddingStart="24dp"
+        android:textSize="16sp"
+        android:paddingEnd="24dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>
