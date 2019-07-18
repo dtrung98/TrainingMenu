@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="@drawable/background_item_user_data"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    >
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        tools:text="1"
+        android:textColor="#AAEEEEEE"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="12dp"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+    <ImageView
+        android:id="@+id/user_image_view"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/number"
+        android:background="@drawable/background_item_image"
+        />
+
+    <TextView
+        android:id="@+id/user_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Username TextView"
+        android:layout_gravity="center"
+        android:textColor="@color/FlatWhite"
+        android:textStyle="bold"
+        android:gravity="center_vertical|start"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="15sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/id_text_view"
+        app:layout_constraintStart_toEndOf="@id/user_image_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"/>
+    <TextView
+        android:id="@+id/id_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Id TextView"
+        android:textColor="#EEE"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf="@id/user_name_text_view"
+        app:layout_constraintEnd_toEndOf="@id/user_name_text_view"
+        app:layout_constraintTop_toBottomOf="@id/user_name_text_view"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+    />
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/round"
+        android:tint="#403e47"
+        app:layout_constraintTop_toTopOf="@id/user_image_view"
+        app:layout_constraintBottom_toBottomOf="@id/user_image_view"
+        app:layout_constraintEnd_toEndOf="@id/user_image_view"
+        app:layout_constraintStart_toStartOf="@id/user_image_view"/>
+    <View android:id="@+id/over_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ripple_effect_16dp"
+        android:clickable="true"
+        android:focusable="true" />
+</androidx.constraintlayout.widget.ConstraintLayout>

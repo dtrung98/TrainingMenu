@@ -1,74 +1,36 @@
 package com.zalo.servicetraining.ui;
 
 
-import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.Item;
+import com.zalo.servicetraining.ui.base.AbsMenuActivity;
 import com.zalo.servicetraining.ui.contentprovider.ContentProviderDemoActivity;
-import com.zalo.servicetraining.ui.network.DemoNetwork;
+import com.zalo.servicetraining.ui.multithreading.MultithreadingActivity;
+import com.zalo.servicetraining.ui.multithreading.PipeExampleActivity;
+import com.zalo.servicetraining.ui.network.NetworkMenuActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class MainActivity extends AppCompatActivity implements MenuAdapter.OnItemClickListener {
+public class MainActivity extends AbsMenuActivity {
     public static final String TAG = "MainActivity";
 
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
+    @Override
+    protected List<Item> onRefreshDataList() {
+        ArrayList<Item> list = new ArrayList<>();
+        list.add(new Item().setTitle("Service").setDescription("Create a simple foreground service").setDestinationActivityClass(ServiceDemoActivity.class));
+        list.add(new Item().setTitle("Content Provider").setDescription("A note app using SQLite to store data").setDestinationActivityClass(ContentProviderDemoActivity.class));
+        list.add(new Item().setTitle("Network").setDescription("Network handler and JSON Parsing").setDestinationActivityClass(NetworkMenuActivity.class));
+        list.add(new Item().setTitle("Multithreading").setDescription("Doing something in background").setDestinationActivityClass(MultithreadingActivity.class));
 
-    @BindView(R.id.swipe_refresh)
-    SwipeRefreshLayout mSwipeRefresh;
-
-    MenuAdapter mAdapter;
-
+        return list;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
-        ButterKnife.bind(this);
-        mAdapter = new MenuAdapter();
-        mAdapter.setListener(this);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this,2,RecyclerView.VERTICAL,false));
-        refreshData();
-        mSwipeRefresh.setOnRefreshListener(this::refreshData);
     }
-
-    ArrayList<Item> mList = new ArrayList<>();
-
-    private void refreshData() {
-       mList.clear();
-       mList.add(new Item().setTitle("Service").setDescription("Create a simple foreground service."));
-       mList.add(new Item().setTitle("Content Provider").setDescription("A note app using SQLite to store data"));
-       mList.add(new Item().setTitle("Network").setDescription("A weather app fetching data from internet"));
-
-       mAdapter.setData(mList);
-       mSwipeRefresh.setRefreshing(false);
-    }
-
-    @Override
-    public void onEventItemClick(Item item) {
-        switch (item.getTitle()) {
-            case "Service" :
-                startActivity(new Intent(this, ServiceDemoActivity.class));
-                break;
-            case "Content Provider" :
-                startActivity(new Intent(this, ContentProviderDemoActivity.class));
-                break;
-            case "Network":
-                startActivity(new Intent(this, DemoNetwork.class));
-                break;
-        }
-    }
-
 }

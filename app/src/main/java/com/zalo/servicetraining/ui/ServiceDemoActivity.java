@@ -35,6 +35,11 @@ public class ServiceDemoActivity extends AppCompatActivity implements ServiceCon
     @BindView(R.id.end_button)
     Button mEndButton;
 
+    @OnClick(R.id.back_button)
+    void back() {
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +81,13 @@ public class ServiceDemoActivity extends AppCompatActivity implements ServiceCon
         bindStatusButton();
     }
 
+    @Override
+    protected void onDestroy() {
+        TimeTrackRemote.unBind(this);
+        mService = null;
+        super.onDestroy();
+    }
+
     private void bindStatusButton() {
         if(mStatus==UN_SET) checkStatus();
         switch (mStatus) {
@@ -84,7 +96,7 @@ public class ServiceDemoActivity extends AppCompatActivity implements ServiceCon
                 mStartButton.setEnabled(true);
                 mStartButton.setBackgroundResource(R.drawable.background_sign_in);
                 mEndButton.setEnabled(false);
-                mStartButton.setText("Start Service");
+                mStartButton.setText(R.string.start_new_service);
                 break;
             case RUNNING:
                 mStartButton.setEnabled(false);

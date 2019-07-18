@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="100dp"
+    android:width="100dp"
+    android:viewportHeight="100"
+    android:viewportWidth="100"
+    >
+      <path
+        android:name="dark_triangle"
+        android:fillColor="#FF002D"
+        android:pathData="
+        M 50.000000,95.000000L 18.180195,81.819805 5.000000,50.000000 18.180195,18.180195 50.000000,5.000000 81.819805,18.180195 95.000000,50.000000 81.819805,81.819805 50.000000,95.000000  z" />
+    <path
+        android:name="border_triangle"
+        android:strokeColor="#FF002D"
+        android:strokeWidth="2"
+        android:pathData="M 50.000000,100.000000 L14.644661,85.355339 0.000000,50.000000 14.644661,14.644661 50.000000,0.000000 85.355339,14.644661 100.000000,50.000000 85.355339,85.355339 50.000000,100.000000 z"
+        />
+</vector>

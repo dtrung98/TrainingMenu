@@ -20,7 +20,7 @@ public class NoteDatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static NoteDatabaseHelper sNoteDatabaseHelper;
     public static NoteDatabaseHelper getInstance(Context context) {
-        if(sNoteDatabaseHelper==null) sNoteDatabaseHelper = new NoteDatabaseHelper(context);
+        if(sNoteDatabaseHelper==null) sNoteDatabaseHelper = new NoteDatabaseHelper(context.getApplicationContext());
         return sNoteDatabaseHelper;
     }
 
@@ -57,7 +57,7 @@ public class NoteDatabaseHelper extends SQLiteOpenHelper {
         if(cursor!=null) {
             cursor.moveToFirst();
             Note note = new Note(cursor);
-                   /* .setId(cursor.getInt(cursor.getColumnIndex(Note.COLUMN_ID)))
+                   /* .setmId(cursor.getInt(cursor.getColumnIndex(Note.COLUMN_ID)))
                     .setTitle(cursor.getString(cursor.getColumnIndex(Note.COLUMN_TITLE)))
                     .setContent(cursor.getString(cursor.getColumnIndex(Note.COLUMN_CONTENT)));*/
             cursor.close();

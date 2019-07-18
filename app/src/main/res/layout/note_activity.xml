@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#44444444"
     android:clickable="true"
     android:focusable="true"
     tools:context=".ui.contentprovider.DemoNoteApp">
@@ -43,7 +42,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <com.zalo.servicetraining.ui.widget.ScaleSwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -59,7 +58,7 @@
             android:paddingEnd="8dp"
             android:overScrollMode="never"
             tools:spanCount="2"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </com.zalo.servicetraining.ui.widget.ScaleSwipeRefreshLayout>
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_button"
             android:layout_width="60dp"

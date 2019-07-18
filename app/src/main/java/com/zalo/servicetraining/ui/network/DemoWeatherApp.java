@@ -13,8 +13,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.LocalArea;
+import com.zalo.servicetraining.ui.base.AbsListActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,57 +34,32 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import butterknife.BindView;
+
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import es.dmoral.toasty.Toasty;
 
-public class DemoWeatherApp extends AppCompatActivity implements LocalAreaAdapter.OnItemClickListener {
-    private static final String TAG = "DemoNoteApp";
+public class DemoWeatherApp extends AbsListActivity implements LocalAreaAdapter.OnItemClickListener {
+    private static final String TAG = "DemoWeatherApp";
+
     public static final int DETAIL_REQUEST_CODE = 1;
 
-
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
-
-    @BindView(R.id.swipe_refresh)
-    SwipeRefreshLayout mSwipeRefresh;
-
-    @BindView(R.id.title)
-    TextView mTitle;
-
-    @BindView(R.id.add_button)
-    View mAddButton;
-
-    @OnClick(R.id.back_button)
-    void back() {
-        finish();
-    }
+    FloatingActionButton mAddButton;
 
     private LocalAreaAdapter mAdapter;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.note_activity);
-        ButterKnife.bind(this);
-        init();
-        mSwipeRefresh.setRefreshing(true);
-        refreshData();
-    }
-    private void init() {
-        mTitle.setText(R.string.weather);
+    protected void onInitRecyclerView() {
+        getRecyclerView().setLayoutManager(new GridLayoutManager(this,2,RecyclerView.VERTICAL,false));
 
         mAdapter = new LocalAreaAdapter();
         mAdapter.setListener(this);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this,2,RecyclerView.VERTICAL,false));
-        mSwipeRefresh.setOnRefreshListener(this::refreshData);
-
+        getRecyclerView().setAdapter(mAdapter);
     }
 
-    private void refreshData() {
+    @Override
+    protected void refreshData() {
+        getSwipeRefreshLayout().setRefreshing(true);
         if(mTask!=null) mTask.cancel();
         mTask = new LoadWeatherDataTask(this);
         mTask.execute();
@@ -91,7 +68,7 @@ public class DemoWeatherApp extends AppCompatActivity implements LocalAreaAdapte
 
     private void reportResult(List<LocalArea> list) {
         Log.d(TAG, "reportResult: ");
-        mSwipeRefresh.setRefreshing(false);
+        getSwipeRefreshLayout().setRefreshing(false);
         mAdapter.setData(list);
     }
 

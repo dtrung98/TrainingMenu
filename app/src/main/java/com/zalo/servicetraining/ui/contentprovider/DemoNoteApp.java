@@ -4,18 +4,22 @@ package com.zalo.servicetraining.ui.contentprovider;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.data.NoteDatabaseHelper;
 import com.zalo.servicetraining.model.Note;
+import com.zalo.servicetraining.ui.base.AbsListActivity;
 
 import java.util.List;
 import java.util.Random;
@@ -24,57 +28,47 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DemoNoteApp extends AppCompatActivity implements NoteAdapter.OnItemClickListener {
+public class DemoNoteApp extends AbsListActivity implements NoteAdapter.OnItemClickListener{
     private static final String TAG = "DemoNoteApp";
     public static final int DETAIL_REQUEST_CODE = 1;
 
+    @BindView(R.id.root)
+    CoordinatorLayout mRoot;
 
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
-
-    @BindView(R.id.swipe_refresh)
-    SwipeRefreshLayout mSwipeRefresh;
-
-    @BindView(R.id.title)
-    TextView mTitle;
 
     NoteAdapter mAdapter;
 
-    @BindView(R.id.add_button)
-    View mAddButton;
+    FloatingActionButton mAddButton;
 
-    @OnClick(R.id.back_button)
-    void back() {
-        finish();
-    }
 
-    @OnClick(R.id.add_button)
     void addNewNote() {
         Intent intent = new Intent(this,NoteDetailActivity.class);
         intent.setAction(NoteDetailActivity.ACTION_NEW_NOTE);
         startActivityForResult(intent,DETAIL_REQUEST_CODE);
     }
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.note_activity);
-        ButterKnife.bind(this);
-        init();
-
-       // NoteDatabaseHelper.getInstance(this).dropAndRecreateNoteTable();
-        refreshData();
-    }
-    private void init() {
-        mTitle.setText(R.string.notes);
-        mAddButton.setVisibility(View.VISIBLE);
+    protected void onInitRecyclerView() {
+        super.onInitRecyclerView();
+        addPlusButton();
+        getRecyclerView().setLayoutManager(new GridLayoutManager(this,1,RecyclerView.VERTICAL,false));
         mAdapter = new NoteAdapter();
         mAdapter.setListener(this);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this,1,RecyclerView.VERTICAL,false));
-        mSwipeRefresh.setOnRefreshListener(this::refreshData);
+        getRecyclerView().setAdapter(mAdapter);
 
+    }
+
+    private void addPlusButton() {
+        mAddButton = new FloatingActionButton(this);
+        mAddButton.setImageResource(R.drawable.ic_add_black_24dp);
+        float oneDP = getResources().getDimension(R.dimen.oneDp);
+        mAddButton.setCustomSize((int) (60*oneDP));
+       CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams((int)(60*oneDP),(int)(60*oneDP));
+       params.gravity = Gravity.BOTTOM|Gravity.END;
+       params.bottomMargin = (int)(oneDP*16);
+       params.setMarginEnd(params.bottomMargin);
+       mAddButton.setOnClickListener(view -> addNewNote());
+       mRoot.addView(mAddButton,params);
     }
 
     @Override
@@ -105,10 +99,11 @@ public class DemoNoteApp extends AppCompatActivity implements NoteAdapter.OnItem
         }
     }
 
-    private void refreshData() {
+    @Override
+    protected void refreshData() {
         List<Note> list = NoteDatabaseHelper.getInstance(this).getAllNotes();
        mAdapter.setData(list);
-       mSwipeRefresh.setRefreshing(false);
+       getSwipeRefreshLayout().setRefreshing(false);
     }
 
     @Override
@@ -122,6 +117,5 @@ public class DemoNoteApp extends AppCompatActivity implements NoteAdapter.OnItem
     public void onNoteLongClick(Note item, int position) {
         NoteOptionDialogFragment.newInstance(item).show(getSupportFragmentManager(), NoteOptionDialogFragment.TAG);
     }
-
 
 }

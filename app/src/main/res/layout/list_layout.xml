@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#44444444"
     android:clickable="true"
     android:focusable="true">
     <com.google.android.material.appbar.AppBarLayout
@@ -22,16 +21,16 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Menu"
+                tools:text="Menu"
                 android:gravity="center"
                 android:textSize="48sp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="#FAF3DD"
+                android:textColor="@color/FocusYellowColor"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="20dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="70dp"
                 android:paddingBottom="20dp"
                 android:fontFamily="@font/helvetica_font"
                 android:shadowRadius="14"
@@ -42,7 +41,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <com.zalo.servicetraining.ui.widget.ScaleSwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -58,5 +57,17 @@
             android:paddingEnd="8dp"
             android:overScrollMode="never"
             tools:spanCount="2"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </com.zalo.servicetraining.ui.widget.ScaleSwipeRefreshLayout>
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:srcCompat="@drawable/ic_arrow_back_24dp"
+        android:background="@drawable/circle_background_support_touch"
+        android:tint="#FAF3DD"
+        android:alpha="0.8"
+        android:visibility="gone"
+        android:padding="12dp"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

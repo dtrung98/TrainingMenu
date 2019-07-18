@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Service Training</string>
+    <string name="app_name">Training Menu</string>
     <string name="accessibility_overflow">Accessibility Overflow</string>
     <string name="notification_chanel_name">Service Training Channel</string>
     <string name="notification_chanel_description">Timer listening service created by Service Training</string>
@@ -7,5 +7,12 @@
     <string name="notes">Notes</string>
     <string name="weather">Weather</string>
     <string name="network">Network</string>
-
+    <string name="message">MESSAGE</string>
+    <string name="banner">A banner</string>
+    <string name="service">Service</string>
+    <string name="users">Users</string>
+    <string name="menu">@string/app_name</string>
+    <string name="notify_will_appear_here">Notify will appear here!</string>
+    <string name="start_new_service">Start New Service</string>
+    <string name="finish_service">Finish Service</string>
 </resources>

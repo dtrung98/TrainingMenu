@@ -10,24 +10,47 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.zalo.servicetraining.ui.MainActivity">
-            <intent-filter>
+        <activity
+            android:theme="@style/SplashTheme"
+            android:label="@string/menu"
+            android:name="com.zalo.servicetraining.ui.MainActivity">
+            <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.ServiceDemoActivity" />
+        <activity
+            android:label="@string/service"
+            android:name=".ui.ServiceDemoActivity" />
 
-        <activity android:name=".ui.contentprovider.ContentProviderDemoActivity" />
-        <activity android:name=".ui.contentprovider.DemoNoteApp" />
-        <activity android:name=".ui.contentprovider.NoteDetailActivity" />
-        <activity android:name=".ui.network.DemoNetwork" />
-        <activity android:name=".ui.network.DemoWeatherApp" />
+        <activity
+            android:label="@string/content_provider"
+            android:name=".ui.contentprovider.ContentProviderDemoActivity" />
+        <activity
+            android:label="@string/notes"
+            android:name=".ui.contentprovider.DemoNoteApp" />
+        <activity
+            android:label="@string/notes"
+            android:name=".ui.contentprovider.NoteDetailActivity" />
+        <activity
+            android:label="@string/network"
+            android:name=".ui.network.NetworkMenuActivity" />
+        <activity
+            android:label="@string/weather"
+            android:name=".ui.network.DemoWeatherApp" />
+        <activity
+            android:label="@string/users"
+            android:name=".ui.userdata.UserDataListActivity" />
+        <activity
+            android:label="@string/users"
+            android:name=".ui.userdata.UserProfileActivity" />
+        <activity android:name=".ui.multithreading.MultithreadingActivity" />
+        <activity android:name=".ui.multithreading.PipeExampleActivity" />
 
         <service android:name=".service.TimeTrackService" />
     </application>
