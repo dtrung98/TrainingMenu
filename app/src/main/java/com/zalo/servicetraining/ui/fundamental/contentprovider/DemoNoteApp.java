@@ -1,19 +1,14 @@
-package com.zalo.servicetraining.ui.contentprovider;
+package com.zalo.servicetraining.ui.fundamental.contentprovider;
 
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.R;
@@ -22,11 +17,8 @@ import com.zalo.servicetraining.model.Note;
 import com.zalo.servicetraining.ui.base.AbsListActivity;
 
 import java.util.List;
-import java.util.Random;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class DemoNoteApp extends AbsListActivity implements NoteAdapter.OnItemClickListener{
     private static final String TAG = "DemoNoteApp";
@@ -49,7 +41,6 @@ public class DemoNoteApp extends AbsListActivity implements NoteAdapter.OnItemCl
 
     @Override
     protected void onInitRecyclerView() {
-        super.onInitRecyclerView();
         addPlusButton();
         getRecyclerView().setLayoutManager(new GridLayoutManager(this,1,RecyclerView.VERTICAL,false));
         mAdapter = new NoteAdapter();

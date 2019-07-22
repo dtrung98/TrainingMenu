@@ -1,20 +1,14 @@
-package com.zalo.servicetraining.ui.network;
+package com.zalo.servicetraining.ui.fundamental.network;
 
 
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.LocalArea;
 import com.zalo.servicetraining.ui.base.AbsListActivity;
 
@@ -35,7 +29,6 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 
-import butterknife.ButterKnife;
 import es.dmoral.toasty.Toasty;
 
 public class DemoWeatherApp extends AbsListActivity implements LocalAreaAdapter.OnItemClickListener {

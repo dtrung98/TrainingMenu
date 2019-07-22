@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.multithreading;
+package com.zalo.servicetraining.ui.fundamental.multithreading;
 
 import android.os.Bundle;
 import android.os.Handler;

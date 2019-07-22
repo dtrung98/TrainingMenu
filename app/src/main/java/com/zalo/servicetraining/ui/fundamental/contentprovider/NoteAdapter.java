@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.network;
+package com.zalo.servicetraining.ui.fundamental.contentprovider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.servicetraining.R;
-import com.zalo.servicetraining.model.LocalArea;
+import com.zalo.servicetraining.model.Note;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,20 +17,20 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 
-public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.MenuItemHolder> {
-    private static final String TAG = "LocalAreaAdapter";
+public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MenuItemHolder> {
+    private static final String TAG = "NoteAdapter";
+    private ArrayList<Note> mData = new ArrayList<>();
 
-    private ArrayList<LocalArea> mData = new ArrayList<>();
-
-    public List<LocalArea> getData() {
+    public List<Note> getData() {
         return mData;
     }
 
     public interface OnItemClickListener {
-        void onLocalAreaItemClick(LocalArea item);
+        void onNoteItemClick(Note item, int position);
+        void onNoteLongClick(Note item,int position);
     }
-
     private OnItemClickListener mListener;
     public void setListener(OnItemClickListener listener) {
         mListener = listener;
@@ -40,7 +40,7 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
     }
 
 
-    public void setData(List<LocalArea> data) {
+    public void setData(List<Note> data) {
         mData.clear();
         if (data !=null) {
             mData.addAll(data);
@@ -54,7 +54,7 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
     public MenuItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-         return new MenuItemHolder(inflater.inflate(R.layout.item_card,parent,false));
+         return new MenuItemHolder(inflater.inflate(R.layout.item_note,parent,false));
 
     }
 
@@ -67,7 +67,6 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
     public int getItemCount() {
         return mData.size();
     }
-
 
 
     public class MenuItemHolder extends RecyclerView.ViewHolder {
@@ -83,21 +82,23 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
             ButterKnife.bind(this,itemView);
         }
 
-        @OnClick({R.id.constraint_root})
+        @OnClick(R.id.constraint_root)
         void clickPanel() {
-            if(mListener!=null) mListener.onLocalAreaItemClick(mData.get(getAdapterPosition()));
+            if(mListener!=null) mListener.onNoteItemClick(mData.get(getAdapterPosition()),getAdapterPosition());
         }
 
-        public void bind(LocalArea item) {
-            mTitle.setText(item.getLocalizedName());
+        @OnLongClick(R.id.constraint_root)
+        void longClickPanel() {
+            if(mListener !=null) mListener.onNoteLongClick(mData.get(getAdapterPosition()),getAdapterPosition());
+        }
+
+        public void bind(Note item) {
+            mTitle.setText(item.getTitle());
 
 
-            if(item.getLocalizedType()!=null&&item.getID()!=null) {
+            if(item.getContent()!=null&&!item.getContent().isEmpty()) {
                 mDescription.setVisibility(View.VISIBLE);
-
-                String id = item.getID();
-                if(id.isEmpty()) mDescription.setText(item.getLocalizedType());
-                else mDescription.setText(new StringBuilder().append(item.getLocalizedType()).append(" ( ").append(item.getID()).append(" )").toString());
+                mDescription.setText(item.getContent());
             }
             else {
                 mDescription.setVisibility(View.INVISIBLE);

@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 tools:text="Menu"
                 android:gravity="center"
-                android:textSize="48sp"
+                android:textSize="40sp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:textColor="@color/FocusYellowColor"

@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.contentprovider;
+package com.zalo.servicetraining.ui.fundamental.contentprovider;
 
 import android.os.Bundle;
 import android.util.Log;

@@ -15,4 +15,19 @@
     <string name="notify_will_appear_here">Notify will appear here!</string>
     <string name="start_new_service">Start New Service</string>
     <string name="finish_service">Finish Service</string>
+    <string name="multithreading">Multithreading</string>
+    <string name="downloader">Downloader</string>
+    <string name="downloads_description">A file downloader application</string>
+    <string name="service_description">Create a simple foreground service</string>
+    <string name="content_provider_description">A note app using SQLite to store data</string>
+    <string name="network_description">Network handler and JSON Parsing</string>
+    <string name="multithreading_description">Do something in background</string>
+    <string name="sqlite_note_app">SQLite Note App</string>
+    <string name="note_app_description">A simple note app using SQLite to store data</string>
+    <string name="another">Another</string>
+    <string name="basic">Basic</string>
+    <string name="fundamental">Fundamental</string>
+    <string name="type_the_url">Type the Url</string>
+    <string name="create_new_task">Create new task</string>
+    <string name="catch_it">Catch it</string>
 </resources>

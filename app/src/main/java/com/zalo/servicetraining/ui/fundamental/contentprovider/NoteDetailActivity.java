@@ -1,8 +1,7 @@
-package com.zalo.servicetraining.ui.contentprovider;
+package com.zalo.servicetraining.ui.fundamental.contentprovider;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.TextView;
 

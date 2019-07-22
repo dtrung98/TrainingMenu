@@ -1,9 +1,9 @@
-package com.zalo.servicetraining.ui.network;
+package com.zalo.servicetraining.ui.fundamental.network;
 
 import com.zalo.servicetraining.model.Item;
 import com.zalo.servicetraining.ui.MenuAdapter;
 import com.zalo.servicetraining.ui.base.AbsMenuActivity;
-import com.zalo.servicetraining.ui.userdata.UserDataListActivity;
+import com.zalo.servicetraining.ui.fundamental.userdata.UserDataListActivity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.userdata;
+package com.zalo.servicetraining.ui.fundamental.userdata;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

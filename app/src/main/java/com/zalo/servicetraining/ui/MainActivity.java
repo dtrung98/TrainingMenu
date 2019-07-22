@@ -6,10 +6,8 @@ import android.os.Bundle;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.Item;
 import com.zalo.servicetraining.ui.base.AbsMenuActivity;
-import com.zalo.servicetraining.ui.contentprovider.ContentProviderDemoActivity;
-import com.zalo.servicetraining.ui.multithreading.MultithreadingActivity;
-import com.zalo.servicetraining.ui.multithreading.PipeExampleActivity;
-import com.zalo.servicetraining.ui.network.NetworkMenuActivity;
+import com.zalo.servicetraining.ui.downloads.DownloaderActivity;
+import com.zalo.servicetraining.ui.fundamental.FundamentalActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +18,8 @@ public class MainActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle("Service").setDescription("Create a simple foreground service").setDestinationActivityClass(ServiceDemoActivity.class));
-        list.add(new Item().setTitle("Content Provider").setDescription("A note app using SQLite to store data").setDestinationActivityClass(ContentProviderDemoActivity.class));
-        list.add(new Item().setTitle("Network").setDescription("Network handler and JSON Parsing").setDestinationActivityClass(NetworkMenuActivity.class));
-        list.add(new Item().setTitle("Multithreading").setDescription("Doing something in background").setDestinationActivityClass(MultithreadingActivity.class));
-
+        list.add(new Item().setTitle(R.string.downloader).setDescription(R.string.downloads_description).setDestinationActivityClass(DownloaderActivity.class).setDrawable(R.drawable.download_icon).setDrawablePadding(4));
+        list.add(new Item().setTitle(R.string.basic).setDrawable(R.drawable.redo).setDestinationActivityClass(FundamentalActivity.class));
         return list;
     }
 

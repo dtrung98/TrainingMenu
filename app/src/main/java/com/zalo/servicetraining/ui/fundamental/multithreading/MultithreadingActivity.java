@@ -1,9 +1,8 @@
-package com.zalo.servicetraining.ui.multithreading;
+package com.zalo.servicetraining.ui.fundamental.multithreading;
 
 
 import com.zalo.servicetraining.model.Item;
 import com.zalo.servicetraining.ui.base.AbsMenuActivity;
-import com.zalo.servicetraining.ui.contentprovider.DemoNoteApp;
 
 import java.util.ArrayList;
 import java.util.List;

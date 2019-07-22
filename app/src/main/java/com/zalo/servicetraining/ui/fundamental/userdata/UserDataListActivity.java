@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zalo.servicetraining.ui.userdata;
+package com.zalo.servicetraining.ui.fundamental.userdata;
 
 import android.content.Context;
 import android.content.Intent;

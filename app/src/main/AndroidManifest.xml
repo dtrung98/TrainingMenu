@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.zalo.servicetraining">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <dist:module dist:instant="true" />
 
     <application
+        android:name="com.zalo.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -30,27 +32,34 @@
 
         <activity
             android:label="@string/content_provider"
-            android:name=".ui.contentprovider.ContentProviderDemoActivity" />
+            android:name=".ui.fundamental.contentprovider.ContentProviderDemoActivity" />
         <activity
             android:label="@string/notes"
-            android:name=".ui.contentprovider.DemoNoteApp" />
+            android:name=".ui.fundamental.contentprovider.DemoNoteApp" />
         <activity
             android:label="@string/notes"
-            android:name=".ui.contentprovider.NoteDetailActivity" />
+            android:name=".ui.fundamental.contentprovider.NoteDetailActivity" />
         <activity
             android:label="@string/network"
-            android:name=".ui.network.NetworkMenuActivity" />
+            android:name=".ui.fundamental.network.NetworkMenuActivity" />
         <activity
             android:label="@string/weather"
-            android:name=".ui.network.DemoWeatherApp" />
+            android:name=".ui.fundamental.network.DemoWeatherApp" />
         <activity
             android:label="@string/users"
-            android:name=".ui.userdata.UserDataListActivity" />
+            android:name=".ui.fundamental.userdata.UserDataListActivity" />
         <activity
             android:label="@string/users"
-            android:name=".ui.userdata.UserProfileActivity" />
-        <activity android:name=".ui.multithreading.MultithreadingActivity" />
-        <activity android:name=".ui.multithreading.PipeExampleActivity" />
+            android:name=".ui.fundamental.userdata.UserProfileActivity" />
+        <activity
+            android:label="@string/multithreading"
+            android:name=".ui.fundamental.multithreading.MultithreadingActivity" />
+        <activity android:name=".ui.fundamental.multithreading.PipeExampleActivity" />
+        <activity
+            android:label="@string/downloader"
+            android:name=".ui.downloads.DownloaderActivity" />
+        <activity android:name=".ui.fundamental.FundamentalActivity"
+            android:label="@string/fundamental"/>
 
         <service android:name=".service.TimeTrackService" />
     </application>

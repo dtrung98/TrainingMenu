@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="FlatWhite" type="color">#F5F5F5</item>
-    <color name= "SurfaceColor">#FFCC00</color>
+    <color name="FlatWhite">#F5F5F5</color>
+    <color name="SurfaceColor">#FFCC00</color>
     <color name="BackwardColorHeavy">#B0000000</color>
     <color name="backward_color">#DD000000</color>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name = "Gray">#22000000</color>
+    <color name="Gray">#22000000</color>
     <color name="NearlyWhite">#44ffffff</color>
     <color name="FlatRed">#FF3B30</color>
     <color name="FlatGreen">#4CD964</color>

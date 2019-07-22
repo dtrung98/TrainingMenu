@@ -25,7 +25,7 @@
         android:textSize="16sp"
         android:textStyle="bold"/>
     <ImageView
-        android:id="@+id/user_image_view"
+        android:id="@+id/image_view"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:scaleType="centerCrop"
@@ -36,10 +36,10 @@
         />
 
     <TextView
-        android:id="@+id/user_name_text_view"
+        android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="Username TextView"
+        tools:text="Some file name abasead dasidf cadf ads"
         android:layout_gravity="center"
         android:textColor="@color/FlatWhite"
         android:textStyle="bold"
@@ -50,12 +50,12 @@
         android:ellipsize="end"
         android:textSize="15sp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/id_text_view"
-        app:layout_constraintStart_toEndOf="@id/user_image_view"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/description"
+        app:layout_constraintStart_toEndOf="@id/image_view"
+        app:layout_constraintEnd_toStartOf="@id/action_button"
         app:layout_constraintVertical_chainStyle="packed"/>
     <TextView
-        android:id="@+id/id_text_view"
+        android:id="@+id/description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="Id TextView"
@@ -63,9 +63,9 @@
         android:textSize="13sp"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintStart_toStartOf="@id/user_name_text_view"
-        app:layout_constraintEnd_toEndOf="@id/user_name_text_view"
-        app:layout_constraintTop_toBottomOf="@id/user_name_text_view"
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintEnd_toEndOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/title"
         app:layout_constraintBottom_toBottomOf="parent"
     />
     <ImageView
@@ -73,10 +73,21 @@
         android:layout_height="0dp"
         android:src="@drawable/round"
         android:tint="#403e47"
-        app:layout_constraintTop_toTopOf="@id/user_image_view"
-        app:layout_constraintBottom_toBottomOf="@id/user_image_view"
-        app:layout_constraintEnd_toEndOf="@id/user_image_view"
-        app:layout_constraintStart_toStartOf="@id/user_image_view"/>
+        app:layout_constraintTop_toTopOf="@id/image_view"
+        app:layout_constraintBottom_toBottomOf="@id/image_view"
+        app:layout_constraintEnd_toEndOf="@id/image_view"
+        app:layout_constraintStart_toStartOf="@id/image_view"/>
+    <ImageView
+        android:id="@+id/action_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/round"
+        android:tint="#403e47"
+        app:layout_constraintTop_toTopOf="@id/image_view"
+        app:layout_constraintBottom_toBottomOf="@id/image_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_marginEnd="12dp"/>
     <View android:id="@+id/over_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

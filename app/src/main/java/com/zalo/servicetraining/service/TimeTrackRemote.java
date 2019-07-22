@@ -10,13 +10,16 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class TimeTrackRemote {
+    private static final String TAG = "TimeTrackRemote";
+
     private static TimeTrackService mService;
     private static final WeakHashMap<Context, RemoteServiceBinder> mConnectionMap = new WeakHashMap<>();
 
-    public static void startThenBindService(Context context, ServiceConnection callback) {
+    public static ServiceToken bindServiceAndStartIfNotRunning(Context context, ServiceConnection callback) {
         Activity realActivity = ((Activity)context).getParent();
         if(realActivity ==null) {
             realActivity  = (Activity)context;
@@ -27,10 +30,14 @@ public class TimeTrackRemote {
 
         final RemoteServiceBinder binder = new RemoteServiceBinder(callback);
 
-        if(contextWrapper.bindService(new Intent().setClass(contextWrapper,TimeTrackService.class),binder,Context.BIND_AUTO_CREATE));
+        if(contextWrapper.bindService(new Intent().setClass(contextWrapper,TimeTrackService.class),binder,Context.BIND_AUTO_CREATE))
         {
             mConnectionMap.put(contextWrapper, binder);
+            Log.d(TAG, "bindServiceAndStartIfNotRunning: put service to connection map");
+            return new ServiceToken(contextWrapper);
         }
+
+        return null;
     }
 
     public static Boolean isServiceRunning(Context context) {
@@ -49,26 +56,59 @@ public class TimeTrackRemote {
         return false;
     }
 
-    public static void unBind(Context context) {
-        Activity realActivity = ((Activity)context).getParent();
-        if(realActivity ==null) {
-            realActivity  = (Activity)context;
+    public static void unBind(ServiceToken serviceToken) {
+        if(serviceToken == null) return;
+
+        final ContextWrapper contextWrapper = serviceToken.mWrappedContext;
+
+        RemoteServiceBinder binder = mConnectionMap.remove(contextWrapper);
+
+        if(binder!=null) {
+            Log.d(TAG, "unBinding");
+            contextWrapper.unbindService(binder);
+        } else Log.d(TAG, "unBind: can't find service to unbind");
+        
+        if(mConnectionMap.isEmpty()) {
+            mService = null;
+        }
+    }
+
+    public static void unBindAll() {
+        for (Map.Entry<Context, RemoteServiceBinder> entry: mConnectionMap.entrySet()){
+            Context context = entry.getKey();
+            RemoteServiceBinder rsb = entry.getValue();
+            context.unbindService(rsb);
         }
 
-        final ContextWrapper contextWrapper = new ContextWrapper(realActivity);
+        mConnectionMap.clear();
+        mService = null;
+    }
 
-        RemoteServiceBinder mBinder = mConnectionMap.remove(contextWrapper);
+    public static void stopService() {
+        for (Map.Entry<Context, RemoteServiceBinder> entry: mConnectionMap.entrySet()){
+            Context context = entry.getKey();
+            RemoteServiceBinder rsb = entry.getValue();
+            context.unbindService(rsb);
+        }
 
-        if(mBinder!=null)
-        contextWrapper.unbindService(mBinder);
+        mConnectionMap.clear();
 
-       // if(mService!=null)
-      //      mService.stopForegroundThenStop();
+        if(mService!=null)
+            mService.stopForegroundThenStopSelf();
+        else Log.d(TAG, "stopService: oop, service instance is null");
+        mService = null;
+    }
+
+    public static final class ServiceToken {
+        public ContextWrapper mWrappedContext;
+
+        public ServiceToken(final ContextWrapper context) {
+            mWrappedContext = context;
+        }
     }
 
 
     public static class RemoteServiceBinder implements ServiceConnection {
-        public static final String TAG = "RemoteServiceBinder";
 
         private final ServiceConnection mCallback;
 
@@ -79,7 +119,7 @@ public class TimeTrackRemote {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            Log.d(TAG, "onServiceConnected: ");
+            Log.d(TAG, "RemoteServiceBinder: onServiceConnected: ");
             
             TimeTrackService.TimeTrackBinder binder = (TimeTrackService.TimeTrackBinder) iBinder;
             mService = binder.getService();
@@ -91,7 +131,7 @@ public class TimeTrackRemote {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(TAG, "onServiceDisconnected: ");
+            Log.d(TAG, "RemoteServiceBinder: onServiceDisconnected: ");
 
             if(mCallback != null) {
                 mCallback.onServiceDisconnected(componentName);
