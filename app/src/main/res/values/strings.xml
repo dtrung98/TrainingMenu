@@ -3,6 +3,7 @@
     <string name="accessibility_overflow">Accessibility Overflow</string>
     <string name="notification_chanel_name">Service Training Channel</string>
     <string name="notification_chanel_description">Timer listening service created by Service Training</string>
+    <string name="downloader_notification_chanel_description">Downloader Service created by Service Training</string>
     <string name="content_provider">Content Provider</string>
     <string name="notes">Notes</string>
     <string name="weather">Weather</string>
@@ -27,7 +28,15 @@
     <string name="another">Another</string>
     <string name="basic">Basic</string>
     <string name="fundamental">Fundamental</string>
-    <string name="type_the_url">Type the Url</string>
+    <string name="type_the_url">Put the download link here…</string>
     <string name="create_new_task">Create new task</string>
     <string name="catch_it">Catch it</string>
+    <string name="add_new_download">Add new download</string>
+    <string name="new_task">New Task</string>
+    <string name="or">Or</string>
+    <string name="add_to_download">Add to download</string>
+    <string name="paste_and_go">Paste and go</string>
+    <string name="time_track_service">Time Track Service</string>
+    <string name="downloader_service">Downloader Service</string>
+    <string name="downloader_notification_chanel_name">Downloader Service</string>
 </resources>

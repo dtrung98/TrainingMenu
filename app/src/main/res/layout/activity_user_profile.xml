@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.AppBarOverlay"
     android:fitsSystemWindows="true"
-    tools:context=".ui.fundamental.userdata.UserProfileActivity"
+    tools:context=".fundamental.userlist.UserProfileActivity"
     >
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"

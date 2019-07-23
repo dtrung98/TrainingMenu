@@ -5,7 +5,6 @@ import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zalo.servicetraining.model.Item;
-import com.zalo.servicetraining.ui.MenuAdapter;
 
 import java.util.List;
 

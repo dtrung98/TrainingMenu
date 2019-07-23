@@ -28,40 +28,45 @@
         </activity>
         <activity
             android:label="@string/service"
-            android:name=".ui.ServiceDemoActivity" />
+            android:name=".fundamental.servicedemo.ServiceDemoActivity" />
 
         <activity
             android:label="@string/content_provider"
-            android:name=".ui.fundamental.contentprovider.ContentProviderDemoActivity" />
+            android:name=".fundamental.index.ContentProviderDemoActivity" />
         <activity
             android:label="@string/notes"
-            android:name=".ui.fundamental.contentprovider.DemoNoteApp" />
+            android:name=".fundamental.noteapp.DemoNoteActivity" />
         <activity
             android:label="@string/notes"
-            android:name=".ui.fundamental.contentprovider.NoteDetailActivity" />
+            android:name=".fundamental.noteapp.NoteDetailActivity" />
         <activity
             android:label="@string/network"
-            android:name=".ui.fundamental.network.NetworkMenuActivity" />
+            android:name=".fundamental.index.NetworkMenuActivity" />
         <activity
             android:label="@string/weather"
-            android:name=".ui.fundamental.network.DemoWeatherApp" />
+            android:name=".fundamental.weather.DemoWeatherApp" />
         <activity
             android:label="@string/users"
-            android:name=".ui.fundamental.userdata.UserDataListActivity" />
+            android:name=".fundamental.userlist.UserDataListActivity" />
         <activity
             android:label="@string/users"
-            android:name=".ui.fundamental.userdata.UserProfileActivity" />
+            android:name=".fundamental.userlist.UserProfileActivity" />
         <activity
             android:label="@string/multithreading"
-            android:name=".ui.fundamental.multithreading.MultithreadingActivity" />
-        <activity android:name=".ui.fundamental.multithreading.PipeExampleActivity" />
+            android:name=".fundamental.index.MultithreadingActivity" />
+        <activity android:name=".fundamental.pipe.PipeExampleActivity" />
         <activity
             android:label="@string/downloader"
-            android:name=".ui.downloads.DownloaderActivity" />
-        <activity android:name=".ui.fundamental.FundamentalActivity"
+            android:name=".downloader.ui.DownloaderActivity" />
+        <activity android:name=".fundamental.FundamentalActivity"
             android:label="@string/fundamental"/>
 
-        <service android:name=".service.TimeTrackService" />
+        <service
+            android:label="@string/time_track_service"
+            android:name=".fundamental.servicedemo.service.TimeTrackService" />
+        <service
+            android:label="@string/downloader_service"
+            android:name=".downloader.service.DownloaderService" />
     </application>
 
 </manifest>

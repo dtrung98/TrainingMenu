@@ -37,15 +37,10 @@ public abstract class AbsListActivity extends AppCompatActivity {
         finish();
     }
 
-    protected int getContentLayout() {
-        return R.layout.list_layout;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-        setContentView(getContentLayout());
+        setContentView(R.layout.list_layout);
         ButterKnife.bind(this);
         init();
         refreshData();
