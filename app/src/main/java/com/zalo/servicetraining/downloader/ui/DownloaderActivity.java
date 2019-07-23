@@ -23,7 +23,8 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     FloatingActionButton mAddButton;
 
     void addNewTask() {
-        AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+        doSomething();
+       // AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
     }
 
     private void addPlusButton() {

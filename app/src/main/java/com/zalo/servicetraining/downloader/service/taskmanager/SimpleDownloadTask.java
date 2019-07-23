@@ -32,7 +32,9 @@ public class SimpleDownloadTask extends BaseTask {
 
     private void longRunningTask() {
         setState(RUNNING);
-        for (int i = 0; i <= 20; i++) {
+        mDownloadManager.notifyTaskChanged(this);
+
+        for (int i = 1; i <= 20; i++) {
             try {
                 Thread.sleep(1000);
                 Log.d(TAG, "task "+getId()+" run: sleep "+i);
@@ -42,8 +44,6 @@ public class SimpleDownloadTask extends BaseTask {
             setProgress((float) (i/20.0));
             mDownloadManager.notifyTaskChanged(this);
         }
-        setState(SUCCESS);
-        mDownloadManager.notifyTaskChanged(this);
         Log.d(TAG, "run: finish");
     }
 

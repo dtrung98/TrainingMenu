@@ -40,8 +40,8 @@ public class SimpleTaskManager extends BaseTaskManager {
 
         if(mExecutor ==null)
             mExecutor = new ThreadPoolExecutor(
-                    NUMBER_OF_CORES * 2,
-                    NUMBER_OF_CORES * 2,
+                    4,
+                    4,
                     60L,
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>(),

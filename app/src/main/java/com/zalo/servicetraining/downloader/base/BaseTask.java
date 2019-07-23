@@ -18,18 +18,19 @@ public abstract class BaseTask implements Runnable {
         }
     }
 
-    public void setState(int mState) {
+    protected synchronized void setState(int mState) {
         this.mState = mState;
     }
 
-    public int mState = PENDING;
+    private int mState = PENDING;
     private float mProgress = 0;
     public synchronized float getProgress() {
         return mProgress;
     }
 
-    protected final void setProgress(float value) {
+    protected synchronized final void setProgress(float value) {
         mProgress = value;
+        if(mProgress==1) setState(SUCCESS);
     }
 
     public synchronized int getState() {
