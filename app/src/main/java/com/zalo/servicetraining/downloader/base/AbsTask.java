@@ -111,7 +111,7 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         if(!mProgressUpdateFlag) {
             mNotifyHandler.sendEmptyMessageDelayed(PROGRESS_CHANGED,1250);
             mProgressUpdateFlag = true;
-            Log.d(TAG, "task id "+mId+", update after 1250ms");
+            Log.d(TAG, "task id "+mId+", update after 500ms");
         } else if(mFirstTime) {
             mFirstTime = false;
             mNotifyHandler.sendEmptyMessage(PROGRESS_CHANGED);

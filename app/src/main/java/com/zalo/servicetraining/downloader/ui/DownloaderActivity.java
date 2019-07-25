@@ -1,6 +1,10 @@
 package com.zalo.servicetraining.downloader.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -8,16 +12,20 @@ import android.util.Log;
 import android.view.Gravity;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.R;
+import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
+import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.service.ServiceToken;
 import com.zalo.servicetraining.ui.base.AbsListActivity;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -116,18 +124,83 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Log.d(TAG, "onServiceConnected: receive mService");
         refreshData();
+        register();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
+        unregister();
         Log.d(TAG, "onServiceConnected: detach mService");
 
     }
 
+    private void taskUpdated(int id, int state, float progress, boolean progress_support) {
+        mAdapter.taskUpdated(id,state, progress, progress_support);
+    }
+
+    private DownloaderBroadcastReceiver mReceiver;
+
+    private static final class DownloaderBroadcastReceiver extends BroadcastReceiver {
+        private final WeakReference<DownloaderActivity> mWeakRefActivity;
+        public DownloaderBroadcastReceiver(final DownloaderActivity activity) {
+            mWeakRefActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            DownloaderActivity activity = mWeakRefActivity.get();
+
+            if(activity!=null && action!=null && !action.isEmpty()) {
+                switch (action) {
+                    case DownloaderService.ACTION_TASK_CHANGED:
+                        Bundle bundle = intent.getExtras();
+                        if (bundle != null) {
+                            final int id = bundle.getInt(AbsTask.EXTRA_NOTIFICATION_ID, -1);
+                            final int state = bundle.getInt(AbsTask.EXTRA_STATE, -1);
+                            final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS, -1);
+                            final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
+                            activity.taskUpdated(id,state,progress,progress_support);
+                        }
+                        Log.d(TAG, "onReceive: action_task_changed");
+                        break;
+                }
+            }
+        }
+    }
+
     private ServiceToken mServiceToken;
+
+    private boolean mReceiverRegistered = false;
+    private void register() {
+        if(!mReceiverRegistered) {
+            mReceiver = new DownloaderBroadcastReceiver(this);
+
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(DownloaderService.ACTION_TASK_CHANGED);
+
+            Log.d(TAG, "registered");
+            try {
+                LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+            } catch (Exception ignored) {};
+
+            mReceiverRegistered = true;
+        }
+    }
+
+    private void unregister() {
+        if (mReceiverRegistered) {
+            try {
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+            } catch (Exception ignored) {}
+            mReceiver = null;
+            mReceiverRegistered = false;
+        }
+    }
 
     @Override
     protected void onDestroy() {
+        unregister();
         DownloaderRemote.unBind(mServiceToken);
         mAdapter.destroy();
         mGridLayoutManager = null;
@@ -139,4 +212,5 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     public void onItemClick(Object object) {
 
     }
+
 }

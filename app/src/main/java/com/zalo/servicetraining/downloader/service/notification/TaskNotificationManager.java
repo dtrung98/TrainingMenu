@@ -10,7 +10,6 @@ import android.os.Build;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.annotation.MainThread;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -18,11 +17,9 @@ import com.zalo.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
-import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
 
-import java.util.List;
 
 
 public class TaskNotificationManager {

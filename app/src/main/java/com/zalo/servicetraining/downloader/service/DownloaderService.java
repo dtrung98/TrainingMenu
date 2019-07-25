@@ -10,7 +10,9 @@ import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.zalo.App;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
@@ -27,6 +29,8 @@ public class DownloaderService extends Service {
     public static final String PACKAGE_NAME = "com.zalo.servicetraining.downloader.mService";
 
     private static final int UPDATE_FROM_TASK = 2;
+
+    public static final String ACTION_TASK_CHANGED = "action_task_changed";
 
     private AbsTaskManager mDownloadManager;
     private TaskNotificationManager mTaskNotificationManager;
@@ -47,6 +51,14 @@ public class DownloaderService extends Service {
 
     public void updateFromTask(AbsTask task) {
        mTaskNotificationManager.notifyTaskNotificationChanged(task);
+       Intent intent = new Intent();
+       intent.setAction(ACTION_TASK_CHANGED);
+        intent.putExtra(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
+        intent.putExtra(AbsTask.EXTRA_STATE,task.getState());
+        intent.putExtra(AbsTask.EXTRA_PROGRESS,task.getProgress());
+        intent.putExtra(AbsTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
+
+        LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
     }
 
     public void updateFromTaskRunInUIThread(AbsTask task) {
@@ -149,6 +161,7 @@ public class DownloaderService extends Service {
                     final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
                     service.mTaskNotificationManager.notifyTaskNotificationChanged(id,state,progress, progress_support);
                     break;
+
             }
         }
     }

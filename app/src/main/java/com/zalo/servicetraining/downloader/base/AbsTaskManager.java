@@ -87,7 +87,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
             if(task instanceof SimpleDownloadTask)
             info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
 
-            info.setState(task.getState())
+            info.setId(task.getId()).setState(task.getState())
                     .setProgress(task.getProgress())
                     .setProgressSupport(task.isProgressSupport());
             infos.add(info);

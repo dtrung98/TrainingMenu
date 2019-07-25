@@ -11,6 +11,8 @@ public class TaskInfo {
     private int mState = AbsTask.PENDING;
     private DownloadItem mDownloadItem;
 
+    private int mId;
+
     public int getSectionState() {
         return mState==AbsTask.SUCCESS? STATE_DOWNLOADED : STATE_DOWNLOADING;
     }
@@ -51,5 +53,14 @@ public class TaskInfo {
         mProgress = progress;
         return this;
 
+    }
+
+    public int getId() {
+        return mId;
+    }
+
+    public TaskInfo setId(int id) {
+        mId = id;
+        return this;
     }
 }

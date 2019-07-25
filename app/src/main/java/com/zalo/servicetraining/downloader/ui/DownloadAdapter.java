@@ -44,6 +44,18 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mSpanSizeLookup;
     }
 
+    public void taskUpdated(int id, int state, float progress, boolean progress_support) {
+        int size = mData.size();
+        for (int i = 0; i < size; i++) {
+            Object object = mData.get(i);
+            if(object instanceof TaskInfo && ((TaskInfo)object).getId()==id) {
+                ((TaskInfo)object).setState(state).setProgress(progress).setProgressSupport(progress_support);
+                notifyItemChanged(i);
+                return;
+            }
+        }
+    }
+
     public interface ItemClickListener {
         void onItemClick(Object object);
     }
