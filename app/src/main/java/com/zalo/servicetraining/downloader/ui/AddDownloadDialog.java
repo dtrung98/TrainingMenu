@@ -1,15 +1,20 @@
 package com.zalo.servicetraining.downloader.ui;
 
-import android.content.ComponentName;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.URLUtil;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,13 +23,20 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.zalo.servicetraining.R;
+import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 
-public class AddDownloadDialog extends DialogFragment implements View.OnClickListener {
+import es.dmoral.toasty.Toasty;
+
+public class AddDownloadDialog extends DialogFragment implements View.OnClickListener, ClipboardManager.OnPrimaryClipChangedListener, TextWatcher {
     public static final String TAG = "AddDownloadDialog";
 
     private TextInputLayout mUrlTextInputLayout;
     private TextInputEditText mUrlEditText;
+
+    private TextView mDownloadButton;
+    private TextView mPasteAndGoButton;
+    private ImageView mPasteIcon;
 
 
     public static AddDownloadDialog newInstance() {
@@ -35,6 +47,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         fragment.setArguments(args);
         return fragment;
     }
+
+    private ClipboardManager mClipboardManager;
+
 
     @Override
     public int getTheme() {
@@ -47,49 +62,43 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         return inflater.inflate(R.layout.add_download_layout,container,false);
     }
 
-   /* public static boolean hasSoftKeys(WindowManager windowManager){
-        Display d = windowManager.getDefaultDisplay();
-
-        DisplayMetrics realDisplayMetrics = new DisplayMetrics();
-        d.getRealMetrics(realDisplayMetrics);
-
-        int realHeight = realDisplayMetrics.heightPixels;
-        int realWidth = realDisplayMetrics.widthPixels;
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        d.getMetrics(displayMetrics);
-
-        int displayHeight = displayMetrics.heightPixels;
-        int displayWidth = displayMetrics.widthPixels;
-
-        return (realWidth - displayWidth) > 0 || (realHeight - displayHeight) > 0;
-    }
-
-    public static int getNavigationHeight(Activity activity)
-    {
-
-        int navigationBarHeight = 0;
-        int resourceId = activity.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            navigationBarHeight = activity.getResources().getDimensionPixelSize(resourceId);
-        }
-        if(!hasSoftKeys(activity.getWindowManager())) return 0;
-        return  navigationBarHeight;
-    }*/
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         bind(view);
+        mClipboardManager = (ClipboardManager) view.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if(mClipboardManager!=null) {
+            mClipboardManager.addPrimaryClipChangedListener(this);
+        }
+        updateDownloadButton();
+        updatePasteButton();
         showKeyboard();
 
     }
+
+    @Override
+    public void dismiss() {
+        closeKeyboard();
+        super.dismiss();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mClipboardManager.removePrimaryClipChangedListener(this);
+        mClipboardManager = null;
+        super.onDestroyView();
+    }
+
     private void bind(View root) {
-        View mDownloadButton = root.findViewById(R.id.download_button);
+        mDownloadButton = root.findViewById(R.id.download_button);
         View mCloseButton = root.findViewById(R.id.close);
-        View mPasteAndGoButton = root.findViewById(R.id.paste_and_go_button);
+
+        mPasteAndGoButton = root.findViewById(R.id.paste_and_go_button);
+        mPasteIcon = root.findViewById(R.id.paste_icon);
         mUrlTextInputLayout = root.findViewById(R.id.url_input_layout);
         mUrlEditText = mUrlTextInputLayout.findViewById(R.id.url_input_edit_text);
+        mUrlEditText.addTextChangedListener(this);
 
         mDownloadButton.setOnClickListener(this);
         mCloseButton.setOnClickListener(this);
@@ -114,7 +123,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     public void showKeyboard(){
         if(getContext()!=null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if(inputMethodManager!=null)
+            if(inputMethodManager!=null&&!inputMethodManager.isAcceptingText())
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
     }
@@ -122,21 +131,119 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     public void closeKeyboard(){
         if(getContext()!=null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if(inputMethodManager!=null)
+            if(inputMethodManager!=null&&inputMethodManager.isAcceptingText())
             inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
         }
     }
 
     private void addToDownload() {
         closeKeyboard();
-        if(getActivity() instanceof DownloaderActivity)
-            ((DownloaderActivity)getActivity()).doSomething();
+        Editable editable = mUrlEditText.getText();
+        if(editable!=null) {
+            String text = editable.toString();
+            if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
+                DownloaderRemote.appendTask(new DownloadItem(mUrlEditText.getText().toString()));
+                Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
+                dismiss();
+            } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
+        }
     }
 
     private void pasteAndGo() {
-        mUrlEditText.clearFocus();
+        closeKeyboard();
+        if(getContext()!=null) {
+            if(mClipboardManager !=null&& mClipboardManager.getPrimaryClip()!=null) {
+                ClipData.Item item = mClipboardManager.getPrimaryClip().getItemAt(0);
+
+                CharSequence pasteData = item.getText();
+
+                if (pasteData == null) {
+                    Uri pasteUri = item.getUri();
+
+                    if (pasteUri != null) {
+
+                        pasteData = pasteUri.toString();
+                    } else {
+                        Log.e(TAG, "Clipboard contains an invalid data type");
+                    }
+                }
+                if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
+                    DownloaderRemote.appendTask(new DownloadItem(pasteData.toString()));
+                    Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
+                    dismiss();
+                } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
+            }
+        }
 
     }
 
+    private void updateDownloadButton() {
+        Editable editable = mUrlEditText.getText();
+        if(editable!=null) {
+            String text = editable.toString();
+            if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
+                mDownloadButton.setBackgroundResource(R.drawable.background_round_green);
+                mDownloadButton.setEnabled(true);
+             return;
+            }
+        }
 
+        // else
+        mDownloadButton.setBackgroundResource(R.drawable.background_round_dark);
+        mDownloadButton.setEnabled(false);
+
+    }
+
+    private void updatePasteButton() {
+        if(getContext()!=null) {
+            if(mClipboardManager !=null&& mClipboardManager.getPrimaryClip()!=null) {
+                ClipData.Item item = mClipboardManager.getPrimaryClip().getItemAt(0);
+
+                CharSequence pasteData = item.getText();
+
+                if (pasteData == null) {
+                    Uri pasteUri = item.getUri();
+
+                    if (pasteUri != null) {
+
+                        pasteData = pasteUri.toString();
+                    }
+                }
+                if(pasteData!=null && URLUtil.isValidUrl(pasteData.toString())) {
+                    mPasteIcon.setColorFilter(getResources().getColor(R.color.FlatTealBlue));
+                    mPasteAndGoButton.setBackgroundResource(R.drawable.background_round_teal_blue_border);
+                    mPasteAndGoButton.setTextColor(getResources().getColor(R.color.FlatTealBlue));
+                    mPasteAndGoButton.setEnabled(true);
+                    return;
+                }
+            }
+        }
+
+        // else
+        mPasteIcon.setColorFilter(getResources().getColor(R.color.dark_666));
+        mPasteAndGoButton.setBackgroundResource(R.drawable.background_round_dark_border);
+        mPasteAndGoButton.setTextColor(getResources().getColor(R.color.dark_666));
+        mPasteAndGoButton.setEnabled(false);
+    }
+
+
+    @Override
+    public void onPrimaryClipChanged() {
+        updatePasteButton();
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        updateDownloadButton();
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+
+    }
 }

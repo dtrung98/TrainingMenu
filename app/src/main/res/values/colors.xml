@@ -44,4 +44,5 @@
     <color name="DarkerColorL3">#161218</color>
     <color name="GradientRed">#ff1361</color>
     <color name="DribbleBlue">#3C245C</color>
+    <color name="dark_666">#666</color>
 </resources>

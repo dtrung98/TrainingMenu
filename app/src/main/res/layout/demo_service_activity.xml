@@ -41,7 +41,7 @@
         app:layout_constraintEnd_toStartOf="@id/end_button"
         android:layout_marginStart="16dp"
         android:text="@string/start_new_service"
-        android:background="@drawable/background_sign_in"
+        android:background="@drawable/background_round_green"
         android:textColor="@color/FlatWhite"
         android:layout_marginBottom="8dp"/>
 

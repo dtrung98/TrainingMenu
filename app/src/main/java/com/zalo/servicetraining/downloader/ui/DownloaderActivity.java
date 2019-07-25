@@ -23,8 +23,7 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     FloatingActionButton mAddButton;
 
     void addNewTask() {
-        doSomething();
-       // AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+        AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
     }
 
     private void addPlusButton() {
@@ -60,7 +59,7 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     }
 
     public void doSomething() {
-         DownloaderRemote.appendTask(new DownloadItem(""));
+         DownloaderRemote.appendTask(new DownloadItem("http://www.effigis.com/wp-content/uploads/2015/02/Airbus_Pleiades_50cm_8bit_RGB_Yogyakarta.jpg"));
     }
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {

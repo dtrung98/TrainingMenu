@@ -2,6 +2,7 @@ package com.zalo.servicetraining.downloader.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -9,10 +10,9 @@ import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.zalo.servicetraining.downloader.base.BaseTask;
-import com.zalo.servicetraining.downloader.base.BaseTaskManager;
+import com.zalo.servicetraining.downloader.base.AbsTask;
+import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.notification.TaskNotificationManager;
 import com.zalo.servicetraining.downloader.service.taskmanager.SimpleTaskManager;
@@ -24,10 +24,9 @@ public class DownloaderService extends Service {
 
     public static final String PACKAGE_NAME = "com.zalo.servicetraining.downloader.mService";
 
-    static final int A_SECOND_LOOP = 1;
-    static final int STOP_LOOP = 2;
+    private static final int UPDATE_FROM_TASK = 2;
 
-    private BaseTaskManager mDownloadManager;
+    private AbsTaskManager mDownloadManager;
     private TaskNotificationManager mTaskNotificationManager;
 
     public void initManager() {
@@ -40,15 +39,26 @@ public class DownloaderService extends Service {
         mDownloadManager.addNewTask(item);
     }
 
-    public void updateFromTaskManager(BaseTaskManager manager) {
+    public void updateFromTaskManager(AbsTaskManager manager) {
 
     }
 
-    public void updateFromTask(BaseTask task) {
-        mTaskNotificationManager.notifyTaskNotificationChanged(task);
+    public void updateFromTask(AbsTask task) {
+       mTaskNotificationManager.notifyTaskNotificationChanged(task);
     }
 
-    public BaseTaskManager getDownloadManager() {
+    public void updateFromTaskRunInUIThread(AbsTask task) {
+        Message message = new Message();
+        message.what = UPDATE_FROM_TASK;
+        Bundle bundle = new Bundle();
+        bundle.putInt(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
+        bundle.putInt(AbsTask.EXTRA_STATE,task.getState());
+        bundle.putFloat(AbsTask.EXTRA_PROGRESS,task.getProgress());
+        message.setData(bundle);
+        mServiceHandler.sendMessage(message);
+    }
+
+    public AbsTaskManager getDownloadManager() {
         return mDownloadManager;
     }
 
@@ -62,6 +72,7 @@ public class DownloaderService extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
+        mServiceHandler = new ServiceHandler(this);
         initManager();
         initNotification();
     }
@@ -98,6 +109,38 @@ public class DownloaderService extends Service {
         Log.d(TAG, "onUnbind");
         return super.onUnbind(intent);
     }
+
+    private ServiceHandler mServiceHandler;
+
+    private static class ServiceHandler extends Handler {
+        private final WeakReference<DownloaderService> mRefService;
+
+        public ServiceHandler(@NonNull Looper looper, DownloaderService service) {
+            super(looper);
+            mRefService = new WeakReference<>(service);
+        }
+
+        ServiceHandler(DownloaderService service) {
+            mRefService = new WeakReference<>(service);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            DownloaderService service = mRefService.get();
+            if(service!=null)
+            switch (msg.what) {
+                case UPDATE_FROM_TASK :
+                    Bundle bundle = msg.getData();
+                    final int id = bundle.getInt(AbsTask.EXTRA_NOTIFICATION_ID,-1);
+                    final int state = bundle.getInt(AbsTask.EXTRA_STATE,-1);
+                    final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS,-1);
+                    service.mTaskNotificationManager.notifyTaskNotificationChanged(id,state,progress);
+                    break;
+            }
+        }
+    }
+
+
     public IBinder mTimeTrackBinder = new Binder();
 
     public class Binder extends android.os.Binder {

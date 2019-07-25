@@ -13,13 +13,12 @@ import android.util.SparseArray;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.zalo.App;
 import com.zalo.servicetraining.R;
-import com.zalo.servicetraining.downloader.base.BaseTask;
-import com.zalo.servicetraining.downloader.base.BaseTaskManager;
+import com.zalo.servicetraining.downloader.base.AbsTask;
+import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
-
-import java.util.HashMap;
 
 
 public class TaskNotificationManager {
@@ -43,62 +42,84 @@ public class TaskNotificationManager {
         }
     }
 
-    private BaseTaskManager getDownloadManager() {
+    private AbsTaskManager getDownloadManager() {
         return mService.getDownloadManager();
     }
 
-    private synchronized boolean shouldForeground() {
-        BaseTaskManager downloadManager = getDownloadManager();
+    private boolean shouldForeground() {
+        AbsTaskManager downloadManager = getDownloadManager();
         return downloadManager.isSomeTaskRunning();
     }
+    public synchronized void notifyTaskNotificationChanged(final int NOTIFICATION_ID, final int STATE, final float PROGRESS) {
+        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ AbsTask.getStateName(STATE)+", progress "+ PROGRESS);
 
-    public synchronized void notifyTaskNotificationChanged(BaseTask task) {
+        NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
+        if(builder==null) {
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", null builder for id "+ NOTIFICATION_ID);
+            builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
+            Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloaderActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(),0,intent, 0);
+            builder.setContentIntent(pendingIntent);
+            builder.setSmallIcon(R.drawable.ic_style_black_24dp)
+                    .setContentTitle("Task ID "+ NOTIFICATION_ID)
+                    .setOnlyAlertOnce(true);
+            mIndexBuilders.put(NOTIFICATION_ID,builder);
+
+        }
+
+        builder.setContentText("State is " + AbsTask.getStateName(STATE)+", progress is "+PROGRESS)
+                .setOngoing(STATE == AbsTask.RUNNING);
+
+        if(STATE!= AbsTask.SUCCESS) {
+            builder.setProgress(100, (int) (PROGRESS * 100), false);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+((int)PROGRESS*100)+", false");
+        }
+        else {
+            builder.setProgress(0,0,false);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 0, 0, false");
+        }
+
+        postNotification(builder.build(), NOTIFICATION_ID, STATE== AbsTask.RUNNING);
+        if(STATE!= AbsTask.RUNNING) {
+            mIndexBuilders.delete(NOTIFICATION_ID);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" from IndexBuilders");
+        }
+    }
+
+    public void notifyTaskNotificationChanged(AbsTask task) {
 
         int NOTIFICATION_ID = task.getId();
         int STATE = task.getState();
         float PROGRESS = task.getProgress();
 
-        NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
-        if(builder==null) {
-            Log.d(TAG, "notifyTaskNotificationChanged: null builder");
-            builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
-            Intent intent = new Intent(mService, DownloaderActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(mService,0,intent, 0);
-            builder.setContentIntent(pendingIntent);
-            mIndexBuilders.put(NOTIFICATION_ID,builder);
-        }
-                builder.setSmallIcon(R.drawable.ic_style_black_24dp)
-                .setContentTitle("Notification for task id "+ NOTIFICATION_ID)
-                .setContentText("Task State is " + BaseTask.getStateName(STATE)+", progress is "+PROGRESS)
-                .setOngoing(STATE == BaseTask.RUNNING)
-                .setOnlyAlertOnce(true);
-
-        if(STATE!=BaseTask.SUCCESS)  builder.setProgress(100,(int)(PROGRESS*100),false);
-        else builder.setProgress(0,0,false);
-
-        postNotification(builder.build(), NOTIFICATION_ID, STATE==BaseTask.RUNNING);
+        notifyTaskNotificationChanged(NOTIFICATION_ID,STATE, PROGRESS);
     }
 
-    private synchronized void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
+    private void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
             newNotifyMode = NOTIFY_MODE_FOREGROUND;
         } else {
             newNotifyMode = NOTIFY_MODE_BACKGROUND;
         }
+       // if(!isOnGoing) mNotificationManager.cancel(NOTIFICATION_ID);
 
         if (mNotifyMode != newNotifyMode && newNotifyMode == NOTIFY_MODE_BACKGROUND) {
             mService.stopForeground(false);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", stop foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
         }
 
-        if (mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND) {
+         if (mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND) {
             mService.startForeground(NOTIFICATION_ID, notification);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", start foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
         } else {
             mNotificationManager.notify(NOTIFICATION_ID, notification);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", notify id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
+
         }
 
+
         mNotifyMode = newNotifyMode;
-        if(!isOnGoing) mIndexBuilders.delete(NOTIFICATION_ID);
 
     }
 
@@ -113,7 +134,7 @@ public class TaskNotificationManager {
             channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,mService.getString(R.string.downloader_notification_chanel_name),NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription(mService.getString(R.string.downloader_notification_chanel_description));
             channel.enableLights(true);
-            channel.enableVibration(true);
+          //  channel.enableVibration(true);
         }
 
         mNotificationManager.createNotificationChannel(channel);

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -109,7 +108,7 @@ public class ServiceDemoActivity extends AppCompatActivity implements ServiceCon
             case ERROR:
             case NOT_RUNNING:
                 mStartButton.setEnabled(true);
-                mStartButton.setBackgroundResource(R.drawable.background_sign_in);
+                mStartButton.setBackgroundResource(R.drawable.background_round_green);
                 mEndButton.setEnabled(false);
                 mStartButton.setText(R.string.start_new_service);
                 break;
