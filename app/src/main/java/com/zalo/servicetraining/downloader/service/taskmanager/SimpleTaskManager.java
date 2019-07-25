@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SimpleTaskManager extends AbsTaskManager<SimpleDownloadTask> {
     private static final String TAG = "SimpleTaskManager";
-    private static int mIdCounting = 0;
+    private static int mIdCounting = 1;
 
     private synchronized static int getNextId() {
         int current = mIdCounting;

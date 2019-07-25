@@ -57,6 +57,7 @@
         <activity android:name=".fundamental.pipe.PipeExampleActivity" />
         <activity
             android:label="@string/downloader"
+            android:launchMode="singleTop"
             android:name=".downloader.ui.DownloaderActivity" />
         <activity android:name=".fundamental.FundamentalActivity"
             android:label="@string/fundamental"/>

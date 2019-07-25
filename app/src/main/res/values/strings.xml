@@ -40,4 +40,8 @@
     <string name="downloader_service">Downloader Service</string>
     <string name="downloader_notification_chanel_name">Downloader Service</string>
     <string name="invalid_url">Invalid Url</string>
+    <string name="restart">Restart</string>
+    <string name="clear">Clear</string>
+    <string name="invalid_section">Invalid Section</string>
+    <string name="downloading">Downloading</string>
 </resources>

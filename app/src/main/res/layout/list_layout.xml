@@ -51,12 +51,12 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/item_card"
+            tools:listitem="@layout/item_downloaded"
             tools:layoutManager="GridLayoutManager"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:overScrollMode="never"
-            tools:spanCount="2"/>
+            tools:spanCount="1"/>
     </com.zalo.servicetraining.ui.widget.ScaleSwipeRefreshLayout>
     <ImageView
         android:id="@+id/back_button"

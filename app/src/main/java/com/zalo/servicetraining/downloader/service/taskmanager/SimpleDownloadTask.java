@@ -1,6 +1,5 @@
 package com.zalo.servicetraining.downloader.service.taskmanager;
 
-import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -16,9 +15,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
-
-
 public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
     private static final String TAG = "SimpleDownloadTask";
 
@@ -29,6 +25,10 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
     private static final int MODE_CONTINUE_RESUME = 8;
 
     private int mMode = MODE_DOWNLOAD_FROM_START;
+
+    public DownloadItem getDownloadItem() {
+        return mDownloadItem;
+    }
 
     private final DownloadItem mDownloadItem;
 
@@ -157,6 +157,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         }
 
         long fileSize = getFileSize(url);
+        if(fileSize>0) setProgressSupport(true);
         Log.d(TAG, "start download file size = "+ fileSize);
 
         byte[] buffer = new byte[1024*4];
@@ -168,8 +169,10 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
             while ((bufferReadLength = inputStream.read(buffer)) != -1) {
                 fileWriter.write(buffer, 0, bufferReadLength);
                 fileReadLength += bufferReadLength;
-                if(fileSize>0)
-                setProgressAndNotify((fileReadLength+0f)/fileSize);
+                if(isProgressSupport()) {
+
+                    setProgressAndNotify((fileReadLength + 0f) / fileSize);
+                }
                 else notifyProgressChanged();
             }
 

@@ -14,10 +14,12 @@ import androidx.annotation.NonNull;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.TaskNotificationManager;
 import com.zalo.servicetraining.downloader.service.taskmanager.SimpleTaskManager;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class DownloaderService extends Service {
     public static final String TAG = "DownloaderService";
@@ -54,6 +56,7 @@ public class DownloaderService extends Service {
         bundle.putInt(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
         bundle.putInt(AbsTask.EXTRA_STATE,task.getState());
         bundle.putFloat(AbsTask.EXTRA_PROGRESS,task.getProgress());
+        bundle.putBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
         message.setData(bundle);
         mServiceHandler.sendMessage(message);
     }
@@ -65,7 +68,7 @@ public class DownloaderService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind");
-        return mTimeTrackBinder;
+        return mBinder;
     }
 
     @Override
@@ -93,6 +96,7 @@ public class DownloaderService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
+        mTaskNotificationManager.cancelAll();
         super.onDestroy();
     }
 
@@ -111,6 +115,14 @@ public class DownloaderService extends Service {
     }
 
     private ServiceHandler mServiceHandler;
+
+    public List getSessionTaskList() {
+        return mDownloadManager.getSessionTaskList();
+    }
+
+    public TaskInfo getTaskInfoWithId(int id) {
+       return mDownloadManager.getTaskInfo(id);
+    }
 
     private static class ServiceHandler extends Handler {
         private final WeakReference<DownloaderService> mRefService;
@@ -134,14 +146,15 @@ public class DownloaderService extends Service {
                     final int id = bundle.getInt(AbsTask.EXTRA_NOTIFICATION_ID,-1);
                     final int state = bundle.getInt(AbsTask.EXTRA_STATE,-1);
                     final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS,-1);
-                    service.mTaskNotificationManager.notifyTaskNotificationChanged(id,state,progress);
+                    final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
+                    service.mTaskNotificationManager.notifyTaskNotificationChanged(id,state,progress, progress_support);
                     break;
             }
         }
     }
 
 
-    public IBinder mTimeTrackBinder = new Binder();
+    public IBinder mBinder = new Binder();
 
     public class Binder extends android.os.Binder {
         @NonNull

@@ -33,7 +33,6 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
 
     private TextInputLayout mUrlTextInputLayout;
     private TextInputEditText mUrlEditText;
-
     private TextView mDownloadButton;
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
@@ -93,13 +92,12 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     private void bind(View root) {
         mDownloadButton = root.findViewById(R.id.download_button);
         View mCloseButton = root.findViewById(R.id.close);
-
         mPasteAndGoButton = root.findViewById(R.id.paste_and_go_button);
         mPasteIcon = root.findViewById(R.id.paste_icon);
         mUrlTextInputLayout = root.findViewById(R.id.url_input_layout);
         mUrlEditText = mUrlTextInputLayout.findViewById(R.id.url_input_edit_text);
         mUrlEditText.addTextChangedListener(this);
-
+        root.findViewById(R.id.panel).setOnClickListener(this);
         mDownloadButton.setOnClickListener(this);
         mCloseButton.setOnClickListener(this);
         mPasteAndGoButton.setOnClickListener(this);
@@ -116,6 +114,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                 break;
             case R.id.paste_and_go_button:
                 pasteAndGo();
+                break;
+            case R.id.panel:
+                closeKeyboard();
                 break;
         }
     }
@@ -143,8 +144,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
             String text = editable.toString();
             if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
                 DownloaderRemote.appendTask(new DownloadItem(mUrlEditText.getText().toString()));
-                Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
                 dismiss();
+
+                Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
             } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
         }
     }
@@ -169,8 +171,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                 }
                 if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
                     DownloaderRemote.appendTask(new DownloadItem(pasteData.toString()));
-                    Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
                     dismiss();
+
+                    Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
                 } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
             }
         }

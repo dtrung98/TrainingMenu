@@ -8,9 +8,12 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 
 import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
+import com.zalo.servicetraining.downloader.service.taskmanager.SimpleDownloadTask;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public abstract class AbsTaskManager<T extends AbsTask> {
@@ -75,4 +78,42 @@ public abstract class AbsTaskManager<T extends AbsTask> {
         return false;
     }
 
+    public synchronized List<TaskInfo> getSessionTaskList() {
+        List<T> tasks = getAllTask();
+        List<TaskInfo> infos = new ArrayList<>();
+        for (T task:
+             tasks) {
+            TaskInfo info = new TaskInfo();
+            if(task instanceof SimpleDownloadTask)
+            info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
+
+            info.setState(task.getState())
+                    .setProgress(task.getProgress())
+                    .setProgressSupport(task.isProgressSupport());
+            infos.add(info);
+        }
+
+        return infos;
+    }
+
+    public TaskInfo getTaskInfo(int id) {
+        List<T> tasks = getAllTask();
+        AbsTask task = null;
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null) {
+            TaskInfo info = new TaskInfo();
+            if(task instanceof SimpleDownloadTask)
+                info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
+            info.setState(task.getState())
+                    .setProgress(task.getProgress())
+                    .setProgressSupport(task.isProgressSupport());
+        }
+        return null;
+    }
 }

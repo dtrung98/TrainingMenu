@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -17,8 +18,11 @@ import com.zalo.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
+import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
+
+import java.util.List;
 
 
 public class TaskNotificationManager {
@@ -40,6 +44,7 @@ public class TaskNotificationManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel();
         }
+     //   notifyTaskNotificationChanged(1,AbsTask.RUNNING,0.5f,false);
     }
 
     private AbsTaskManager getDownloadManager() {
@@ -50,7 +55,7 @@ public class TaskNotificationManager {
         AbsTaskManager downloadManager = getDownloadManager();
         return downloadManager.isSomeTaskRunning();
     }
-    public synchronized void notifyTaskNotificationChanged(final int NOTIFICATION_ID, final int STATE, final float PROGRESS) {
+    public synchronized void notifyTaskNotificationChanged(final int NOTIFICATION_ID, final int STATE, final float PROGRESS, final boolean PROGRESS_SUPPORT) {
         Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ AbsTask.getStateName(STATE)+", progress "+ PROGRESS);
 
         NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
@@ -60,9 +65,10 @@ public class TaskNotificationManager {
             Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloaderActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(),0,intent, 0);
             builder.setContentIntent(pendingIntent);
-            builder.setSmallIcon(R.drawable.ic_style_black_24dp)
-                    .setContentTitle("Task ID "+ NOTIFICATION_ID)
-                    .setOnlyAlertOnce(true);
+            builder.setSmallIcon(R.drawable.downloading)
+                   .setContentTitle("Task ID "+ NOTIFICATION_ID)
+                   .setOnlyAlertOnce(true)
+            .setAutoCancel(false);
             mIndexBuilders.put(NOTIFICATION_ID,builder);
 
         }
@@ -71,10 +77,13 @@ public class TaskNotificationManager {
                 .setOngoing(STATE == AbsTask.RUNNING);
 
         if(STATE!= AbsTask.SUCCESS) {
+            if(PROGRESS_SUPPORT)
             builder.setProgress(100, (int) (PROGRESS * 100), false);
+            else builder.setProgress(100,0,true);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+((int)PROGRESS*100)+", false");
         }
         else {
+            builder.setOnlyAlertOnce(false);
             builder.setProgress(0,0,false);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 0, 0, false");
         }
@@ -92,14 +101,15 @@ public class TaskNotificationManager {
         int STATE = task.getState();
         float PROGRESS = task.getProgress();
 
-        notifyTaskNotificationChanged(NOTIFICATION_ID,STATE, PROGRESS);
+        notifyTaskNotificationChanged(NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
     }
 
     private void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
+        if(mStopped) return;
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
             newNotifyMode = NOTIFY_MODE_FOREGROUND;
-        } else {
+        } else {http://ipv4.download.thinkbroadband.com/50MB.zip
             newNotifyMode = NOTIFY_MODE_BACKGROUND;
         }
        // if(!isOnGoing) mNotificationManager.cancel(NOTIFICATION_ID);
@@ -138,5 +148,11 @@ public class TaskNotificationManager {
         }
 
         mNotificationManager.createNotificationChannel(channel);
+    }
+    private boolean mStopped = false;
+
+    public void cancelAll() {
+        mStopped = true;
+        mNotificationManager.cancelAll();
     }
 }

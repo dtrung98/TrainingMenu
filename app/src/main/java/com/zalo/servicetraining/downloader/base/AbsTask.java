@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
+    public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
     private static final String TAG = "AbsTask";
 
     public static final String EXTRA_NOTIFICATION_ID = "notification_id";
@@ -26,6 +27,9 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     private String mMessage = "";
 
     private T mTaskManager;
+
+    private boolean mIsProgressSupport = false;
+
 
     public AbsTask(final int id, T t) {
         mId = id;
@@ -64,7 +68,7 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     protected synchronized void setState(int state, String message) {
         this.mState = state;
         setMessage(message);
-        Log.d(TAG, "setState with message: "+ message);
+        Log.d(TAG, "setSectionState with message: "+ message);
     }
 
     private int mState = PENDING;
@@ -136,6 +140,14 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
 
     public void setMessage(String message) {
         mMessage = message;
+    }
+
+    public boolean isProgressSupport() {
+        return mIsProgressSupport;
+    }
+
+    public void setProgressSupport(boolean progressSupport) {
+        mIsProgressSupport = progressSupport;
     }
 
     private static class NotifyHandler extends Handler {
