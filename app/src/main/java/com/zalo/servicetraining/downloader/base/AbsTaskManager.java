@@ -1,12 +1,5 @@
 package com.zalo.servicetraining.downloader.base;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-
-import androidx.annotation.NonNull;
-
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
@@ -45,6 +38,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
         mTaskList.add(task);
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
+        notifyTaskChanged(task);
     }
 
     public abstract T onNewTaskAdded(DownloadItem item);
@@ -81,11 +75,11 @@ public abstract class AbsTaskManager<T extends AbsTask> {
     public synchronized List<TaskInfo> getSessionTaskList() {
         List<T> tasks = getAllTask();
         List<TaskInfo> infos = new ArrayList<>();
-        for (T task:
-             tasks) {
+        for (int i = tasks.size() -1; i >= 0; i--) {
+            T task = tasks.get(i);
             TaskInfo info = new TaskInfo();
-            if(task instanceof SimpleDownloadTask)
-            info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
+            if (task instanceof SimpleDownloadTask)
+                info.setDownloadItem(new DownloadItem(((SimpleDownloadTask) task).getDownloadItem()));
 
             info.setId(task.getId()).setState(task.getState())
                     .setProgress(task.getProgress())
@@ -110,9 +104,11 @@ public abstract class AbsTaskManager<T extends AbsTask> {
             TaskInfo info = new TaskInfo();
             if(task instanceof SimpleDownloadTask)
                 info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
-            info.setState(task.getState())
+            info.setId(task.getId())
+                    .setState(task.getState())
                     .setProgress(task.getProgress())
                     .setProgressSupport(task.isProgressSupport());
+            return info;
         }
         return null;
     }

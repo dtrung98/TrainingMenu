@@ -13,7 +13,7 @@ import android.util.SparseArray;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.zalo.App;
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
@@ -22,8 +22,8 @@ import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
 
 
 
-public class TaskNotificationManager {
-    private static final String TAG = "TaskNotificationManager";
+public class DownNotificationManager {
+    private static final String TAG = "DownNotificationManager";
     private static final String NOTIFICATION_CHANNEL_ID = "downloader_service_notification";
 
     private static final int NOTIFY_MODE_BACKGROUND = 0;
@@ -65,7 +65,7 @@ public class TaskNotificationManager {
             builder.setSmallIcon(R.drawable.downloading)
                    .setContentTitle("Task ID "+ NOTIFICATION_ID)
                    .setOnlyAlertOnce(true)
-            .setAutoCancel(false);
+            .setAutoCancel(true);
             mIndexBuilders.put(NOTIFICATION_ID,builder);
 
         }
@@ -76,7 +76,8 @@ public class TaskNotificationManager {
         if(STATE!= AbsTask.SUCCESS) {
             if(PROGRESS_SUPPORT)
             builder.setProgress(100, (int) (PROGRESS * 100), false);
-            else builder.setProgress(100,0,true);
+            else if(STATE==AbsTask.RUNNING)
+                builder.setProgress(100,0,true);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+((int)PROGRESS*100)+", false");
         }
         else {
@@ -97,16 +98,16 @@ public class TaskNotificationManager {
         int NOTIFICATION_ID = task.getId();
         int STATE = task.getState();
         float PROGRESS = task.getProgress();
-
         notifyTaskNotificationChanged(NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
     }
+    private int mFlagForegroundID = -1;
 
     private void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
         if(mStopped) return;
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
             newNotifyMode = NOTIFY_MODE_FOREGROUND;
-        } else {http://ipv4.download.thinkbroadband.com/50MB.zip
+        } else {
             newNotifyMode = NOTIFY_MODE_BACKGROUND;
         }
        // if(!isOnGoing) mNotificationManager.cancel(NOTIFICATION_ID);
@@ -116,15 +117,16 @@ public class TaskNotificationManager {
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", stop foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
         }
 
-         if (mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND) {
+         if ((mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND)
+         ||(newNotifyMode==NOTIFY_MODE_FOREGROUND&&mIndexBuilders.get(mFlagForegroundID)==null)) {
             mService.startForeground(NOTIFICATION_ID, notification);
+            mFlagForegroundID = NOTIFICATION_ID;
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", start foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
         } else {
             mNotificationManager.notify(NOTIFICATION_ID, notification);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", notify id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
 
         }
-
 
         mNotifyMode = newNotifyMode;
 

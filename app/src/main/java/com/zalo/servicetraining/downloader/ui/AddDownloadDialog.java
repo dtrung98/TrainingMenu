@@ -18,7 +18,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -36,7 +39,6 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     private TextView mDownloadButton;
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
-
 
     public static AddDownloadDialog newInstance() {
 
@@ -74,6 +76,12 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         updatePasteButton();
         showKeyboard();
 
+    }
+
+    @Override
+    public void onPause() {
+        closeKeyboard();
+        super.onPause();
     }
 
     @Override
@@ -122,6 +130,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     public void showKeyboard(){
+        mUrlEditText.requestFocus();
         if(getContext()!=null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if(inputMethodManager!=null&&!inputMethodManager.isAcceptingText())
@@ -138,21 +147,18 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     private void addToDownload() {
-        closeKeyboard();
         Editable editable = mUrlEditText.getText();
         if(editable!=null) {
             String text = editable.toString();
             if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
                 DownloaderRemote.appendTask(new DownloadItem(mUrlEditText.getText().toString()));
                 dismiss();
-
                 Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
             } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
         }
     }
 
     private void pasteAndGo() {
-        closeKeyboard();
         if(getContext()!=null) {
             if(mClipboardManager !=null&& mClipboardManager.getPrimaryClip()!=null) {
                 ClipData.Item item = mClipboardManager.getPrimaryClip().getItemAt(0);
@@ -170,14 +176,20 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                     }
                 }
                 if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
+                    closeKeyboard();
                     DownloaderRemote.appendTask(new DownloadItem(pasteData.toString()));
                     dismiss();
-
                     Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
                 } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
             }
         }
 
+    }
+    @Override
+    public void show(FragmentManager manager, String tag) {
+        FragmentTransaction fragmentTransaction = manager.beginTransaction();
+        fragmentTransaction.add(this, TAG);
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     private void updateDownloadButton() {

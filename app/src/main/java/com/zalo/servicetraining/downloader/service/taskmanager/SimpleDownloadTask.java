@@ -2,10 +2,12 @@ package com.zalo.servicetraining.downloader.service.taskmanager;
 
 import android.os.Build;
 import android.util.Log;
+import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -14,6 +16,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
     private static final String TAG = "SimpleDownloadTask";
@@ -98,7 +102,9 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         long size = -1;
         HttpURLConnection conn = null;
         try {
-            conn = (HttpURLConnection) url.openConnection();
+            if(URLUtil.isHttpsUrl(mDownloadItem.getUrlString()))
+                conn = (HttpsURLConnection)url.openConnection();
+            else conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("HEAD");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 size = conn.getContentLengthLong();
@@ -128,7 +134,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         }
 
         if(url==null) {
-            setState(FAILURE_TERMINATED, "URL is invalid");
+            setState(FAILURE_TERMINATED, "URL is null");
             notifyProgressChanged();
             return;
         }
@@ -136,22 +142,22 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
         try {
-            urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            //urlConnection.setDoOutput(true);
-           // urlConnection.setReadTimeout(10000);
-           // urlConnection.setConnectTimeout(15000);
+            if(URLUtil.isHttpsUrl(mDownloadItem.getUrlString()))
+            urlConnection = (HttpsURLConnection)url.openConnection();
+            else urlConnection = (HttpURLConnection)url.openConnection();
+            urlConnection.setReadTimeout(40000);
             urlConnection.connect();
-            // if (urlConnection.getResponseCode() == 200) {
-                inputStream = urlConnection.getInputStream();
-          //  }
+
+            inputStream = urlConnection.getInputStream();
+          //  inputStream  = new BufferedInputStream(url.openStream(),8192);
 
         } catch (Exception e) {
             if (urlConnection != null) urlConnection.disconnect();
+            Log.d(TAG, "exception: "+e.getMessage());
         }
 
         if(urlConnection==null||inputStream==null) {
-            setState(FAILURE_TERMINATED, "Fail to establish connection, urlConnection is "+ urlConnection+", inputStream is "+ inputStream);
+            setState(FAILURE_TERMINATED, "Failure to establish connection, urlConnection is "+ urlConnection+", inputStream is "+ inputStream);
             notifyProgressChanged();
             return;
         }
@@ -178,7 +184,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
 
             setState(SUCCESS);
             notifyProgressChanged();
-        } catch (IOException ignored) {
+        } catch (Exception ignored) {
             setState(FAILURE_TERMINATED, "Error throw");
             notifyProgressChanged();
         } finally {

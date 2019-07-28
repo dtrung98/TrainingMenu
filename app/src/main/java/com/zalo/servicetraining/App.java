@@ -1,4 +1,4 @@
-package com.zalo;
+package com.zalo.servicetraining;
 
 import android.app.Application;
 

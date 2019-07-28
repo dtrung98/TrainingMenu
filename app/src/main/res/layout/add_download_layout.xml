@@ -65,7 +65,9 @@
                     android:paddingEnd="12dp"
                     android:singleLine="true"
                     android:textColor="@color/FlatWhite"
-                    android:textSize="14sp" />
+                    android:textSize="14sp" >
+                    <requestFocus/>
+                </com.google.android.material.textfield.TextInputEditText>
 
             </com.google.android.material.textfield.TextInputLayout>
 

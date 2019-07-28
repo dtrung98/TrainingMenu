@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.telephony.mbms.DownloadRequest;
 import android.util.Log;
 import android.view.Gravity;
 
@@ -23,25 +24,47 @@ import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.service.ServiceToken;
-import com.zalo.servicetraining.ui.base.AbsListActivity;
+import com.zalo.servicetraining.downloader.ui.base.BasePermissionActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 
-public class DownloaderActivity extends AbsListActivity implements ServiceConnection, DownloadAdapter.ItemClickListener {
+
+public class DownloaderActivity extends BasePermissionActivity implements ServiceConnection, DownloadAdapter.ItemClickListener {
     private static final String TAG = "DownloaderActivity";
+    public static final String ACTION_ADD_NEW_DOWNLOAD = "add_new_download";
+    public static final String ACTION_RESUME_DOWNLOAD = "resume_download";
+
 
     FloatingActionButton mAddButton;
     DownloadAdapter mAdapter;
     GridLayoutManager mGridLayoutManager;
 
     void addNewTask() {
-        AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+        Intent intent = new Intent(ACTION_ADD_NEW_DOWNLOAD);
+        executeWriteStorageAction(intent);
     }
 
+    @Override
+    public void onPermissionResult(Intent intent, boolean granted) {
+        if(intent==null) return;
+        String action = intent.getAction();
+        if(action!=null&&!action.isEmpty())
+        switch (action) {
+            case ACTION_ADD_NEW_DOWNLOAD:
+                if(granted) {
+                    AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+                }
+                else Toasty.error(this,"Can't add new task because you denied permission!").show();
+                break;
+            case ACTION_RESUME_DOWNLOAD:
+                break;
+        }
+    }
 
     private void addPlusButton() {
         CoordinatorLayout mRoot = findViewById(R.id.root);
@@ -96,8 +119,9 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
        /* for (int i = 0; i < 20; i++) {
             list.add(new TaskInfo().setState(AbsTask.SUCCESS));
         }*/
+        list.add("Downloading");
+
         if(task_list!=null&&!task_list.isEmpty()) {
-            list.add("Downloading");
 
 
             for (TaskInfo info :
@@ -112,7 +136,7 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
                 if (info.getSectionState() != TaskInfo.STATE_DOWNLOADING)
                     list.add(info);
             }
-        }
+        } else list.add("Downloaded");
         mAdapter.setData(list);
         getSwipeRefreshLayout().setRefreshing(false);
     }
@@ -135,7 +159,8 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     }
 
     private void taskUpdated(int id, int state, float progress, boolean progress_support) {
-        mAdapter.taskUpdated(id,state, progress, progress_support);
+       if(!mAdapter.onTaskUpdated(id,state, progress, progress_support))
+          mAdapter.onTaskAdded(DownloaderRemote.getTaskInfoWithTaskId(id));
     }
 
     private DownloaderBroadcastReceiver mReceiver;
@@ -212,5 +237,4 @@ public class DownloaderActivity extends AbsListActivity implements ServiceConnec
     public void onItemClick(Object object) {
 
     }
-
 }

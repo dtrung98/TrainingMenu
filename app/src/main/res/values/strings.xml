@@ -44,4 +44,6 @@
     <string name="clear">Clear</string>
     <string name="invalid_section">Invalid Section</string>
     <string name="downloading">Downloading</string>
+    <string name="pending">Pending</string>
+    <string name="failure">Failure</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.zalo.servicetraining.downloader.ui;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +13,24 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.servicetraining.R;
+import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
 public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private static final String TAG = "SpaceInEventAdapter";
+    private static final String TAG = "DownloadAdapter";
+
+    private static final int BIND_PROGRESS_CHANGED = 1;
+    private static final int BIND_STATE_CHANGED = 2;
+    private static final int BIND_PROGRESS_SUPPORT = 3;
 
     Context mContext;
-    private boolean mAdminMode = false;
     private ArrayList<Object> mData = new ArrayList<>();
 
     public List<Object> getData() {
@@ -44,16 +51,90 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mSpanSizeLookup;
     }
 
-    public void taskUpdated(int id, int state, float progress, boolean progress_support) {
+    public boolean onTaskUpdated(int id, int state, float progress, boolean progress_support) {
         int size = mData.size();
+        int posFound = -1;
         for (int i = 0; i < size; i++) {
             Object object = mData.get(i);
             if(object instanceof TaskInfo && ((TaskInfo)object).getId()==id) {
-                ((TaskInfo)object).setState(state).setProgress(progress).setProgressSupport(progress_support);
-                notifyItemChanged(i);
-                return;
+               posFound = i;
+               break;
             }
         }
+
+        if(posFound!=-1) {
+            TaskInfo info = (TaskInfo) mData.get(posFound);
+            if ((info.getState() != AbsTask.SUCCESS && state == AbsTask.SUCCESS) || (info.getState() == AbsTask.SUCCESS && state != AbsTask.SUCCESS)) {
+                if(mContext instanceof DownloaderActivity) {
+                    Log.d(TAG, "onTaskUpdated: need to refresh");
+                    ((DownloaderActivity) mContext).refreshData();
+                }
+            } else {
+               // info.setState(state).setProgress(progress).setProgressSupport(progress_support);
+                Log.d(TAG, "onTaskUpdated: just update");
+
+                if(info.getState()!=state) {
+                    info.setState(state);
+                    notifyItemChanged(posFound,BIND_STATE_CHANGED);
+                }
+
+                if(info.getProgress()!=progress) {
+                    info.setProgress(progress);
+                    notifyItemChanged(posFound,BIND_PROGRESS_CHANGED);
+                }
+
+                if(info.isProgressSupport()!=progress_support) {
+                    info.setProgressSupport(progress_support);
+                    notifyItemChanged(posFound,BIND_PROGRESS_SUPPORT);
+                }
+
+
+              /*  if(info.getState()==state&&info.getProgress()==progress) return true;
+                else if(info.getState()!=state) {
+                    info.setState(state);
+                    notifyItemChanged(posFound,ONLY_STATE_CHANGED);
+                } else if(info.getProgress()!=progress) {
+                    info.setProgress(progress);
+                    notifyItemChanged(posFound,ONLY_PROGRESS_CHANGED);
+                }
+                notifyItemChanged(posFound, PROGRESS_N_STATE_CHANGED);*/
+            }
+            Log.d(TAG, "onTaskUpdated posFound = "+posFound);
+            return true;
+        } else {
+            // not in list
+            return false;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if(payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads);
+        } else if(holder instanceof DownloadingItemHolder )
+            for (Object object :
+                    payloads) {
+                if(object instanceof Integer) {
+                    switch ((int)object) {
+                        case BIND_PROGRESS_CHANGED:
+                            ((DownloadingItemHolder)holder).bindProgress((TaskInfo) mData.get(position));
+                            break;
+                        case BIND_STATE_CHANGED:
+                            ((DownloadingItemHolder)holder).bindState((TaskInfo) mData.get(position));
+                            break;
+                        case BIND_PROGRESS_SUPPORT:
+                            ((DownloadingItemHolder)holder).bindProgressSupport((TaskInfo) mData.get(position));
+                            break;
+
+                    }
+                }
+            }
+    }
+
+    public void onTaskAdded(TaskInfo info) {
+        Log.d(TAG, "onTaskAdded");
+        mData.add(1,info);
+        notifyItemInserted(1);
     }
 
     public interface ItemClickListener {
@@ -186,20 +267,92 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public class DownloadingItemHolder extends TaskInfoItemHolder {
         ProgressBar mProgressBar;
 
+        public void bindProgress(TaskInfo info) {
+            int progress  = (int)(info.getProgress()*100);
+            mProgressBar.setProgress(progress);
+            if(!mProgressBar.isIndeterminate())
+                mStateTextView.setText(progress+"%");
+
+        }
+        public void bindProgressSupport(TaskInfo info) {
+            if(info.isProgressSupport()) {
+                mProgressBar.setIndeterminate(false);
+
+            } else {
+                mProgressBar.setIndeterminate(true);
+                switch (info.getState()) {
+                    case AbsTask.PENDING:
+                    case AbsTask.FAILURE_TERMINATED:
+                        break;
+                    case AbsTask.RUNNING:
+                        mStateTextView.setText(R.string.downloading);
+                        break;
+                }
+            }
+        }
+
+        public void bindState(TaskInfo info) {
+            switch (info.getState()) {
+                case AbsTask.PENDING:
+                    mProgressBar.setVisibility(View.GONE);
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
+                    mStateTextView.setText(R.string.pending);
+                    break;
+                case AbsTask.RUNNING:
+                    mProgressBar.setVisibility(View.VISIBLE);
+                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+
+                    break;
+                case AbsTask.FAILURE_TERMINATED:
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
+
+                    if(mProgressBar.isIndeterminate()) {
+                        mProgressBar.setVisibility(View.GONE);
+                        mStateTextView.setText(R.string.failure);
+                    } else
+                        mProgressBar.setVisibility(View.VISIBLE);
+                    break;
+            }
+        }
+
+
         @Override
         public void bind(TaskInfo info) {
             super.bind(info);
             int progress  = (int)(info.getProgress()*100);
 
-            if(info.isProgressSupport()&&progress>=0 && progress <=100) {
-                mProgressBar.setIndeterminate(false);
-                if(progress>1)
-                mProgressBar.setProgress(progress);
-                mStateTextView.setText(progress+"%");
-            } else {
-                mProgressBar.setIndeterminate(true);
-                mStateTextView.setText(R.string.downloading);
-            }
+           switch (info.getState()) {
+               case AbsTask.PENDING:
+                   mProgressBar.setVisibility(View.GONE);
+                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
+                   mStateTextView.setText(R.string.pending);
+                   break;
+               case AbsTask.RUNNING:
+                   mProgressBar.setVisibility(View.VISIBLE);
+                   if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                       mProgressBar.setIndeterminate(false);
+                       mProgressBar.setProgress(progress);
+                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                       mStateTextView.setText(progress+"%");
+                   } else {
+                       mProgressBar.setIndeterminate(true);
+                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                       mStateTextView.setText(R.string.downloading);
+                   }
+                   break;
+               case AbsTask.FAILURE_TERMINATED:
+                   mProgressBar.setVisibility(View.VISIBLE);
+                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
+                   if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
+                       mProgressBar.setIndeterminate(false);
+                       mProgressBar.setProgress(progress);
+                       mStateTextView.setText(progress+"%");
+                   } else {
+                       mProgressBar.setVisibility(View.GONE);
+                       mStateTextView.setText(R.string.failure);
+                   }
+                   break;
+           }
         }
 
         DownloadingItemHolder(View itemView) {

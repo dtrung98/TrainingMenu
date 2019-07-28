@@ -12,12 +12,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.zalo.App;
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
-import com.zalo.servicetraining.downloader.service.notification.TaskNotificationManager;
+import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
 import com.zalo.servicetraining.downloader.service.taskmanager.SimpleTaskManager;
 
 import java.lang.ref.WeakReference;
@@ -33,7 +33,7 @@ public class DownloaderService extends Service {
     public static final String ACTION_TASK_CHANGED = "action_task_changed";
 
     private AbsTaskManager mDownloadManager;
-    private TaskNotificationManager mTaskNotificationManager;
+    private DownNotificationManager mDownNotificationManager;
 
     public void initManager() {
         mDownloadManager = new SimpleTaskManager();
@@ -50,7 +50,7 @@ public class DownloaderService extends Service {
     }
 
     public void updateFromTask(AbsTask task) {
-       mTaskNotificationManager.notifyTaskNotificationChanged(task);
+       mDownNotificationManager.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
         intent.putExtra(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
@@ -93,8 +93,8 @@ public class DownloaderService extends Service {
     }
 
     private void initNotification() {
-        mTaskNotificationManager = new TaskNotificationManager();
-        mTaskNotificationManager.init(this);
+        mDownNotificationManager = new DownNotificationManager();
+        mDownNotificationManager.init(this);
     }
 
 
@@ -108,13 +108,14 @@ public class DownloaderService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        mTaskNotificationManager.cancelAll();
+        mDownNotificationManager.cancelAll();
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent.getAction()==null)
+        if(intent==null) Log.d(TAG, "onStartCommand: null intent");
+        else if(intent.getAction()==null)
         Log.d(TAG, "onStartCommand : receive intent with no action");
         else Log.d(TAG, "onStartCommand: receive intent with action :["+intent.getAction()+"]");
         return super.onStartCommand(intent, flags, startId);
@@ -128,7 +129,7 @@ public class DownloaderService extends Service {
 
     private ServiceHandler mServiceHandler;
 
-    public List getSessionTaskList() {
+    public List<TaskInfo> getSessionTaskList() {
         return mDownloadManager.getSessionTaskList();
     }
 
@@ -159,7 +160,7 @@ public class DownloaderService extends Service {
                     final int state = bundle.getInt(AbsTask.EXTRA_STATE,-1);
                     final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS,-1);
                     final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
-                    service.mTaskNotificationManager.notifyTaskNotificationChanged(id,state,progress, progress_support);
+                    service.mDownNotificationManager.notifyTaskNotificationChanged(id,state,progress, progress_support);
                     break;
 
             }

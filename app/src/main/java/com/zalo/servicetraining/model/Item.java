@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.zalo.App;
+import com.zalo.servicetraining.App;
 
 public class Item {
     private String mTitle = "";
