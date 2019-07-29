@@ -3,7 +3,7 @@ package com.zalo.servicetraining.downloader.base;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.service.taskmanager.SimpleDownloadTask;
+import com.zalo.servicetraining.downloader.service.task.SimpleDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +34,22 @@ public abstract class AbsTaskManager<T extends AbsTask> {
     }
 
     public void addNewTask(DownloadItem item) {
-        T task = onNewTaskAdded(item);
+        T task = newInstance(item);
+        task.setMode(AbsTask.EXECUTE_MODE_NEW_DOWNLOAD);
         mTaskList.add(task);
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
         notifyTaskChanged(task);
     }
 
-    public abstract T onNewTaskAdded(DownloadItem item);
+    public void executeExistedTask(AbsTask task) {
+        if(mExecutor==null) throw new NullPointerException("Executor is null");
+        mExecutor.execute(task);
+        notifyTaskChanged(task);
+    }
+
+
+    public abstract T newInstance(DownloadItem item);
 
     public void destroy() {
         mService = null;
@@ -111,5 +119,66 @@ public abstract class AbsTaskManager<T extends AbsTask> {
             return info;
         }
         return null;
+    }
+
+    public void pauseTaskFromUser(int id) {
+        List<T> tasks = getAllTask();
+        AbsTask task = null;
+
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null) task.pauseByUser();
+
+    }
+
+    public void cancelTaskFromUser(int id) {
+        List<T> tasks = getAllTask();
+        AbsTask task = null;
+
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null) task.cancelByUser();
+    }
+
+    public void resumeTaskByUser(int id) {
+        List<T> tasks = getAllTask();
+        AbsTask task = null;
+
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null&&task.getState()==AbsTask.PAUSED) {
+            task.resumeByUser();
+        }
+    }
+
+    public void restartTaskByUser(int id) {
+        List<T> tasks = getAllTask();
+        AbsTask task = null;
+
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null) {
+            task.restartByUser();
+        }
     }
 }

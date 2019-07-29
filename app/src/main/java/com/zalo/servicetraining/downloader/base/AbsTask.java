@@ -6,8 +6,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
     private static final String TAG = "AbsTask";
@@ -18,17 +16,29 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
 
     public static final int PENDING = 0;
     public static final int RUNNING = 1;
-    public static final int FAILURE_TERMINATED = 2;
-    public static final int SUCCESS = 3;
-    public static final int PAUSED = 4;
+    public static final int PAUSED = 3;
+    public static final int CONNECTING = 4;
+    public static final int SUCCESS = 5;
+    public static final int FAILURE_TERMINATED = 6;
+    public static final int CANCELLED = 7;
 
     private final static int PROGRESS_CHANGED = 1;
+
+    public static final int EXECUTE_MODE_NEW_DOWNLOAD = 5;
+
+    public static final int EXECUTE_MODE_RESTART = 7;
+    public static final int EXECUTE_MODE_RESUME = 8;
+
+    private int mMode = EXECUTE_MODE_NEW_DOWNLOAD;
 
     private String mMessage = "";
 
     private T mTaskManager;
 
     private boolean mIsProgressSupport = false;
+
+    private long mDownloadedInBytes = 0;
+    private long mFileContentLength = -1;
 
 
     public AbsTask(final int id, T t) {
@@ -53,9 +63,11 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         switch (state) {
             case PENDING: return "PENDING";
             case RUNNING: return "RUNNING";
-            case FAILURE_TERMINATED: return "FAILURE_TERMINATED";
+            case FAILURE_TERMINATED: return "FAILURE TERMINATED";
             case SUCCESS: return "SUCCESS";
             case PAUSED: return "PAUSED";
+            case CANCELLED: return "CANCELLED";
+            case CONNECTING: return "CONNECTING";
             default: return null;
         }
     }
@@ -68,7 +80,7 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     protected synchronized void setState(int state, String message) {
         this.mState = state;
         setMessage(message);
-        Log.d(TAG, "setSectionState with message: "+ message);
+        Log.d(TAG, "setState with message: "+ message);
     }
 
     private int mState = PENDING;
@@ -91,7 +103,7 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         if(mProgress !=value) {
             mProgress = value;
             if(mProgress ==1) setState(SUCCESS);
-            notifyProgressChanged();
+            notifyTaskChanged();
         }
     }
 
@@ -105,31 +117,30 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     private boolean mFirstTime = true;
     private boolean mProgressUpdateFlag = false;
 
-    protected void notifyProgressChanged(){
+    protected void notifyTaskChanged(){
 
-        // Nếu chưa có order nào, thì hãy đợi 500s sau, t sẽ gửi
-        if(!mProgressUpdateFlag) {
-            mNotifyHandler.sendEmptyMessageDelayed(PROGRESS_CHANGED,1250);
-            mProgressUpdateFlag = true;
-            Log.d(TAG, "task id "+mId+", update after 500ms");
-        } else if(mFirstTime) {
-            mFirstTime = false;
-            mNotifyHandler.sendEmptyMessage(PROGRESS_CHANGED);
-        }
+        if(mNotifyHandler==null)  getTaskManager().notifyTaskChanged(this);
         else {
-            // Nếu đã có order
-            // bỏ qua
-            Log.d(TAG, "task id "+mId+", update ignored");
+            // Nếu chưa có order nào, thì hãy đợi 500s sau, t sẽ gửi
+            if (!mProgressUpdateFlag) {
+                mNotifyHandler.sendEmptyMessageDelayed(PROGRESS_CHANGED, 1250);
+                mProgressUpdateFlag = true;
+                Log.d(TAG, "task id " + mId + ", update after 500ms");
+            } else if (mFirstTime) {
+                mFirstTime = false;
+                mNotifyHandler.sendEmptyMessage(PROGRESS_CHANGED);
+            } else {
+                // Nếu đã có order
+                // bỏ qua
+                Log.d(TAG, "task id " + mId + ", update ignored");
+            }
         }
-
     }
 
-    private HandlerThread mHandlerThread;
-
     public void startHandlerThread(){
-        mHandlerThread = new HandlerThread("HandlerThread");
-        mHandlerThread.start();
-        mNotifyHandler = new NotifyHandler(this, mHandlerThread.getLooper());
+        HandlerThread handlerThread = new HandlerThread("HandlerThread");
+        handlerThread.start();
+        mNotifyHandler = new NotifyHandler(this, handlerThread.getLooper());
     }
 
     private NotifyHandler mNotifyHandler;
@@ -149,6 +160,91 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     public void setProgressSupport(boolean progressSupport) {
         mIsProgressSupport = progressSupport;
     }
+
+    private boolean mUserCancelledFlag = false;
+
+    private boolean mUserPauseFlag = false;
+
+    protected final boolean isPausedOrCancelled() {
+        return mUserPauseFlag|| mUserCancelledFlag;
+    }
+
+    protected final void clearUserFlag() {
+        mUserCancelledFlag = false;
+        mUserPauseFlag = false;
+    }
+
+    protected final void pauseByUser() {
+        if(!isPausedOrCancelled()) mUserPauseFlag = true;
+        if(getState()==PENDING) {
+            setState(PAUSED);
+            notifyTaskChanged();
+        }
+    }
+
+    protected final void cancelByUser() {
+        if(!isPausedOrCancelled()) mUserCancelledFlag = true;
+        if(getState()==PENDING) {
+            setState(CANCELLED);
+            notifyTaskChanged();
+        }
+    }
+
+    protected final boolean shouldContinueRunning() {
+         if(mUserCancelledFlag) {
+            setState(CANCELLED);
+            notifyTaskChanged();
+            return false;
+        }
+        else if(mUserPauseFlag) {
+             setState(PAUSED);
+             notifyTaskChanged();
+             return false;
+         } else return true;
+    }
+
+    public long getDownloadedInBytes() {
+        return mDownloadedInBytes;
+    }
+
+    public void setDownloadedInBytes(long downloadedInBytes) {
+        mDownloadedInBytes = downloadedInBytes;
+    }
+
+    public long getFileContentLength() {
+        return mFileContentLength;
+    }
+
+    public void setFileContentLength(long fileContentLength) {
+        mFileContentLength = fileContentLength;
+    }
+
+    public int getMode() {
+        return mMode;
+    }
+
+    public void setMode(int mode) {
+        mMode = mode;
+    }
+
+    public void resumeByUser() {
+        if(getState()==PAUSED) {
+            setMode(EXECUTE_MODE_RESUME);
+            setState(PENDING);
+            clearUserFlag();
+            getTaskManager().executeExistedTask(this);
+        }
+    }
+
+    public void restartByUser() {
+        setMode(EXECUTE_MODE_RESTART);
+        setDownloadedInBytes(0);
+        setProgress(0);
+        setState(PENDING);
+        clearUserFlag();
+        getTaskManager().executeExistedTask(this);
+    }
+
 
     private static class NotifyHandler extends Handler {
         private final AbsTask mTask;

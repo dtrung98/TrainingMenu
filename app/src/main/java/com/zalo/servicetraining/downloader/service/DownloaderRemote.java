@@ -42,6 +42,16 @@ public class DownloaderRemote {
         return null;
     }
 
+    public static void pauseTaskWithTaskId(int id) {
+        if(mService!=null)
+            mService.pauseTaskWithTaskId(id);
+    }
+
+    public static void cancelTaskWithTaskId(int id) {
+        if(mService!=null)
+            mService.cancelTaskWithTaskId(id);
+    }
+
 
     public static ServiceToken bindServiceAndStartIfNotRunning(Context context, ServiceConnection callback) {
         Activity realActivity = ((Activity)context).getParent();
@@ -121,6 +131,13 @@ public class DownloaderRemote {
             mService.stopForegroundThenStopSelf();
         else Log.d(TAG, "stopService: oop, mService instance is null");
         mService = null;
+    }
+
+    public static void resumeTaskWithTaskId(int id) {
+        if(mService!=null) mService.resumeTaskWithTaskId(id);
+    }
+    public static void restartTaskWithTaskId(int id) {
+        if(mService!=null) mService.restartTaskWithTaskId(id);
     }
 
 

@@ -1,11 +1,10 @@
-package com.zalo.servicetraining.downloader.service.taskmanager;
+package com.zalo.servicetraining.downloader.service.task;
 
 import android.util.Log;
 
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 
-import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 
 public class RangeDownloadTask implements Runnable {

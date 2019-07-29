@@ -18,6 +18,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="12dp"
+        android:src="@drawable/tick"
+        android:tint="@color/FlatGreen"
         android:background="@drawable/background_item_image"
         />
 
@@ -25,7 +27,7 @@
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Some file name abasead dasidf cadf ads"
+        tools:text="Some file name abasead dasidf cadf ads"
         android:layout_gravity="center"
         android:textColor="@android:color/white"
         android:textStyle="bold"
@@ -44,7 +46,7 @@
         android:id="@+id/description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="https://someurl.com/somefile.scf"
+        tools:text="https://someurl.com/somefile.scf"
         android:textColor="#AAA"
         android:textSize="13sp"
         android:maxLines="1"
@@ -61,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="24Mb | 08:45 Monday 22 Feb 2019"
-        android:textColor="@color/FocusYellowColor"
+        android:textColor="#5AC8FA"
         android:textSize="13sp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -84,7 +86,12 @@
         app:layout_constraintTop_toBottomOf="@id/state_text_view"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/ripple_effect_small_round"
         />
     <TextView
         android:id="@+id/clear"
@@ -100,6 +107,11 @@
         app:layout_constraintStart_toEndOf="@id/restart"
         app:layout_constraintTop_toTopOf="@id/restart"
         app:layout_constraintBottom_toBottomOf="@id/restart"
+        android:background="@drawable/ripple_effect_small_round"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         />
     <ImageView
         android:id="@+id/menu_button"
@@ -110,6 +122,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         android:src="@drawable/ic_more_vert_black_24dp"
+        android:background="@drawable/ripple_effect_16dp"
         android:padding="12dp"
         android:layout_marginEnd="10dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

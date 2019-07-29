@@ -69,9 +69,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         super.onViewCreated(view, savedInstanceState);
         bind(view);
         mClipboardManager = (ClipboardManager) view.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        if(mClipboardManager!=null) {
-            mClipboardManager.addPrimaryClipChangedListener(this);
-        }
+
         updateDownloadButton();
         updatePasteButton();
         showKeyboard();
@@ -79,22 +77,19 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if(mClipboardManager!=null) {
+            mClipboardManager.addPrimaryClipChangedListener(this);
+        }
+    }
+
+    @Override
     public void onPause() {
-        closeKeyboard();
-        super.onPause();
-    }
-
-    @Override
-    public void dismiss() {
-        closeKeyboard();
-        super.dismiss();
-    }
-
-    @Override
-    public void onDestroyView() {
         mClipboardManager.removePrimaryClipChangedListener(this);
         mClipboardManager = null;
-        super.onDestroyView();
+        closeKeyboard();
+        super.onPause();
     }
 
     private void bind(View root) {

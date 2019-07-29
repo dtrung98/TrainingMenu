@@ -46,4 +46,8 @@
     <string name="downloading">Downloading</string>
     <string name="pending">Pending</string>
     <string name="failure">Failure</string>
+    <string name="connecting">Connecting…</string>
+    <string name="three_dot">… </string>
+    <string name="cancelled">Cancelled</string>
+    <string name="paused">Paused</string>
 </resources>

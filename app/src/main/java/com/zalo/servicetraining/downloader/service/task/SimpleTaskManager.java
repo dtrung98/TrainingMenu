@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.service.taskmanager;
+package com.zalo.servicetraining.downloader.service.task;
 
 import android.os.Process;
 import android.util.Log;
@@ -50,7 +50,7 @@ public class SimpleTaskManager extends AbsTaskManager<SimpleDownloadTask> {
     }
 
     @Override
-    public synchronized SimpleDownloadTask onNewTaskAdded(DownloadItem item) {
+    public synchronized SimpleDownloadTask newInstance(DownloadItem item) {
         return new SimpleDownloadTask(getNextId(),this,item);
     }
 

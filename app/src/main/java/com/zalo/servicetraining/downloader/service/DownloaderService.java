@@ -18,7 +18,7 @@ import com.zalo.servicetraining.downloader.base.AbsTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
-import com.zalo.servicetraining.downloader.service.taskmanager.SimpleTaskManager;
+import com.zalo.servicetraining.downloader.service.task.SimpleTaskManager;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -135,6 +135,22 @@ public class DownloaderService extends Service {
 
     public TaskInfo getTaskInfoWithId(int id) {
        return mDownloadManager.getTaskInfo(id);
+    }
+
+    public void pauseTaskWithTaskId(int id) {
+        mDownloadManager.pauseTaskFromUser(id);
+    }
+
+    public void cancelTaskWithTaskId(int id) {
+        mDownloadManager.cancelTaskFromUser(id);
+    }
+
+    public void resumeTaskWithTaskId(int id) {
+        mDownloadManager.resumeTaskByUser(id);
+    }
+
+    public void restartTaskWithTaskId(int id) {
+        mDownloadManager.restartTaskByUser(id) ;
     }
 
     private static class ServiceHandler extends Handler {

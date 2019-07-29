@@ -1,21 +1,33 @@
 package com.zalo.servicetraining.downloader.ui;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.AbsTask;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
+import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -116,14 +128,14 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     payloads) {
                 if(object instanceof Integer) {
                     switch ((int)object) {
+                        case BIND_PROGRESS_SUPPORT:
+                            ((DownloadingItemHolder)holder).bindProgressSupport((TaskInfo) mData.get(position));
+                            break;
                         case BIND_PROGRESS_CHANGED:
                             ((DownloadingItemHolder)holder).bindProgress((TaskInfo) mData.get(position));
                             break;
                         case BIND_STATE_CHANGED:
                             ((DownloadingItemHolder)holder).bindState((TaskInfo) mData.get(position));
-                            break;
-                        case BIND_PROGRESS_SUPPORT:
-                            ((DownloadingItemHolder)holder).bindProgressSupport((TaskInfo) mData.get(position));
                             break;
 
                     }
@@ -216,10 +228,59 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Toasty.info(mContext,"Menu Clicked but this feature's not written yet :)").show();
 
     }
+    public void onIconClick(int position, Object object) {
+        if(object instanceof TaskInfo) {
+            TaskInfo info = ((TaskInfo)object);
+            switch (info.getState()) {
+                case AbsTask.PENDING:
+                    Toasty.info(mContext,"Task is pending, please wait");
+                    break;
+                case AbsTask.PAUSED:
+                    DownloaderRemote.resumeTaskWithTaskId(info.getId());
+                    break;
+                case AbsTask.CONNECTING:
+                case AbsTask.RUNNING:
+                    DownloaderRemote.pauseTaskWithTaskId(info.getId());
+                    break;
+                case AbsTask.FAILURE_TERMINATED:
+                    DownloaderRemote.restartTaskWithTaskId(info.getId());
+
+            }
+        } else
+        Toasty.info(mContext,"Icon Clicked but this feature's not written yet :)").show();
+
+    }
 
     public void onItemClick(int position, Object object) {
-        Toasty.info(mContext,"Clicked but this feature's not written yet :)").show();
+       if(object instanceof TaskInfo && mContext instanceof Activity && ((TaskInfo)object).getState()==AbsTask.SUCCESS) {
+           TaskInfo info = (TaskInfo) object;
+
+          try {
+              File filePath = new File(info.getDownloadItem().getDirectoryPath());
+              File fileToWrite = new File(filePath, info.getDownloadItem().getTitle());
+              final Uri data = FileProvider.getUriForFile(mContext, "com.zalo.servicetraining.provider", fileToWrite);
+              mContext.grantUriPermission(mContext.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+              String fileExtension = info.getDownloadItem().getTitle().substring(info.getDownloadItem().getTitle().lastIndexOf("."));
+              Log.d(TAG, "onItemClick: extension " + fileExtension);
+              final Intent intent = new Intent(Intent.ACTION_VIEW);
+              if (fileExtension.contains("apk")) {
+                  Log.d(TAG, "open as apk");
+                  intent.setDataAndType(data, "application/vnd.android.package-archive");
+             // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              }
+              else
+              intent.setData(data);
+              intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+              mContext.startActivity(intent);
+          } catch (ActivityNotFoundException e) {
+              Toasty.error(mContext,"Not found any app that could open this file").show();
+          } catch (Exception e) {
+              Toasty.error(mContext,"Sorry, something went wrong").show();
+          }
+       }
     }
+
+
 
     public class SectionItemHolder extends RecyclerView.ViewHolder {
         TextView mTextView;
@@ -259,7 +320,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     Toasty.info(mTitleTextView.getContext(),"Clear!").show();
                     break;
                 case R.id.restart:
-                    Toasty.info(mTitleTextView.getContext(),"Restart!").show();
+                    DownloaderRemote.restartTaskWithTaskId(((TaskInfo)mData.get(getAdapterPosition())).getId());
+                    break;
             }
         }
     }
@@ -291,34 +353,90 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
 
+        @SuppressLint("SetTextI18n")
         public void bindState(TaskInfo info) {
+            int progress  = (int)(info.getProgress()*100);
+
             switch (info.getState()) {
                 case AbsTask.PENDING:
                     mProgressBar.setVisibility(View.GONE);
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
                     mStateTextView.setText(R.string.pending);
+                    mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatGreen));
+                    mImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                    break;
+                case AbsTask.CONNECTING:
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                    mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
+                    mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
+                    if(info.isProgressSupport()&&progress>=0 && progress <=100)
+                        mStateTextView.setText(progress+"%"+", "+mStateTextView.getResources().getString(R.string.connecting));
+                    else {
+                    mStateTextView.setText(R.string.connecting);
+                    }
                     break;
                 case AbsTask.RUNNING:
+                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatTealBlue)));
                     mProgressBar.setVisibility(View.VISIBLE);
-                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
-
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                    mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
+                    mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
+                    break;
+                case AbsTask.PAUSED:
+                mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatOrange)));
+                mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatOrange));
+                mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatOrange));
+                mImageView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                    if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mStateTextView.setText(progress+"%, "+mStateTextView.getResources().getString(R.string.paused));
+                    } else {
+                        mProgressBar.setVisibility(View.GONE);
+                        mStateTextView.setText(R.string.paused);
+                    }
+                break;
+                case AbsTask.CANCELLED:
+                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FocusColorTwo)));
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FocusColorTwo));
+                    mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
+                    mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
+                    if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mStateTextView.setText(progress+"%, "+mStateTextView.getResources().getString(R.string.cancelled));
+                    } else {
+                        mProgressBar.setVisibility(View.GONE);
+                        mStateTextView.setText(R.string.cancelled);
+                    }
                     break;
                 case AbsTask.FAILURE_TERMINATED:
+                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatRed)));
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
-
-                    if(mProgressBar.isIndeterminate()) {
+                    mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
+                    mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
+                    if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mStateTextView.setText(progress+"%, Failure");
+                    } else {
                         mProgressBar.setVisibility(View.GONE);
                         mStateTextView.setText(R.string.failure);
-                    } else
-                        mProgressBar.setVisibility(View.VISIBLE);
+                    }
                     break;
             }
         }
 
 
+
+
         @Override
         public void bind(TaskInfo info) {
             super.bind(info);
+            bindProgressSupport(info);
+            bindProgress(info);
+            bindState(info);
+
+
+         /*   if(true) return;
             int progress  = (int)(info.getProgress()*100);
 
            switch (info.getState()) {
@@ -326,7 +444,24 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                    mProgressBar.setVisibility(View.GONE);
                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
                    mStateTextView.setText(R.string.pending);
+                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatGreen));
+                   mImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
                    break;
+               case AbsTask.CONNECTING:
+                   mProgressBar.setVisibility(View.VISIBLE);
+                   if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                       mProgressBar.setIndeterminate(false);
+                       mProgressBar.setProgress(progress);
+                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                       mStateTextView.setText(progress+"%"+", "+mStateTextView.getResources().getString(R.string.connecting));
+                   } else {
+                       mProgressBar.setIndeterminate(true);
+                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
+                       mStateTextView.setText(R.string.connecting);
+                   }
+                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
+                   mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
+               break;
                case AbsTask.RUNNING:
                    mProgressBar.setVisibility(View.VISIBLE);
                    if(info.isProgressSupport()&&progress>=0 && progress <=100) {
@@ -339,20 +474,52 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                        mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
                        mStateTextView.setText(R.string.downloading);
                    }
+                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
+                   mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
                    break;
+               case AbsTask.PAUSED:
+                   mProgressBar.setVisibility(View.VISIBLE);
+                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatOrange));
+                   if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
+                       mProgressBar.setIndeterminate(false);
+                       mProgressBar.setProgress(progress);
+                       mStateTextView.setText(progress+"%, Paused");
+                   } else {
+                       mProgressBar.setVisibility(View.GONE);
+                       mStateTextView.setText("Paused");
+                   }
+                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatOrange));
+                   mImageView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                   break;
+                   case AbsTask.CANCELLED:
+                       mProgressBar.setVisibility(View.VISIBLE);
+                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FocusColorTwo));
+                       if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
+                           mProgressBar.setIndeterminate(false);
+                           mProgressBar.setProgress(progress);
+                           mStateTextView.setText(progress+"%, Cancelled");
+                       } else {
+                           mProgressBar.setVisibility(View.GONE);
+                           mStateTextView.setText("Cancelled");
+                       }
+                       mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
+                       mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
+                       break;
                case AbsTask.FAILURE_TERMINATED:
                    mProgressBar.setVisibility(View.VISIBLE);
                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
                    if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
                        mProgressBar.setIndeterminate(false);
                        mProgressBar.setProgress(progress);
-                       mStateTextView.setText(progress+"%");
+                       mStateTextView.setText(progress+"%, Failure");
                    } else {
                        mProgressBar.setVisibility(View.GONE);
                        mStateTextView.setText(R.string.failure);
                    }
+                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
+                   mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
                    break;
-           }
+           }*/
         }
 
         DownloadingItemHolder(View itemView) {
@@ -365,12 +532,15 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView mTitleTextView;
         TextView mStateTextView;
         TextView mDescriptionTextView;
+        ImageView mImageView;
 
         TaskInfoItemHolder(View itemView) {
             super(itemView);
             mTitleTextView = itemView.findViewById(R.id.title);
             mStateTextView = itemView.findViewById(R.id.state_text_view);
             mDescriptionTextView = itemView.findViewById(R.id.description);
+            mImageView = itemView.findViewById(R.id.image_view);
+            mImageView.setOnClickListener(this);
             itemView.findViewById(R.id.menu_button).setOnClickListener(this);
             itemView.setOnClickListener(this);
         }
@@ -390,6 +560,9 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             else
             switch (view.getId()) {
                 case R.id.menu_button: onMenuButtonClick(getAdapterPosition(), mData.get(getAdapterPosition()));
+                break;
+                case R.id.image_view: onIconClick(getAdapterPosition(),mData.get(getAdapterPosition()));
+                break;
             }
         }
     }
