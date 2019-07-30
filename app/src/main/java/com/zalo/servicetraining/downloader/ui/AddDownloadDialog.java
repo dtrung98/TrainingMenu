@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
@@ -34,23 +35,15 @@ import es.dmoral.toasty.Toasty;
 public class AddDownloadDialog extends DialogFragment implements View.OnClickListener, ClipboardManager.OnPrimaryClipChangedListener, TextWatcher {
     public static final String TAG = "AddDownloadDialog";
 
-    private TextInputLayout mUrlTextInputLayout;
     private TextInputEditText mUrlEditText;
     private TextView mDownloadButton;
+    View mCloseButton;
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
 
     public static AddDownloadDialog newInstance() {
-
-        Bundle args = new Bundle();
-
-        AddDownloadDialog fragment = new AddDownloadDialog();
-        fragment.setArguments(args);
-        return fragment;
+        return new AddDownloadDialog();
     }
-
-    private ClipboardManager mClipboardManager;
-
 
     @Override
     public int getTheme() {
@@ -68,37 +61,38 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         bind(view);
-        mClipboardManager = (ClipboardManager) view.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-
+        if(getContext()!=null) {
+            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboardManager != null) {
+                clipboardManager.addPrimaryClipChangedListener(this);
+            }
+        }
         updateDownloadButton();
         updatePasteButton();
         showKeyboard();
 
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
-        if(mClipboardManager!=null) {
-            mClipboardManager.addPrimaryClipChangedListener(this);
-        }
+
     }
 
     @Override
     public void onPause() {
-        mClipboardManager.removePrimaryClipChangedListener(this);
-        mClipboardManager = null;
         closeKeyboard();
         super.onPause();
     }
 
     private void bind(View root) {
         mDownloadButton = root.findViewById(R.id.download_button);
-        View mCloseButton = root.findViewById(R.id.close);
+        mCloseButton = root.findViewById(R.id.close);
         mPasteAndGoButton = root.findViewById(R.id.paste_and_go_button);
         mPasteIcon = root.findViewById(R.id.paste_icon);
-        mUrlTextInputLayout = root.findViewById(R.id.url_input_layout);
-        mUrlEditText = mUrlTextInputLayout.findViewById(R.id.url_input_edit_text);
+        TextInputLayout urlTextInputLayout = root.findViewById(R.id.url_input_layout);
+        mUrlEditText = urlTextInputLayout.findViewById(R.id.url_input_edit_text);
         mUrlEditText.addTextChangedListener(this);
         root.findViewById(R.id.panel).setOnClickListener(this);
         mDownloadButton.setOnClickListener(this);
@@ -148,15 +142,16 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
             if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
                 DownloaderRemote.appendTask(new DownloadItem(mUrlEditText.getText().toString()));
                 dismiss();
-                Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
-            } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
+                Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
+            } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
         }
     }
 
     private void pasteAndGo() {
         if(getContext()!=null) {
-            if(mClipboardManager !=null&& mClipboardManager.getPrimaryClip()!=null) {
-                ClipData.Item item = mClipboardManager.getPrimaryClip().getItemAt(0);
+            ClipboardManager clipboardManager = (ClipboardManager)getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            if(clipboardManager !=null&& clipboardManager.getPrimaryClip()!=null) {
+                ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
 
                 CharSequence pasteData = item.getText();
 
@@ -167,15 +162,15 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
 
                         pasteData = pasteUri.toString();
                     } else {
-                        Log.e(TAG, "Clipboard contains an invalid data type");
+                        Log.d(TAG, "Clipboard contains an invalid data type");
                     }
                 }
                 if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
                     closeKeyboard();
                     DownloaderRemote.appendTask(new DownloadItem(pasteData.toString()));
                     dismiss();
-                    Toasty.info(mUrlEditText.getContext(),R.string.add_new_download).show();
-                } else Toasty.error(mUrlEditText.getContext(),R.string.invalid_url).show();
+                    Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
+                } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
             }
         }
 
@@ -206,8 +201,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
 
     private void updatePasteButton() {
         if(getContext()!=null) {
-            if(mClipboardManager !=null&& mClipboardManager.getPrimaryClip()!=null) {
-                ClipData.Item item = mClipboardManager.getPrimaryClip().getItemAt(0);
+            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            if(clipboardManager !=null&& clipboardManager.getPrimaryClip()!=null) {
+                ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
 
                 CharSequence pasteData = item.getText();
 
@@ -255,5 +251,18 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     @Override
     public void afterTextChanged(Editable editable) {
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        if(getContext()!=null) {
+            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            if(clipboardManager!=null)
+            clipboardManager.removePrimaryClipChangedListener(this);
+        }
+        mDownloadButton.setOnClickListener(null);
+        mCloseButton.setOnClickListener(null);
+        mPasteAndGoButton.setOnClickListener(null);
+        super.onDestroyView();
     }
 }

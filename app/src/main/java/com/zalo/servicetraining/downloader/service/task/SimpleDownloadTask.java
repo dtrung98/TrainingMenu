@@ -4,7 +4,7 @@ import android.os.Build;
 import android.util.Log;
 import android.webkit.URLUtil;
 
-import com.zalo.servicetraining.downloader.base.AbsTask;
+import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 
 import java.io.Closeable;
@@ -19,19 +19,12 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
+public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
     private static final String TAG = "SimpleDownloadTask";
     private static final String RANGE_PROPERTY = "Range";
 
-    public DownloadItem getDownloadItem() {
-        return mDownloadItem;
-    }
-
-    private final DownloadItem mDownloadItem;
-
     public SimpleDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item) {
-        super(id, manager);
-        mDownloadItem = item;
+        super(id, manager, item);
     }
 
     @Override
@@ -41,12 +34,12 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
     }
 
     private void downloadFileUsingFileChannel() {
-        if(!shouldContinueRunning()) return;
+        if(shouldStopByUser()) return;
         setState(CONNECTING);
         notifyTaskChanged();
 
-        File filePath = new File(mDownloadItem.getDirectoryPath());
-        File fileToWrite = new File(filePath,mDownloadItem.getTitle());
+        File filePath = new File(getDirectory());
+        File fileToWrite = new File(filePath,getFileTitle());
 
         RandomAccessFile fileWriter;
 
@@ -121,11 +114,11 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
 
 /*    private void downloadFileTask() {
 
-        if(!shouldContinueRunning()) return;
+        if(!shouldStopByUser()) return;
         setState(CONNECTING);
         notifyTaskChanged();
         File filePath = new File(mDownloadItem.getDirectoryPath());
-        File fileToWrite = new File(filePath,mDownloadItem.getTitle());
+        File fileToWrite = new File(filePath,mDownloadItem.getFileTitle());
 
         FileOutputStream fileWriter;
 
@@ -153,7 +146,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         long size = -1;
         HttpURLConnection conn = null;
         try {
-            if(URLUtil.isHttpsUrl(mDownloadItem.getUrlString()))
+            if(URLUtil.isHttpsUrl(getURLString()))
                 conn = (HttpsURLConnection)url.openConnection();
             else conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("HEAD");
@@ -185,7 +178,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
 
         URL url;
         try {
-            url = new URL(mDownloadItem.getUrlString());
+            url = new URL(getURLString());
         } catch (MalformedURLException e) {
             url = null;
         }
@@ -199,7 +192,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
         try {
-            if(URLUtil.isHttpsUrl(mDownloadItem.getUrlString()))
+            if(URLUtil.isHttpsUrl(getURLString()))
                 urlConnection = (HttpsURLConnection)url.openConnection();
             else urlConnection = (HttpURLConnection)url.openConnection();
             urlConnection.setReadTimeout(40000);
@@ -253,14 +246,13 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         */
 
         long fileSize = getFileSize(url);
-        setProgressSupport(fileSize>0);
         if(fileSize<=0) fileSize = -1;
         setFileContentLength(fileSize);
         Log.d(TAG, "start download file size = "+ fileSize);
 
         byte[] buffer = new byte[1024*4];
 
-        long fileReadLength = 0;
+        long totalReadLength = 0;
         int bufferReadLength = 0;
 
 
@@ -268,7 +260,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
             Kiểm tra action dismiss từ người dùng
          */
 
-        if(!shouldContinueRunning()) {
+        if(shouldStopByUser()) {
             releaseConnection(urlConnection,inputStream,fileWriter);
             return;
         }
@@ -277,35 +269,26 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
         /*
             Chuyển trạng thái sang đang chạy
          */
-
+        initSpeed();
         setState(RUNNING);
         notifyTaskChanged();
         Log.d(TAG, "running");
 
-
         try {
             while ((bufferReadLength = inputStream.read(buffer)) != -1) {
                 fileWriter.write(buffer, 0, bufferReadLength);
-                fileReadLength += bufferReadLength;
-                setDownloadedInBytes(getDownloadedInBytes()+bufferReadLength);
+                totalReadLength += bufferReadLength;
+                setDownloadedAndUpdateProgress(getDownloadedInBytes()+bufferReadLength);
+                calculateSpeed();
                 Log.d(TAG, "downloadedInBytes " +getDownloadedInBytes());
                 /*
                     Kiểm tra action dismiss từ người dùng
                  */
 
-                if(!shouldContinueRunning()) {
+                if(shouldStopByUser()) {
                     releaseConnection(urlConnection,inputStream, fileWriter);
                     return;
                 }
-
-                /*
-                    Thông báo tiến trình
-                 */
-                if(isProgressSupport()) {
-
-                    setProgressAndNotify((getDownloadedInBytes() + 0f) / getFileContentLength());
-                }
-                else notifyTaskChanged();
             }
             Log.d(TAG, "success with downloaded "+getDownloadedInBytes());
             setState(SUCCESS);
@@ -383,7 +366,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
             Kiểm tra action dismiss từ người dùng
 
 
-        if(!shouldContinueRunning()) {
+        if(!shouldStopByUser()) {
             releaseConnection(urlConnection,inputStream,fileWriter);
             return;
         }
@@ -406,7 +389,7 @@ public class SimpleDownloadTask extends AbsTask<SimpleTaskManager> {
                     Kiểm tra action dismiss từ người dùng
 
 
-                if(!shouldContinueRunning()) {
+                if(!shouldStopByUser()) {
                    releaseConnection(urlConnection,inputStream, fileWriter);
                     return;
                 }

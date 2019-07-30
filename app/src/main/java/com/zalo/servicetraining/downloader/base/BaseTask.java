@@ -6,13 +6,19 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
+import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.util.Util;
+
+public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
-    private static final String TAG = "AbsTask";
+    private static final String TAG = "BaseTask";
 
     public static final String EXTRA_NOTIFICATION_ID = "notification_id";
     public static final String EXTRA_STATE = "state";
     public static final String EXTRA_PROGRESS ="progress";
+    public static final String EXTRA_DOWNLOADED_IN_BYTES = "downloaded_in_bytes";
+    public static final String EXTRA_FILE_CONTENT_LENGTH = "file_content_length";
+    public static final String EXTRA_SPEED ="speed";
 
     public static final int PENDING = 0;
     public static final int RUNNING = 1;
@@ -22,33 +28,86 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     public static final int FAILURE_TERMINATED = 6;
     public static final int CANCELLED = 7;
 
-    private final static int PROGRESS_CHANGED = 1;
+    private final static int TASK_CHANGED = 1;
 
     public static final int EXECUTE_MODE_NEW_DOWNLOAD = 5;
 
     public static final int EXECUTE_MODE_RESTART = 7;
     public static final int EXECUTE_MODE_RESUME = 8;
 
-    private int mMode = EXECUTE_MODE_NEW_DOWNLOAD;
 
+    private int mMode = EXECUTE_MODE_NEW_DOWNLOAD;
+    private final int mId;
     private String mMessage = "";
 
     private T mTaskManager;
 
-    private boolean mIsProgressSupport = false;
+    private float mProgress = 0;
 
     private long mDownloadedInBytes = 0;
     private long mFileContentLength = -1;
+    private final long mCreatedTime;
+    private long mExecutedTime = -1;
 
+    private long mFinishedTime = -1;
+    private long mRunningTime = 0;
+    private final String mFileTitle ;
+    private final String mDirectory;
+    private final String mURLString;
 
-    public AbsTask(final int id, T t) {
-        mId = id;
-        setTaskManager(t);
+    private float mSpeedInBytes = 0;
+
+    public long getCreatedTime() {
+        return mCreatedTime;
     }
 
-    private final int mId;
-    public AbsTask(final int id) {
+    public long getExecutedTime() {
+        return mExecutedTime;
+    }
+
+    public long getFinishedTime() {
+        return mFinishedTime;
+    }
+
+    public void setFinishedTime(long finishedTime) {
+        mFinishedTime = finishedTime;
+    }
+
+    public long getRunningTime() {
+        return mRunningTime;
+    }
+
+    public void setRunningTime(long runningTime) {
+        mRunningTime = runningTime;
+    }
+
+    public String getFileTitle() {
+        return mFileTitle;
+    }
+
+    public String getDirectory() {
+        return mDirectory;
+    }
+
+    public String getURLString() {
+        return mURLString;
+    }
+
+    public BaseTask(final int id, T t, DownloadItem item) {
         mId = id;
+        setTaskManager(t);
+        mDirectory = item.getDirectoryPath();
+        mURLString = item.getUrlString();
+        mCreatedTime = System.currentTimeMillis();
+        mFileTitle = item.getFileTitle();
+    }
+
+    public BaseTask(final int id, DownloadItem item) {
+        mId = id;
+        mDirectory = item.getDirectoryPath();
+        mURLString = item.getUrlString();
+        mCreatedTime = System.currentTimeMillis();
+        mFileTitle = item.getFileTitle();
     }
 
     public void setTaskManager(T manager) {
@@ -61,13 +120,13 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
 
     public static String getStateName(int state) {
         switch (state) {
-            case PENDING: return "PENDING";
-            case RUNNING: return "RUNNING";
-            case FAILURE_TERMINATED: return "FAILURE TERMINATED";
-            case SUCCESS: return "SUCCESS";
-            case PAUSED: return "PAUSED";
-            case CANCELLED: return "CANCELLED";
-            case CONNECTING: return "CONNECTING";
+            case PENDING: return "Pending";
+            case RUNNING: return "Running";
+            case FAILURE_TERMINATED: return "Failure Terminated";
+            case SUCCESS: return "Success";
+            case PAUSED: return "Paused";
+            case CANCELLED: return "Cancelled";
+            case CONNECTING: return "Connecting";
             default: return null;
         }
     }
@@ -84,27 +143,17 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     }
 
     private int mState = PENDING;
-    private float mProgress = 0;
     public synchronized float getProgress() {
         return mProgress;
+    }
+
+    public synchronized int getProgressInteger() {
+        return (int) (mProgress*100);
     }
 
     @Override
     public void run() {
         startHandlerThread();
-    }
-
-    protected synchronized final void setProgress(float value) {
-        mProgress = value;
-        if(mProgress==1) setState(SUCCESS);
-    }
-
-    protected synchronized final void setProgressAndNotify(float value) {
-        if(mProgress !=value) {
-            mProgress = value;
-            if(mProgress ==1) setState(SUCCESS);
-            notifyTaskChanged();
-        }
     }
 
     public synchronized int getState() {
@@ -115,20 +164,26 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         return mId;
     }
     private boolean mFirstTime = true;
+    private long mLastUpdatedSpeedTime = 0;
+    private long mLastUpdatedSpeedDownloaded = 0;
     private boolean mProgressUpdateFlag = false;
 
-    protected void notifyTaskChanged(){
+    protected void notifyTaskChanged() {
+        notifyTaskChanged(TASK_CHANGED);
+    }
+
+    protected void notifyTaskChanged(int whichChanged){
 
         if(mNotifyHandler==null)  getTaskManager().notifyTaskChanged(this);
         else {
             // Nếu chưa có order nào, thì hãy đợi 500s sau, t sẽ gửi
             if (!mProgressUpdateFlag) {
-                mNotifyHandler.sendEmptyMessageDelayed(PROGRESS_CHANGED, 1250);
+                mNotifyHandler.sendEmptyMessageDelayed(TASK_CHANGED, 1250);
                 mProgressUpdateFlag = true;
-                Log.d(TAG, "task id " + mId + ", update after 500ms");
+                Log.d(TAG, "task id " + mId + ", update after 1250ms");
             } else if (mFirstTime) {
                 mFirstTime = false;
-                mNotifyHandler.sendEmptyMessage(PROGRESS_CHANGED);
+                mNotifyHandler.sendEmptyMessage(TASK_CHANGED);
             } else {
                 // Nếu đã có order
                 // bỏ qua
@@ -154,11 +209,7 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     }
 
     public boolean isProgressSupport() {
-        return mIsProgressSupport;
-    }
-
-    public void setProgressSupport(boolean progressSupport) {
-        mIsProgressSupport = progressSupport;
+        return mFileContentLength != -1;
     }
 
     private boolean mUserCancelledFlag = false;
@@ -190,17 +241,19 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         }
     }
 
-    protected final boolean shouldContinueRunning() {
+    protected final boolean shouldStopByUser() {
          if(mUserCancelledFlag) {
             setState(CANCELLED);
             notifyTaskChanged();
-            return false;
+            return true;
         }
-        else if(mUserPauseFlag) {
+        if(mUserPauseFlag) {
              setState(PAUSED);
              notifyTaskChanged();
-             return false;
-         } else return true;
+             return true;
+         }
+
+        return false;
     }
 
     public long getDownloadedInBytes() {
@@ -209,6 +262,21 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
 
     public void setDownloadedInBytes(long downloadedInBytes) {
         mDownloadedInBytes = downloadedInBytes;
+    }
+
+    public void setDownloadedAndUpdateProgress(long bytes) {
+        setDownloadedInBytes(bytes);
+        if(isProgressSupport()) {
+            float newProgress = (mDownloadedInBytes+0.0f)/mFileContentLength;
+            if(newProgress>1) newProgress = 0.99f;
+            else if(newProgress<0) newProgress = 0f;
+
+            if(newProgress!=mProgress) {
+                mProgress = newProgress;
+                if (mProgress == 1) setState(SUCCESS);
+                notifyTaskChanged();
+            }
+        }
     }
 
     public long getFileContentLength() {
@@ -239,16 +307,23 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
     public void restartByUser() {
         setMode(EXECUTE_MODE_RESTART);
         setDownloadedInBytes(0);
-        setProgress(0);
         setState(PENDING);
         clearUserFlag();
         getTaskManager().executeExistedTask(this);
     }
 
+    public float getSpeedInBytes() {
+        return mSpeedInBytes;
+    }
+
+    public String getSpeedInBytesString() {
+        if(isProgressSupport()) return Util.humanReadableByteCount((long) getSpeedInBytes(),true)+"/s";
+        return "";
+    }
 
     private static class NotifyHandler extends Handler {
-        private final AbsTask mTask;
-        NotifyHandler(AbsTask task, Looper looper) {
+        private final BaseTask mTask;
+        NotifyHandler(BaseTask task, Looper looper) {
             super(looper);
             mTask = task;
         }
@@ -256,13 +331,29 @@ public abstract class AbsTask<T extends AbsTaskManager> implements Runnable {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case PROGRESS_CHANGED:
+                case TASK_CHANGED:
                     mTask.mProgressUpdateFlag = false;
                     Log.d(TAG, "task id "+mTask.mId+" is updating with progress "+mTask.getProgress());
-
                     mTask.getTaskManager().notifyTaskChanged(mTask);
                     break;
             }
         }
+    }
+    protected void initSpeed() {
+        mLastUpdatedSpeedTime = System.currentTimeMillis();
+        mLastUpdatedSpeedDownloaded = getDownloadedInBytes();
+        mSpeedInBytes = 0;
+    }
+
+    protected void calculateSpeed() {
+
+        long currentDownloaded = getDownloadedInBytes();
+        long currentTime = System.currentTimeMillis();
+
+        if(currentTime-mLastUpdatedSpeedTime<800) return;
+
+         mSpeedInBytes = (currentDownloaded - mLastUpdatedSpeedDownloaded +0.0f)/(currentTime- mLastUpdatedSpeedTime)*1000;
+         mLastUpdatedSpeedTime = currentTime;
+         mLastUpdatedSpeedDownloaded = currentDownloaded;
     }
 }

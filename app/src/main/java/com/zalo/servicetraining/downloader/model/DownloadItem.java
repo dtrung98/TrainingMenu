@@ -4,76 +4,47 @@ import android.os.Environment;
 import android.webkit.URLUtil;
 
 public class DownloadItem {
-    private final String mUrlConnection;
-    private final String mTitle;
-    private final boolean mNotifyOnFinish;
+    private final String mUrl;
+    private final String mFileTitle;
     private final String mDirectoryPath;
 
-    public boolean isAppendIfExist() {
-        return mAppendIfExist;
-    }
-
-    public void setAppendIfExist(boolean appendIfExist) {
-        mAppendIfExist = appendIfExist;
-    }
-
-    private boolean mAppendIfExist = false;
-
-
-    public boolean isForceDownload() {
-        return mForceDownload;
-    }
-
-    private final boolean mForceDownload;
-
-    public DownloadItem(String mUrlConnection, String mTitle, boolean mNotifyOnFinish, boolean mForceDownload, String directoryPath) {
-        this.mUrlConnection = mUrlConnection;
-        this.mTitle = mTitle;
-        this.mNotifyOnFinish = mNotifyOnFinish;
-        this.mForceDownload = mForceDownload;
+    public DownloadItem(String mUrlConnection, String mTitle, String directoryPath) {
+        this.mUrl = mUrlConnection;
+        this.mFileTitle = mTitle;
         this.mDirectoryPath = directoryPath;
     }
 
     public DownloadItem(String mUrlConnection) {
-        this.mUrlConnection = mUrlConnection;
-        this.mTitle = "";
-        mNotifyOnFinish = false;
-        mForceDownload = false;
+        this.mUrl = mUrlConnection;
+        this.mFileTitle = "";
         this.mDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
     }
 
     public DownloadItem(String mUrlConnection, String mTitle) {
-        this.mUrlConnection = mUrlConnection;
-        this.mTitle = mTitle;
-        this.mNotifyOnFinish = false;
-        this.mForceDownload = false;
+        this.mUrl = mUrlConnection;
+        this.mFileTitle = mTitle;
         this.mDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
     }
 
     public String getUrlString() {
-        return mUrlConnection;
+        return mUrl;
     }
 
-    public String getTitle() {
-        if(!mTitle.isEmpty())
-        return mTitle;
+    public String getFileTitle() {
+        if(!mFileTitle.isEmpty())
+        return mFileTitle;
 
-        String autoTitle = URLUtil.guessFileName(mUrlConnection, null, null);
+        String autoTitle = URLUtil.guessFileName(mUrl, null, null);
         if(autoTitle!=null&&!autoTitle.isEmpty())
             return autoTitle;
         return "Unknown.std";
     }
 
-    public boolean isNotifyOnFinish() {
-        return mNotifyOnFinish;
-    }
 
     public DownloadItem(DownloadItem item) {
-        this.mUrlConnection = item.getUrlString();
-        this.mTitle = item.getTitle();
-        this.mNotifyOnFinish = item.isNotifyOnFinish();
-        this.mForceDownload = item.mForceDownload;
-        this.mDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+        this.mUrl = item.getUrlString();
+        this.mFileTitle = item.getFileTitle();
+        this.mDirectoryPath = item.mDirectoryPath;
     }
 
     public String getDirectoryPath() {

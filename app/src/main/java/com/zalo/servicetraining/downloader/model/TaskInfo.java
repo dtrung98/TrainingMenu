@@ -1,29 +1,124 @@
 package com.zalo.servicetraining.downloader.model;
 
-import com.zalo.servicetraining.downloader.base.AbsTask;
+import com.zalo.servicetraining.downloader.base.BaseTask;
 
 public class TaskInfo {
-    public static final int STATE_DOWNLOADING = 0;
-    public static final int STATE_DOWNLOADED = 1;
+    // Used by Adapter
+    public static final int SECTION_DOWNLOADING = 0;
+    public static final int SECTION_DOWNLOADED = 1;
+
+    public int getId() {
+        return mId;
+    }
+
+    public long getCreatedTime() {
+        return mCreatedTime;
+    }
+
+    public String getFileTitle() {
+        return mFileTitle;
+    }
+
+    public String getDirectory() {
+        return mDirectory;
+    }
+
+    public String getURLString() {
+        return mURLString;
+    }
+
+    // Task Property
+    private final int mId;
+    private final long mCreatedTime;
+    private final String mFileTitle ;
+    private final String mDirectory;
+    private final String mURLString;
+
+    private float mSpeedInBytes=0;
+
+    private String mMessage;
 
     private float mProgress = 0;
-    private boolean mProgressSupport = false;
-    private int mState = AbsTask.PENDING;
-    private DownloadItem mDownloadItem;
+    private boolean mIsProgressSupport;
 
-    private int mId;
+    public String getMessage() {
+        return mMessage;
+    }
+
+    public void setMessage(String message) {
+        mMessage = message;
+    }
+
+    public long getDownloadedInBytes() {
+        return mDownloadedInBytes;
+    }
+
+    public void setDownloadedInBytes(long downloadedInBytes) {
+        mDownloadedInBytes = downloadedInBytes;
+    }
+
+    public long getFileContentLength() {
+        return mFileContentLength;
+    }
+
+    public void setFileContentLength(long fileContentLength) {
+        mFileContentLength = fileContentLength;
+    }
+
+    public long getExecutedTime() {
+        return mExecutedTime;
+    }
+
+    public long getFinishedTime() {
+        return mFinishedTime;
+    }
+
+    public void setFinishedTime(long finishedTime) {
+        mFinishedTime = finishedTime;
+    }
+
+    public long getRunningTime() {
+        return mRunningTime;
+    }
+
+    public void setRunningTime(long runningTime) {
+        mRunningTime = runningTime;
+    }
+
+    private long mDownloadedInBytes;
+    private long mFileContentLength = -1;
+
+    private long mExecutedTime = -1;
+    private long mFinishedTime = -1;
+    private long mRunningTime = 0;
+
+    public TaskInfo(int id, long createdTime, String fileTitle, String directory, String URLString) {
+        mId = id;
+        mCreatedTime = createdTime;
+        mFileTitle = fileTitle;
+        mDirectory = directory;
+        mURLString = URLString;
+    }
+
+    public static TaskInfo newInstance(BaseTask task) {
+        TaskInfo info = new TaskInfo(task.getId(),task.getCreatedTime(),task.getFileTitle(),task.getDirectory(),task.getURLString());
+        info.setState(task.getState());
+        info.setProgress(task.getProgress());
+        info.setMessage(task.getMessage());
+        info.setProgressSupport(task.isProgressSupport());
+        info.setSpeedInBytes(task.getSpeedInBytes());
+        info.mExecutedTime = task.getExecutedTime();
+        info.mFinishedTime = task.getFinishedTime();
+        info.mRunningTime = task.getRunningTime();
+        info.mFileContentLength = task.getFileContentLength();
+        info.mDownloadedInBytes = task.getDownloadedInBytes();
+        return info;
+    }
+
+    private int mState = BaseTask.PENDING;
 
     public int getSectionState() {
-        return mState==AbsTask.SUCCESS? STATE_DOWNLOADED : STATE_DOWNLOADING;
-    }
-
-    public DownloadItem getDownloadItem() {
-        return mDownloadItem;
-    }
-
-    public TaskInfo setDownloadItem(DownloadItem downloadItem) {
-        mDownloadItem = downloadItem;
-        return this;
+        return mState== BaseTask.SUCCESS? SECTION_DOWNLOADED : SECTION_DOWNLOADING;
     }
 
     public int getState() {
@@ -37,11 +132,11 @@ public class TaskInfo {
     }
 
     public boolean isProgressSupport() {
-        return mProgressSupport;
+        return mIsProgressSupport;
     }
 
     public TaskInfo setProgressSupport(boolean progressSupport) {
-        mProgressSupport = progressSupport;
+        mIsProgressSupport = progressSupport;
         return this;
     }
 
@@ -55,12 +150,11 @@ public class TaskInfo {
 
     }
 
-    public int getId() {
-        return mId;
+    public float getSpeedInBytes() {
+        return mSpeedInBytes;
     }
 
-    public TaskInfo setId(int id) {
-        mId = id;
-        return this;
+    public void setSpeedInBytes(float speedInBytes) {
+        mSpeedInBytes = speedInBytes;
     }
 }

@@ -103,6 +103,7 @@ public class DownloaderRemote {
         } else Log.d(TAG, "unBind: can't find mService to unbind");
         
         if(mConnectionMap.isEmpty()) {
+            mService.stopIfModeBackground();
             mService = null;
         }
     }
