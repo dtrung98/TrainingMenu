@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.service.task;
+package com.zalo.servicetraining.downloader.task;
 
 import android.os.Process;
 import android.util.Log;

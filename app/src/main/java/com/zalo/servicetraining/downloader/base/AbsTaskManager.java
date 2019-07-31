@@ -3,7 +3,7 @@ package com.zalo.servicetraining.downloader.base;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.service.task.SimpleDownloadTask;
+import com.zalo.servicetraining.downloader.task.SimpleDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;
