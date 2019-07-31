@@ -65,8 +65,8 @@ public class TaskInfo {
         mFileContentLength = fileContentLength;
     }
 
-    public long getExecutedTime() {
-        return mExecutedTime;
+    public long getFirstExecutedTime() {
+        return mFirstExecutedTime;
     }
 
     public long getFinishedTime() {
@@ -88,7 +88,8 @@ public class TaskInfo {
     private long mDownloadedInBytes;
     private long mFileContentLength = -1;
 
-    private long mExecutedTime = -1;
+    private long mFirstExecutedTime = -1;
+    private long mLastExecutedTime = -1;
     private long mFinishedTime = -1;
     private long mRunningTime = 0;
 
@@ -107,7 +108,8 @@ public class TaskInfo {
         info.setMessage(task.getMessage());
         info.setProgressSupport(task.isProgressSupport());
         info.setSpeedInBytes(task.getSpeedInBytes());
-        info.mExecutedTime = task.getExecutedTime();
+        info.mFirstExecutedTime = task.getFirstExecutedTime();
+        info.mLastExecutedTime = task.getLastExecutedTime();
         info.mFinishedTime = task.getFinishedTime();
         info.mRunningTime = task.getRunningTime();
         info.mFileContentLength = task.getFileContentLength();
@@ -156,5 +158,13 @@ public class TaskInfo {
 
     public void setSpeedInBytes(float speedInBytes) {
         mSpeedInBytes = speedInBytes;
+    }
+
+    public long getLastExecutedTime() {
+        return mLastExecutedTime;
+    }
+
+    public void setLastExecutedTime(long lastExecutedTime) {
+        mLastExecutedTime = lastExecutedTime;
     }
 }

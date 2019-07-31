@@ -10,8 +10,8 @@ import androidx.core.content.ContextCompat;
 
 import com.zalo.servicetraining.ui.base.AbsListActivity;
 
-public abstract class BasePermissionActivity extends AbsListActivity {
-    private static final String TAG = "BasePermissionActivity";
+public abstract class PermissionActivity extends AbsListActivity {
+    private static final String TAG = "PermissionActivity";
 
     private static final int PERMISSION_WRITE_STORAGE = 1;
     private static final String PERMISSION_RESULT = "permission_result";

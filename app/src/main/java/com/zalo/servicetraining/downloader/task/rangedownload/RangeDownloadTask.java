@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.task;
+package com.zalo.servicetraining.downloader.task.rangedownload;
 
 import android.util.Log;
 

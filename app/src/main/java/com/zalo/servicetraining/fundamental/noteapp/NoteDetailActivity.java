@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.fundamental.noteapp.data.NoteDatabaseHelper;
 import com.zalo.servicetraining.model.Note;
@@ -49,7 +50,7 @@ public class NoteDetailActivity extends AppCompatActivity {
         mNote.setContent(mContentEditView.getText().toString());
         if(mAction.equals(ACTION_NEW_NOTE)) {
             long result = NoteDatabaseHelper.getInstance(this).addNewNote(mNote);
-            Toasty.success(this, "Add new note successfully, #return " + result).show();
+            Toasty.success(App.getInstance().getApplicationContext(), "Add new note successfully, #return " + result).show();
 
             Intent intent = new Intent();
             intent.setAction(ACTION_NEW_NOTE);
@@ -59,7 +60,7 @@ public class NoteDetailActivity extends AppCompatActivity {
         } else {
 
             int result = NoteDatabaseHelper.getInstance(this).saveNote(mNote);
-            Toasty.success(this, "Save note successfully, #return " + result).show();
+            Toasty.success(App.getInstance().getApplicationContext(), "Save note successfully, #return " + result).show();
 
             Intent intent = new Intent();
             intent.setAction(UPDATE_OR_SAVE);
@@ -73,7 +74,7 @@ public class NoteDetailActivity extends AppCompatActivity {
     void delete() {
         if(mAction.equals(ACTION_NOTE_DETAIL)) {
             int result = NoteDatabaseHelper.getInstance(this).deleteNote(mNote);
-            Toasty.success(this, "Delete note successfully, #return " + result).show();
+            Toasty.success(App.getInstance().getApplicationContext(), "Delete note successfully, #return " + result).show();
             Intent intent = new Intent();
             intent.setAction(DELETE_NOTE);
             intent.putExtra(Note._ID, mNote.getId());

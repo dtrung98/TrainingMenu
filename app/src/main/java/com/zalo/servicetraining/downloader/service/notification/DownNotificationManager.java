@@ -18,7 +18,7 @@ import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
+import com.zalo.servicetraining.downloader.ui.main.DownloadActivity;
 import com.zalo.servicetraining.util.Util;
 
 
@@ -67,7 +67,7 @@ public class DownNotificationManager {
         if(builder==null) {
             Log.d(TAG, "thread " + Thread.currentThread().getId() + ", null builder for id " + NOTIFICATION_ID);
             builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
-            Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloaderActivity.class);
+            Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloadActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
             builder.setContentIntent(pendingIntent);
             builder.setSmallIcon(R.drawable.downloading)
@@ -80,31 +80,40 @@ public class DownNotificationManager {
             switch (STATE) {
                 case BaseTask.RUNNING:
                     String speed;
-                        speed =MIDDLE_DOT+ Util.humanReadableByteCount((long) task.getSpeedInBytes(),true)+"/s";
+                        speed =Util.humanReadableByteCount((long) task.getSpeedInBytes())+"/s";
+                        if(PROGRESS_SUPPORT)
+                            builder.setContentText(INT_PROGRESS+"%"+MIDDLE_DOT+speed);
+                        else
+                            builder.setContentText("Downloading" + MIDDLE_DOT+speed);
 
-                    if(PROGRESS_SUPPORT) {
-                        builder.setContentText(INT_PROGRESS +"%"+speed+MIDDLE_DOT+ Util.humanReadableByteCount(task.getDownloadedInBytes(),true)+" of "+ Util.humanReadableByteCount(task.getFileContentLength(),true));
-                    } else builder.setContentText("Downloading"+speed+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
                     builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
                     break;
                  case BaseTask.SUCCESS:
-                     builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
+                     builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes()));
                      builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
                      break;
                 case BaseTask.PAUSED:
                     if(PROGRESS_SUPPORT) {
-                        builder.setContentText("Paused"+MIDDLE_DOT+INT_PROGRESS +"%"+MIDDLE_DOT+ Util.humanReadableByteCount(task.getDownloadedInBytes(),true)+" of "+ Util.humanReadableByteCount(task.getFileContentLength(),true));
-                    } else builder.setContentText("Paused"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
+                        builder.setContentText(INT_PROGRESS +"%" +MIDDLE_DOT+"Paused");
+                    } else {
+                        builder.setContentText("Paused");
+                    }
+
                     builder.setColor(mService.getResources().getColor(R.color.FlatOrange));
                     break;
                 case BaseTask.FAILURE_TERMINATED:
                     builder.setContentText("Failed to download file. "+task.getMessage()+", tap for more info");
                     builder.setColor(mService.getResources().getColor(R.color.FlatRed));
+
                     break;
                  default:
                      builder.setContentText(BaseTask.getStateName(STATE));
                      builder.setColor(mService.getResources().getColor(R.color.FlatTealBlue));
             }
+
+        if(PROGRESS_SUPPORT)
+            builder.setSubText( Util.humanReadableByteCount(task.getDownloadedInBytes())+" of "+ Util.humanReadableByteCount(task.getFileContentLength()));
+        else builder.setSubText(Util.humanReadableByteCount(task.getDownloadedInBytes()));
 
             builder.setOnlyAlertOnce(true).setAutoCancel(true).setOngoing(STATE == BaseTask.RUNNING);
             mIndexBuilders.put(NOTIFICATION_ID,builder);

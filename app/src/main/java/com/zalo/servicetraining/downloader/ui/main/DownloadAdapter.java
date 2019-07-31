@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.ui;
+package com.zalo.servicetraining.downloader.ui.main;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -21,10 +21,12 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
+import com.zalo.servicetraining.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.servicetraining.util.Util;
 
 import java.io.File;
@@ -40,7 +42,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int BIND_STATE_CHANGED = 2;
     private static final int BIND_PROGRESS_SUPPORT = 3;
 
-    Context mContext;
+    private Context mContext;
     private ArrayList<Object> mData = new ArrayList<>();
 
     public List<Object> getData() {
@@ -75,9 +77,9 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if(posFound!=-1) {
             TaskInfo info = (TaskInfo) mData.get(posFound);
             if ((info.getState() != BaseTask.SUCCESS && state == BaseTask.SUCCESS) || (info.getState() == BaseTask.SUCCESS && state != BaseTask.SUCCESS)) {
-                if(mContext instanceof DownloaderActivity) {
+                if(mContext instanceof DownloadActivity) {
                     Log.d(TAG, "onTaskUpdated: need to refresh");
-                    ((DownloaderActivity) mContext).refreshData();
+                    ((DownloadActivity) mContext).refreshData();
                 }
             } else {
                // info.setState(state).setProgress(progress).setProgressSupport(progress_support);
@@ -215,15 +217,27 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
     public void onMenuButtonClick(int position, Object object) {
-        Toasty.info(mContext,"Menu Clicked but this feature's not written yet :)").show();
-
+        Toasty.info(App.getInstance().getApplicationContext(),"Menu Clicked but this feature's not written yet :)").show();
+        if(object instanceof TaskInfo) {
+            TaskInfo latest = DownloaderRemote.getTaskInfoWithTaskId(((TaskInfo)object).getId());
+            if(latest!=null) {
+                String log = "TaskInfo:"
+                        + "\nCreated Time: " + Util.formatPrettyDateTimeWithSecond(latest.getCreatedTime())
+                        + "\nFirst Execute Time: " + Util.formatPrettyDateTimeWithSecond(latest.getFirstExecutedTime())
+                        + "\nLast Execute Time: " + Util.formatPrettyDateTimeWithSecond(latest.getLastExecutedTime())
+                        + "\nRunning Time: " + Util.formatDuration(latest.getRunningTime())
+                        + "\nFinish Time: " + Util.formatPrettyDateTimeWithSecond(latest.getFinishedTime());
+                Log.d(TAG, log);
+            }
+        }
     }
+
     public void onIconClick(int position, Object object) {
         if(object instanceof TaskInfo) {
             TaskInfo info = ((TaskInfo)object);
             switch (info.getState()) {
                 case BaseTask.PENDING:
-                    Toasty.info(mContext,"Task is pending, please wait");
+                    Toasty.info(App.getInstance().getApplicationContext(),"Task is pending, please wait");
                     break;
                 case BaseTask.PAUSED:
                     DownloaderRemote.resumeTaskWithTaskId(info.getId());
@@ -234,11 +248,17 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     break;
                 case BaseTask.FAILURE_TERMINATED:
                     DownloaderRemote.restartTaskWithTaskId(info.getId());
+                    break;
+                case BaseTask.SUCCESS:
+                    Intent intent = new Intent(mContext, TaskDetailActivity.class);
+                    intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
+                    intent.putExtra(BaseTask.EXTRA_TASK_ID,info.getId());
+                    mContext.startActivity(intent);
+                    break;
 
             }
         } else
-        Toasty.info(mContext,"Icon Clicked but this feature's not written yet :)").show();
-
+        Toasty.info(App.getInstance().getApplicationContext(),"Icon Clicked but this feature's not written yet :)").show();
     }
 
     public void onItemClick(int position, Object object) {
@@ -263,14 +283,17 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
               intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
               mContext.startActivity(intent);
           } catch (ActivityNotFoundException e) {
-              Toasty.error(mContext,"Not found any app that could open this file").show();
+              Toasty.error(App.getInstance().getApplicationContext(),"Not found any app that could open this file").show();
           } catch (Exception e) {
-              Toasty.error(mContext,"Sorry, something went wrong").show();
+              Toasty.error(App.getInstance().getApplicationContext(),"Sorry, something went wrong").show();
           }
+       } else if(object instanceof TaskInfo) {
+           Intent intent = new Intent(mContext, TaskDetailActivity.class);
+           intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
+           intent.putExtra(BaseTask.EXTRA_TASK_ID,((TaskInfo)object).getId());
+           mContext.startActivity(intent);
        }
     }
-
-
 
     public class SectionItemHolder extends RecyclerView.ViewHolder {
         TextView mTextView;
@@ -284,7 +307,6 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             if(object instanceof String) {
                 mTextView.setText((String)object);
             } else mTextView.setText(R.string.invalid_section);
-
         }
     }
 
@@ -296,7 +318,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             long fileSize = info.getDownloadedInBytes();
             long created = info.getCreatedTime();
             String state =
-                    Util.humanReadableByteCount(fileSize,true)+" • "+
+                    Util.humanReadableByteCount(fileSize)+" • "+
                     DateUtils.formatDateTime(mStateTextView.getContext(), created, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE |
                     DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_WEEKDAY);
             mStateTextView.setText(state);
@@ -313,7 +335,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super.onClick(view);
             switch (view.getId()) {
                 case R.id.clear:
-                    Toasty.info(mTitleTextView.getContext(),"Clear!").show();
+                    Toasty.info(App.getInstance().getApplicationContext(),"Clear!").show();
                     break;
                 case R.id.restart:
                     DownloaderRemote.restartTaskWithTaskId(((TaskInfo)mData.get(getAdapterPosition())).getId());
@@ -330,14 +352,14 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             String speed;
             String MIDDLE_DOT = " • ";
             if(info.getState()==BaseTask.RUNNING) {
-                speed =MIDDLE_DOT+ Util.humanReadableByteCount((long) info.getSpeedInBytes(),true)+"/s";
+                speed =MIDDLE_DOT+ Util.humanReadableByteCount((long) info.getSpeedInBytes())+"/s";
             } else speed = "";
 
             if(info.isProgressSupport()) {
                 int progress  = (int)(info.getProgress()*100);
                 mProgressBar.setProgress(progress);
-                stateText = progress +"%"+speed+MIDDLE_DOT+ Util.humanReadableByteCount(info.getDownloadedInBytes(),true)+" of "+ Util.humanReadableByteCount(info.getFileContentLength(),true);
-            } else stateText = "Downloading"+speed+MIDDLE_DOT+Util.humanReadableByteCount(info.getDownloadedInBytes(),true);
+                stateText = progress +"%"+speed+MIDDLE_DOT+ Util.humanReadableByteCount(info.getDownloadedInBytes())+" of "+ Util.humanReadableByteCount(info.getFileContentLength());
+            } else stateText = "Downloading"+speed+MIDDLE_DOT+Util.humanReadableByteCount(info.getDownloadedInBytes());
 
             mStateTextView.setText(stateText);
         }

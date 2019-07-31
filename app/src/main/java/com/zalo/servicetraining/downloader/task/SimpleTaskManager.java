@@ -6,6 +6,7 @@ import android.util.Log;
 import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
+import com.zalo.servicetraining.downloader.task.simpledownload.SimpleDownloadTask;
 import com.zalo.servicetraining.downloader.threading.PriorityThreadFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;

@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.ui;
+package com.zalo.servicetraining.downloader.ui.main;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -29,6 +28,10 @@ import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
+
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import es.dmoral.toasty.Toasty;
 
@@ -140,7 +143,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         if(editable!=null) {
             String text = editable.toString();
             if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
-                DownloaderRemote.appendTask(new DownloadItem(mUrlEditText.getText().toString()));
+                addTask(mUrlEditText.getText().toString());
                 dismiss();
                 Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
             } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
@@ -167,7 +170,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                 }
                 if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
                     closeKeyboard();
-                    DownloaderRemote.appendTask(new DownloadItem(pasteData.toString()));
+                    addTask(pasteData.toString());
                     dismiss();
                     Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
                 } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
@@ -175,6 +178,40 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         }
 
     }
+    private void addTask(String url) {
+        DownloadItem item = new DownloadItem(url);
+        File parentFolder = new File(item.getDirectoryPath());
+
+        String fileName = item.getFileTitle();
+
+
+        if( new File(parentFolder,fileName).exists()) {
+            Pattern p = Pattern.compile("(.*?)?(\\..*)?");
+            Matcher m = p.matcher(fileName);
+            if(m.matches()) {
+                String base = m.group(1);
+                String extension = m.group(2);
+                int i = 1;
+                do {
+                    fileName = base + " ("+i+")"+extension;
+                    i++;
+                } while (new File(parentFolder,fileName).exists());
+            } else {
+                String base = fileName;
+                int i = 1;
+                do {
+                    fileName = base +" ("+i+")";
+                } while (new File(parentFolder,fileName).exists());
+            }
+        }
+
+
+        item.setFileTitle(fileName);
+
+        DownloaderRemote.appendTask(item);
+
+    }
+
     @Override
     public void show(FragmentManager manager, String tag) {
         FragmentTransaction fragmentTransaction = manager.beginTransaction();

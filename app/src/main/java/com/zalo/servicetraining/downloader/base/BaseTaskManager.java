@@ -2,8 +2,8 @@ package com.zalo.servicetraining.downloader.base;
 
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
+import com.zalo.servicetraining.downloader.model.TaskList;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.task.SimpleDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +81,14 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         return false;
     }
 
-    public synchronized List<TaskInfo> getSessionTaskList() {
-        List<T> tasks = getAllTask();
-        List<TaskInfo> infos = new ArrayList<>();
+    public synchronized TaskList getSessionTaskList() {
+        ArrayList<T> tasks = getAllTask();
+        ArrayList<TaskInfo> infos = new ArrayList<>();
         for (int i = tasks.size() -1; i >= 0; i--) {
             infos.add(TaskInfo.newInstance(tasks.get(i)));
         }
 
-        return infos;
+        return new TaskList().setList(infos);
     }
 
     public TaskInfo getTaskInfo(int id) {

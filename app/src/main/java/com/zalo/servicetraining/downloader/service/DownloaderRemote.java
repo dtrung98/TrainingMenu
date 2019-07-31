@@ -14,6 +14,7 @@ import android.util.Log;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -30,7 +31,7 @@ public class DownloaderRemote {
        }
     }
 
-    public static List<TaskInfo> getSessionTaskList() {
+    public static ArrayList<TaskInfo> getSessionTaskList() {
         if(mService!=null)
             return mService.getSessionTaskList();
         return null;

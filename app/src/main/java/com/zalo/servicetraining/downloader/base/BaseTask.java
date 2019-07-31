@@ -9,11 +9,13 @@ import android.util.Log;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.util.Util;
 
+import java.lang.ref.WeakReference;
+
 public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
     private static final String TAG = "BaseTask";
 
-    public static final String EXTRA_NOTIFICATION_ID = "notification_id";
+    public static final String EXTRA_TASK_ID = "notification_id";
     public static final String EXTRA_STATE = "state";
     public static final String EXTRA_PROGRESS ="progress";
     public static final String EXTRA_DOWNLOADED_IN_BYTES = "downloaded_in_bytes";
@@ -47,7 +49,14 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private long mDownloadedInBytes = 0;
     private long mFileContentLength = -1;
     private final long mCreatedTime;
-    private long mExecutedTime = -1;
+
+    private long mFirstExecutedTime = -1;
+
+    public long getLastExecutedTime() {
+        return mLastExecutedTime;
+    }
+
+    private long mLastExecutedTime = -1;
 
     private long mFinishedTime = -1;
     private long mRunningTime = 0;
@@ -61,8 +70,8 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         return mCreatedTime;
     }
 
-    public long getExecutedTime() {
-        return mExecutedTime;
+    public long getFirstExecutedTime() {
+        return mFirstExecutedTime;
     }
 
     public long getFinishedTime() {
@@ -74,6 +83,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     }
 
     public long getRunningTime() {
+        if(!mStopped) return mRunningTime + (System.currentTimeMillis() - mLastExecutedTime);
         return mRunningTime;
     }
 
@@ -151,9 +161,39 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         return (int) (mProgress*100);
     }
 
+    /**
+     * This class must not be called or override by subclasses
+     * <br>Please use {@link #runTask} instead
+     */
     @Override
     public void run() {
-        startHandlerThread();
+        recordProperties();
+        startNotifier();
+
+        runTask();
+
+        stopRecord();
+        releaseSafely();
+    }
+
+    public abstract void runTask();
+
+    private void recordProperties() {
+        mLastExecutedTime = System.currentTimeMillis();
+
+        switch (getMode()) {
+            case EXECUTE_MODE_NEW_DOWNLOAD:
+            case EXECUTE_MODE_RESTART:
+                mFirstExecutedTime = mLastExecutedTime;
+                break;
+            case EXECUTE_MODE_RESUME:
+                if (mFirstExecutedTime == -1) mFirstExecutedTime = mLastExecutedTime;
+        }
+    }
+
+    private void stopRecord() {
+        mFinishedTime = System.currentTimeMillis();
+        mRunningTime += (mFinishedTime - mLastExecutedTime);
     }
 
     public synchronized int getState() {
@@ -172,33 +212,55 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         notifyTaskChanged(TASK_CHANGED);
     }
 
-    protected void notifyTaskChanged(int whichChanged){
+
+    protected void notifyTaskChanged(int which){
 
         if(mNotifyHandler==null)  getTaskManager().notifyTaskChanged(this);
         else {
             // Nếu chưa có order nào, thì hãy đợi 500s sau, t sẽ gửi
             if (!mProgressUpdateFlag) {
-                mNotifyHandler.sendEmptyMessageDelayed(TASK_CHANGED, 1250);
+                mNotifyHandler.sendEmptyMessageDelayed(which, 1250);
                 mProgressUpdateFlag = true;
-                Log.d(TAG, "task id " + mId + ", update after 1250ms");
+                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " orders to update, plz wait for 1250ms");
             } else if (mFirstTime) {
                 mFirstTime = false;
-                mNotifyHandler.sendEmptyMessage(TASK_CHANGED);
+                mNotifyHandler.sendEmptyMessage(which);
             } else {
                 // Nếu đã có order
                 // bỏ qua
-                Log.d(TAG, "task id " + mId + ", update ignored");
+                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " is ignored, task will update soon");
             }
         }
     }
-
-    public void startHandlerThread(){
-        HandlerThread handlerThread = new HandlerThread("HandlerThread");
-        handlerThread.start();
-        mNotifyHandler = new NotifyHandler(this, handlerThread.getLooper());
+    private boolean mStopped = false;
+    public void releaseSafely() {
+        mStopped = true;
+        notifyTaskChanged(TASK_CHANGED);
     }
 
+    public void release() {
+        if (mNotifyHandler!= null) {
+            final Looper looper = mNotifyHandler.getLooper();
+            looper.quitSafely();
+            mNotifyHandler = null;
+        }
+
+        if(mNotifyThread!=null) {
+            mNotifyThread.quitSafely();
+            mNotifyThread = null;
+        }
+
+    }
+    private HandlerThread mNotifyThread;
     private NotifyHandler mNotifyHandler;
+
+    public void startNotifier(){
+        mStopped = false;
+        mNotifyThread = new HandlerThread("HandlerThread"+getId());
+        mNotifyThread.start();
+        mNotifyHandler = new NotifyHandler(this, mNotifyThread.getLooper());
+    }
+
 
     public String getMessage() {
         return mMessage;
@@ -317,24 +379,31 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     }
 
     public String getSpeedInBytesString() {
-        if(isProgressSupport()) return Util.humanReadableByteCount((long) getSpeedInBytes(),true)+"/s";
+        if(isProgressSupport()) return Util.humanReadableByteCount((long) getSpeedInBytes())+"/s";
         return "";
     }
 
     private static class NotifyHandler extends Handler {
-        private final BaseTask mTask;
+        private final WeakReference<BaseTask> mWeakRefTask;
         NotifyHandler(BaseTask task, Looper looper) {
             super(looper);
-            mTask = task;
+            mWeakRefTask = new WeakReference<>(task);
         }
 
         @Override
         public void handleMessage(Message msg) {
+            BaseTask task = mWeakRefTask.get();
+            if(task==null) return;
             switch (msg.what) {
                 case TASK_CHANGED:
-                    mTask.mProgressUpdateFlag = false;
-                    Log.d(TAG, "task id "+mTask.mId+" is updating with progress "+mTask.getProgress());
-                    mTask.getTaskManager().notifyTaskChanged(mTask);
+
+                    task.mProgressUpdateFlag = false;
+                    Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+task.mId+" is updating with progress "+task.getProgress());
+                    task.getTaskManager().notifyTaskChanged(task);
+                    if(task.mStopped) {
+                        Log.d(TAG, "and stop too");
+                        task.release();
+                    }
                     break;
             }
         }

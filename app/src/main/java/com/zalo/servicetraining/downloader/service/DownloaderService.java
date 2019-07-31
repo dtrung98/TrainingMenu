@@ -17,7 +17,7 @@ import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
 import com.zalo.servicetraining.downloader.task.SimpleTaskManager;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class DownloaderService extends Service {
     public static final String TAG = "DownloaderService";
@@ -51,7 +51,7 @@ public class DownloaderService extends Service {
        mNotificationManager.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
-        intent.putExtra(BaseTask.EXTRA_NOTIFICATION_ID,task.getId());
+        intent.putExtra(BaseTask.EXTRA_TASK_ID,task.getId());
         intent.putExtra(BaseTask.EXTRA_STATE,task.getState());
         intent.putExtra(BaseTask.EXTRA_PROGRESS,task.getProgress());
         intent.putExtra(BaseTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
@@ -123,8 +123,8 @@ public class DownloaderService extends Service {
     }
 
 
-    public List<TaskInfo> getSessionTaskList() {
-        return mDownloadManager.getSessionTaskList();
+    public ArrayList<TaskInfo> getSessionTaskList() {
+        return mDownloadManager.getSessionTaskList().getList();
     }
 
     public TaskInfo getTaskInfoWithId(int id) {

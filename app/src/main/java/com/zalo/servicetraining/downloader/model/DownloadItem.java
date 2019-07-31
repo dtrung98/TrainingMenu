@@ -5,7 +5,12 @@ import android.webkit.URLUtil;
 
 public class DownloadItem {
     private final String mUrl;
-    private final String mFileTitle;
+
+    public void setFileTitle(String fileTitle) {
+        mFileTitle = fileTitle;
+    }
+
+    private String mFileTitle;
     private final String mDirectoryPath;
 
     public DownloadItem(String mUrlConnection, String mTitle, String directoryPath) {

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -37,10 +38,15 @@ public abstract class AbsListActivity extends AppCompatActivity {
         finish();
     }
 
+    @LayoutRes
+    protected int contentLayout() {
+        return R.layout.list_layout;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list_layout);
+        setContentView(contentLayout());
         ButterKnife.bind(this);
         init();
         refreshData();

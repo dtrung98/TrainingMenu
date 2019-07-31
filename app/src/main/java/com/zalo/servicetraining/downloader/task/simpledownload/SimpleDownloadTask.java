@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.task;
+package com.zalo.servicetraining.downloader.task.simpledownload;
 
 import android.os.Build;
 import android.util.Log;
@@ -6,6 +6,7 @@ import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.downloader.task.SimpleTaskManager;
 
 import java.io.Closeable;
 import java.io.DataOutput;
@@ -22,18 +23,18 @@ import javax.net.ssl.HttpsURLConnection;
 public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
     private static final String TAG = "SimpleDownloadTask";
     private static final String RANGE_PROPERTY = "Range";
+    private static final String CONTENT_LENGTH = "content-length";
 
     public SimpleDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item) {
         super(id, manager, item);
     }
 
     @Override
-    public void run() {
-        super.run();
-        downloadFileUsingFileChannel();
+    public void runTask() {
+        downloadFile();
     }
 
-    private void downloadFileUsingFileChannel() {
+    private void downloadFile() {
         if(shouldStopByUser()) return;
         setState(CONNECTING);
         notifyTaskChanged();
@@ -52,7 +53,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
         }
 
         if(fileWriter==null) {
-            setState(FAILURE_TERMINATED,"can't not create file to write");
+            setState(FAILURE_TERMINATED,"Could n't not create file to write");
             notifyTaskChanged();
             return;
         }
@@ -65,7 +66,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                     fileWriter.seek(0);
                 } catch (IOException e) {
 
-                    setState(FAILURE_TERMINATED, "Can't not seek to zero");
+                    setState(FAILURE_TERMINATED, "Can n't override file");
                     notifyTaskChanged();
                     closeFileWriter(fileWriter);
                     return;
@@ -85,7 +86,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
 
                 if(fileSize<downloaded) {
                     closeFileWriter(fileWriter);
-                    setState(FAILURE_TERMINATED, "File is invalid");
+                    setState(FAILURE_TERMINATED, "File had been modified");
                     notifyTaskChanged();
                     return;
                 }
@@ -93,7 +94,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                 try {
                     fileWriter.seek(downloaded);
                 } catch (IOException e) {
-                    setState(FAILURE_TERMINATED,"Can't not seek to " +downloaded);
+                    setState(FAILURE_TERMINATED,"File is broken, can not be resumed");
                     notifyTaskChanged();
                     closeFileWriter(fileWriter);
                     return;
@@ -112,41 +113,11 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
         } catch (IOException ignored) {}
     }
 
-/*    private void downloadFileTask() {
-
-        if(!shouldStopByUser()) return;
-        setState(CONNECTING);
-        notifyTaskChanged();
-        File filePath = new File(mDownloadItem.getDirectoryPath());
-        File fileToWrite = new File(filePath,mDownloadItem.getFileTitle());
-
-        FileOutputStream fileWriter;
-
-        try {
-
-            fileWriter = new FileOutputStream(fileToWrite,mDownloadItem.isAppendIfExist());
-        } catch (FileNotFoundException e) {
-            fileWriter = null;
-            Log.d(TAG, "can't create fileWriter");
-        }
-
-        if(fileWriter!=null) {
-
-            connectAndDownload(fileWriter);
-
-
-        } else {
-            setState(FAILURE_TERMINATED,"fail to create output file \""+ fileToWrite.toString());
-            notifyTaskChanged();
-        }
-
-    }*/
-
-    public long getFileSize(URL url) {
+    public static long getFileSize(URL url) {
         long size = -1;
         HttpURLConnection conn = null;
         try {
-            if(URLUtil.isHttpsUrl(getURLString()))
+            if(URLUtil.isHttpsUrl(url.toString()))
                 conn = (HttpsURLConnection)url.openConnection();
             else conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("HEAD");
@@ -154,7 +125,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                 size = conn.getContentLengthLong();
             } else {
 
-                String sizeString = conn.getHeaderField("content-length");
+                String sizeString = conn.getHeaderField(CONTENT_LENGTH);
                 if (!sizeString.isEmpty())
                 try {
                     size = Long.parseLong(sizeString);
@@ -210,14 +181,14 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                 String rangeFields = urlConnection.getHeaderField("Content-Range");
                 if(rangeFields== null) {
                     urlConnection.disconnect();
-                    setState(FAILURE_TERMINATED,"not accept single part download");
+                    setState(FAILURE_TERMINATED,"Server does not accept single part download");
                     return;
                 }
                 String[] connectionRanges = rangeFields.substring("bytes=".length()).split("-");
                 long downloadedSize = Long.valueOf(connectionRanges[0]);
                 if(downloadedSize > getDownloadedInBytes()) {
                     urlConnection.disconnect();
-                    setState(FAILURE_TERMINATED,"downloadedSize is invalid");
+                    setState(FAILURE_TERMINATED,"Could n't resume because server does not reply true value");
                     notifyTaskChanged();
                     return;
                 }
@@ -236,7 +207,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
         }
 
         if(urlConnection==null||inputStream==null) {
-            setState(FAILURE_TERMINATED, "Failure to establish connection, urlConnection is "+ urlConnection+", inputStream is "+ inputStream);
+            setState(FAILURE_TERMINATED, "Failed to establish the connection to server");
             notifyTaskChanged();
             return;
         }
@@ -290,7 +261,12 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                     return;
                 }
             }
-            Log.d(TAG, "success with downloaded "+getDownloadedInBytes());
+            Log.d(TAG, "Success with downloaded "+getDownloadedInBytes());
+
+            if(fileWriter instanceof RandomAccessFile) {
+                ((RandomAccessFile)fileWriter).setLength(getDownloadedInBytes());
+            }
+
             setState(SUCCESS);
             notifyTaskChanged();
         } catch (Exception ignored) {
@@ -301,128 +277,6 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
         }
 
     }
-
-
-   /* private void connectAndDownload(FileOutputStream fileWriter) {
-
-
-            Tạo kết nối
-
-
-        URL url;
-        try {
-           url = new URL(mDownloadItem.getUrlString());
-        } catch (MalformedURLException e) {
-            url = null;
-        }
-
-        if(url==null) {
-            setState(FAILURE_TERMINATED, "URL is null");
-            notifyTaskChanged();
-            return;
-        }
-
-        HttpURLConnection urlConnection = null;
-        InputStream inputStream = null;
-        try {
-            if(URLUtil.isHttpsUrl(mDownloadItem.getUrlString()))
-            urlConnection = (HttpsURLConnection)url.openConnection();
-            else urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setReadTimeout(40000);
-            urlConnection.connect();
-
-            inputStream = urlConnection.getInputStream();
-          //  inputStream  = new BufferedInputStream(url.openStream(),8192);
-
-        } catch (Exception e) {
-            if (urlConnection != null) urlConnection.disconnect();
-            Log.d(TAG, "exception: "+e.getMessage());
-        }
-
-        if(urlConnection==null||inputStream==null) {
-            setState(FAILURE_TERMINATED, "Failure to establish connection, urlConnection is "+ urlConnection+", inputStream is "+ inputStream);
-            notifyTaskChanged();
-            return;
-        }
-
-
-
-
-            Bắt đầu tải và ghi file
-
-
-        long fileSize = getFileSize(url);
-        if(fileSize>0) setProgressSupport(true);
-        setFileContentLength(fileSize);
-        Log.d(TAG, "start download file size = "+ fileSize);
-
-        byte[] buffer = new byte[1024*4];
-
-        long fileReadLength = 0;
-        int bufferReadLength = 0;
-
-
-
-            Kiểm tra action dismiss từ người dùng
-
-
-        if(!shouldStopByUser()) {
-            releaseConnection(urlConnection,inputStream,fileWriter);
-            return;
-        }
-
-
-
-            Chuyển trạng thái sang đang chạy
-
-
-        setState(RUNNING);
-        notifyTaskChanged();
-
-
-        try {
-            while ((bufferReadLength = inputStream.read(buffer)) != -1) {
-                fileWriter.write(buffer, 0, bufferReadLength);
-                fileReadLength += bufferReadLength;
-
-
-                    Kiểm tra action dismiss từ người dùng
-
-
-                if(!shouldStopByUser()) {
-                   releaseConnection(urlConnection,inputStream, fileWriter);
-                    return;
-                }
-
-
-                    Thông báo tiến trình
-
-                if(isProgressSupport()) {
-
-                    setProgressAndNotify((fileReadLength + 0f) / fileSize);
-                }
-                else notifyTaskChanged();
-            }
-
-            setState(SUCCESS);
-            notifyTaskChanged();
-        } catch (Exception ignored) {
-            setState(FAILURE_TERMINATED, "Error throw");
-            notifyTaskChanged();
-        } finally {
-            urlConnection.disconnect();
-
-            try {
-                inputStream.close();
-            } catch (IOException ignored) {}
-
-            try {
-                fileWriter.close();
-            } catch (IOException ignored) {}
-        }
-
-
-    }*/
 
     private void releaseConnection(HttpURLConnection urlConnection, InputStream inputStream, DataOutput fileWriter) {
         if(fileWriter instanceof Closeable)
