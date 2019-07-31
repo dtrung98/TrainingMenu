@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class AbsTaskManager<T extends AbsTask> {
+public abstract class BaseTaskManager<T extends BaseTask> {
     /*
      * Number of cores to decide the number of threads
      */
@@ -22,7 +22,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     private ArrayList<T> mTaskList = new ArrayList<>();
 
-    public AbsTaskManager() {
+    public BaseTaskManager() {
     }
 
     public void init(DownloaderService service) {
@@ -35,14 +35,14 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     public void addNewTask(DownloadItem item) {
         T task = newInstance(item);
-        task.setMode(AbsTask.EXECUTE_MODE_NEW_DOWNLOAD);
+        task.setMode(BaseTask.EXECUTE_MODE_NEW_DOWNLOAD);
         mTaskList.add(task);
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
         notifyTaskChanged(task);
     }
 
-    public void executeExistedTask(AbsTask task) {
+    public void executeExistedTask(BaseTask task) {
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
         notifyTaskChanged(task);
@@ -53,6 +53,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     public void destroy() {
         mService = null;
+        mTaskList.clear();
     }
 
     public void notifyManagerChanged(){
@@ -62,7 +63,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     }
 
-    public void notifyTaskChanged(AbsTask task) {
+    public void notifyTaskChanged(BaseTask task) {
         if(mService!=null) {
             mService.updateFromTask(task);
         }
@@ -75,7 +76,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
     public synchronized boolean isSomeTaskRunning() {
         for (T task :
                 mTaskList) {
-            if(task.getState()== AbsTask.RUNNING) return true;
+            if(task.getState()== BaseTask.RUNNING) return true;
         }
         return false;
     }
@@ -84,15 +85,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
         List<T> tasks = getAllTask();
         List<TaskInfo> infos = new ArrayList<>();
         for (int i = tasks.size() -1; i >= 0; i--) {
-            T task = tasks.get(i);
-            TaskInfo info = new TaskInfo();
-            if (task instanceof SimpleDownloadTask)
-                info.setDownloadItem(new DownloadItem(((SimpleDownloadTask) task).getDownloadItem()));
-
-            info.setId(task.getId()).setState(task.getState())
-                    .setProgress(task.getProgress())
-                    .setProgressSupport(task.isProgressSupport());
-            infos.add(info);
+            infos.add(TaskInfo.newInstance(tasks.get(i)));
         }
 
         return infos;
@@ -100,7 +93,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     public TaskInfo getTaskInfo(int id) {
         List<T> tasks = getAllTask();
-        AbsTask task = null;
+        BaseTask task = null;
         for (T t:
                 tasks) {
             if(t.getId()==id) {
@@ -109,21 +102,14 @@ public abstract class AbsTaskManager<T extends AbsTask> {
         }
 
         if(task!=null) {
-            TaskInfo info = new TaskInfo();
-            if(task instanceof SimpleDownloadTask)
-                info.setDownloadItem(new DownloadItem(((SimpleDownloadTask)task).getDownloadItem()));
-            info.setId(task.getId())
-                    .setState(task.getState())
-                    .setProgress(task.getProgress())
-                    .setProgressSupport(task.isProgressSupport());
-            return info;
+            return TaskInfo.newInstance(task);
         }
         return null;
     }
 
     public void pauseTaskFromUser(int id) {
         List<T> tasks = getAllTask();
-        AbsTask task = null;
+        BaseTask task = null;
 
         for (T t:
                 tasks) {
@@ -138,7 +124,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     public void cancelTaskFromUser(int id) {
         List<T> tasks = getAllTask();
-        AbsTask task = null;
+        BaseTask task = null;
 
         for (T t:
                 tasks) {
@@ -152,7 +138,7 @@ public abstract class AbsTaskManager<T extends AbsTask> {
 
     public void resumeTaskByUser(int id) {
         List<T> tasks = getAllTask();
-        AbsTask task = null;
+        BaseTask task = null;
 
         for (T t:
                 tasks) {
@@ -161,14 +147,14 @@ public abstract class AbsTaskManager<T extends AbsTask> {
             }
         }
 
-        if(task!=null&&task.getState()==AbsTask.PAUSED) {
+        if(task!=null&&task.getState()== BaseTask.PAUSED) {
             task.resumeByUser();
         }
     }
 
     public void restartTaskByUser(int id) {
         List<T> tasks = getAllTask();
-        AbsTask task = null;
+        BaseTask task = null;
 
         for (T t:
                 tasks) {

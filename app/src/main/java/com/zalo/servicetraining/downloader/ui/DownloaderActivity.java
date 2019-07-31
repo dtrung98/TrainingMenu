@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.telephony.mbms.DownloadRequest;
 import android.util.Log;
 import android.view.Gravity;
 
@@ -17,9 +16,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
-import com.zalo.servicetraining.downloader.base.AbsTask;
-import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
@@ -59,7 +58,7 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
                 if(granted) {
                     AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
                 }
-                else Toasty.error(this,"Can't add new task because you denied permission!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),"Can't create new task because you denied permissions!").show();
                 break;
             case ACTION_RESUME_DOWNLOAD:
                 break;
@@ -94,7 +93,6 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
         mAdapter.setListener(this);
         getRecyclerView().setAdapter(mAdapter);
 
-
         mGridLayoutManager = new GridLayoutManager(this,mAdapter.getSpanCount());
 
         mGridLayoutManager.setSpanSizeLookup(mAdapter.getSpanSizeLookup());
@@ -111,14 +109,6 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
     protected void refreshData() {
         ArrayList<Object> list = new ArrayList<>();
         List<TaskInfo> task_list = DownloaderRemote.getSessionTaskList();
-
-        /*for (int i = 0; i < 4; i++) {
-            list.add(new TaskInfo().setState(AbsTask.RUNNING);
-        }
-*/
-       /* for (int i = 0; i < 20; i++) {
-            list.add(new TaskInfo().setState(AbsTask.SUCCESS));
-        }*/
         list.add("Downloading");
 
         if(task_list!=null&&!task_list.isEmpty()) {
@@ -126,14 +116,14 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
 
             for (TaskInfo info :
                     task_list) {
-                if (info.getSectionState() == TaskInfo.STATE_DOWNLOADING)
+                if (info.getSectionState() == TaskInfo.SECTION_DOWNLOADING)
                     list.add(info);
             }
             list.add("Downloaded");
 
             for (TaskInfo info :
                     task_list) {
-                if (info.getSectionState() != TaskInfo.STATE_DOWNLOADING)
+                if (info.getSectionState() != TaskInfo.SECTION_DOWNLOADING)
                     list.add(info);
             }
         } else list.add("Downloaded");
@@ -141,9 +131,6 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
         getSwipeRefreshLayout().setRefreshing(false);
     }
 
-    public void doSomething() {
-         DownloaderRemote.appendTask(new DownloadItem("http://www.effigis.com/wp-content/uploads/2015/02/Airbus_Pleiades_50cm_8bit_RGB_Yogyakarta.jpg"));
-    }
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Log.d(TAG, "onServiceConnected: receive mService");
@@ -158,8 +145,8 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
 
     }
 
-    private void taskUpdated(int id, int state, float progress, boolean progress_support) {
-       if(!mAdapter.onTaskUpdated(id,state, progress, progress_support))
+    private void taskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
+       if(!mAdapter.onTaskUpdated(id,state, progress, progress_support,downloaded, fileContentLength, speed))
           mAdapter.onTaskAdded(DownloaderRemote.getTaskInfoWithTaskId(id));
     }
 
@@ -181,11 +168,14 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
                     case DownloaderService.ACTION_TASK_CHANGED:
                         Bundle bundle = intent.getExtras();
                         if (bundle != null) {
-                            final int id = bundle.getInt(AbsTask.EXTRA_NOTIFICATION_ID, -1);
-                            final int state = bundle.getInt(AbsTask.EXTRA_STATE, -1);
-                            final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS, -1);
-                            final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
-                            activity.taskUpdated(id,state,progress,progress_support);
+                            final int id = bundle.getInt(BaseTask.EXTRA_NOTIFICATION_ID, -1);
+                            final int state = bundle.getInt(BaseTask.EXTRA_STATE, -1);
+                            final float progress = bundle.getFloat(BaseTask.EXTRA_PROGRESS, -1);
+                            final boolean progress_support = bundle.getBoolean(BaseTask.EXTRA_PROGRESS_SUPPORT, false);
+                            final long downloaded = bundle.getLong(BaseTask.EXTRA_DOWNLOADED_IN_BYTES);
+                            final long fileLength = bundle.getLong(BaseTask.EXTRA_FILE_CONTENT_LENGTH);
+                            final float speedInBytes = bundle.getFloat(BaseTask.EXTRA_SPEED);
+                            activity.taskUpdated(id,state,progress,progress_support,downloaded,fileLength, speedInBytes);
                         }
                         Log.d(TAG, "onReceive: action_task_changed");
                         break;
@@ -230,6 +220,7 @@ public class DownloaderActivity extends BasePermissionActivity implements Servic
         mAdapter.destroy();
         mGridLayoutManager = null;
         mServiceToken = null;
+        Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
 

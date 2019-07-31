@@ -2,25 +2,21 @@ package com.zalo.servicetraining.downloader.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
+import android.os.Build;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.zalo.servicetraining.App;
-import com.zalo.servicetraining.downloader.base.AbsTask;
-import com.zalo.servicetraining.downloader.base.AbsTaskManager;
+import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
 import com.zalo.servicetraining.downloader.task.SimpleTaskManager;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class DownloaderService extends Service {
@@ -32,12 +28,14 @@ public class DownloaderService extends Service {
 
     public static final String ACTION_TASK_CHANGED = "action_task_changed";
 
-    private AbsTaskManager mDownloadManager;
-    private DownNotificationManager mDownNotificationManager;
+    private BaseTaskManager mDownloadManager;
+    private DownNotificationManager mNotificationManager;
 
     public void initManager() {
-        mDownloadManager = new SimpleTaskManager();
-        mDownloadManager.init(this);
+        if(mDownloadManager==null) {
+            mDownloadManager = new SimpleTaskManager();
+            mDownloadManager.init(this);
+        }
     }
 
     public void addNewTask(DownloadItem item) {
@@ -45,35 +43,25 @@ public class DownloaderService extends Service {
         mDownloadManager.addNewTask(item);
     }
 
-    public void updateFromTaskManager(AbsTaskManager manager) {
+    public void updateFromTaskManager(BaseTaskManager manager) {
 
     }
 
-    public void updateFromTask(AbsTask task) {
-       mDownNotificationManager.notifyTaskNotificationChanged(task);
+    public void updateFromTask(BaseTask task) {
+       mNotificationManager.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
-        intent.putExtra(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
-        intent.putExtra(AbsTask.EXTRA_STATE,task.getState());
-        intent.putExtra(AbsTask.EXTRA_PROGRESS,task.getProgress());
-        intent.putExtra(AbsTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
-
+        intent.putExtra(BaseTask.EXTRA_NOTIFICATION_ID,task.getId());
+        intent.putExtra(BaseTask.EXTRA_STATE,task.getState());
+        intent.putExtra(BaseTask.EXTRA_PROGRESS,task.getProgress());
+        intent.putExtra(BaseTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
+        intent.putExtra(BaseTask.EXTRA_DOWNLOADED_IN_BYTES,task.getDownloadedInBytes());
+        intent.putExtra(BaseTask.EXTRA_FILE_CONTENT_LENGTH,task.getFileContentLength());
+        intent.putExtra(BaseTask.EXTRA_SPEED,task.getSpeedInBytes());
         LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
     }
 
-    public void updateFromTaskRunInUIThread(AbsTask task) {
-        Message message = new Message();
-        message.what = UPDATE_FROM_TASK;
-        Bundle bundle = new Bundle();
-        bundle.putInt(AbsTask.EXTRA_NOTIFICATION_ID,task.getId());
-        bundle.putInt(AbsTask.EXTRA_STATE,task.getState());
-        bundle.putFloat(AbsTask.EXTRA_PROGRESS,task.getProgress());
-        bundle.putBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, task.isProgressSupport());
-        message.setData(bundle);
-        mServiceHandler.sendMessage(message);
-    }
-
-    public AbsTaskManager getDownloadManager() {
+    public BaseTaskManager getDownloadManager() {
         return mDownloadManager;
     }
 
@@ -87,17 +75,16 @@ public class DownloaderService extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
-        mServiceHandler = new ServiceHandler(this);
         initManager();
         initNotification();
     }
 
     private void initNotification() {
-        mDownNotificationManager = new DownNotificationManager();
-        mDownNotificationManager.init(this);
+        if(mNotificationManager ==null) {
+            mNotificationManager = new DownNotificationManager();
+            mNotificationManager.init(this);
+        }
     }
-
-
 
     public void stopForegroundThenStopSelf() {
         stopForeground(true);
@@ -108,7 +95,10 @@ public class DownloaderService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        mDownNotificationManager.cancelAll();
+        mNotificationManager.cancelAll();
+        mDownloadManager.destroy();
+        mNotificationManager = null;
+        mDownloadManager = null;
         super.onDestroy();
     }
 
@@ -120,14 +110,18 @@ public class DownloaderService extends Service {
         else Log.d(TAG, "onStartCommand: receive intent with action :["+intent.getAction()+"]");
         return super.onStartCommand(intent, flags, startId);
     }
+    public void stopIfModeBackground() {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O &&mNotificationManager!=null && mNotificationManager.getNotifyMode()==DownNotificationManager.NOTIFY_MODE_BACKGROUND)
+            stopSelf();
+    }
 
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "onUnbind");
+
         return super.onUnbind(intent);
     }
 
-    private ServiceHandler mServiceHandler;
 
     public List<TaskInfo> getSessionTaskList() {
         return mDownloadManager.getSessionTaskList();
@@ -152,37 +146,6 @@ public class DownloaderService extends Service {
     public void restartTaskWithTaskId(int id) {
         mDownloadManager.restartTaskByUser(id) ;
     }
-
-    private static class ServiceHandler extends Handler {
-        private final WeakReference<DownloaderService> mRefService;
-
-        public ServiceHandler(@NonNull Looper looper, DownloaderService service) {
-            super(looper);
-            mRefService = new WeakReference<>(service);
-        }
-
-        ServiceHandler(DownloaderService service) {
-            mRefService = new WeakReference<>(service);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            DownloaderService service = mRefService.get();
-            if(service!=null)
-            switch (msg.what) {
-                case UPDATE_FROM_TASK :
-                    Bundle bundle = msg.getData();
-                    final int id = bundle.getInt(AbsTask.EXTRA_NOTIFICATION_ID,-1);
-                    final int state = bundle.getInt(AbsTask.EXTRA_STATE,-1);
-                    final float progress = bundle.getFloat(AbsTask.EXTRA_PROGRESS,-1);
-                    final boolean progress_support = bundle.getBoolean(AbsTask.EXTRA_PROGRESS_SUPPORT, false);
-                    service.mDownNotificationManager.notifyTaskNotificationChanged(id,state,progress, progress_support);
-                    break;
-
-            }
-        }
-    }
-
 
     public IBinder mBinder = new Binder();
 

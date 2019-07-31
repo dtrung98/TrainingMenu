@@ -15,19 +15,27 @@ import androidx.core.app.NotificationCompat;
 
 import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.R;
-import com.zalo.servicetraining.downloader.base.AbsTask;
-import com.zalo.servicetraining.downloader.base.AbsTaskManager;
+import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
 import com.zalo.servicetraining.downloader.ui.DownloaderActivity;
-
+import com.zalo.servicetraining.util.Util;
 
 
 public class DownNotificationManager {
     private static final String TAG = "DownNotificationManager";
     private static final String NOTIFICATION_CHANNEL_ID = "downloader_service_notification";
 
-    private static final int NOTIFY_MODE_BACKGROUND = 0;
-    private static final int NOTIFY_MODE_FOREGROUND = 1;
+    public static final int NOTIFY_MODE_BACKGROUND = 0;
+    public static final int NOTIFY_MODE_FOREGROUND = 1;
+
+    public int getNotifyMode() {
+        return mNotifyMode;
+    }
+
+    public void setNotifyMode(int notifyMode) {
+        mNotifyMode = notifyMode;
+    }
 
     private int mNotifyMode = NOTIFY_MODE_BACKGROUND;
     private NotificationManager mNotificationManager;
@@ -41,44 +49,72 @@ public class DownNotificationManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel();
         }
-     //   notifyTaskNotificationChanged(1,AbsTask.RUNNING,0.5f,false);
+     //   notifyTaskNotificationChanged(1,BaseTask.RUNNING,0.5f,false);
     }
 
-    private AbsTaskManager getDownloadManager() {
+    private BaseTaskManager getDownloadManager() {
         return mService.getDownloadManager();
     }
 
     private boolean shouldForeground() {
-        AbsTaskManager downloadManager = getDownloadManager();
+        BaseTaskManager downloadManager = getDownloadManager();
         return downloadManager.isSomeTaskRunning();
     }
-    public synchronized void notifyTaskNotificationChanged(final int NOTIFICATION_ID, final int STATE, final float PROGRESS, final boolean PROGRESS_SUPPORT) {
-        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ AbsTask.getStateName(STATE)+", progress "+ PROGRESS);
+    public synchronized void notifyTaskNotificationChanged(BaseTask task, final int NOTIFICATION_ID, final int STATE, final int INT_PROGRESS, final boolean PROGRESS_SUPPORT) {
+        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ BaseTask.getStateName(STATE)+", progress "+ INT_PROGRESS);
 
         NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
         if(builder==null) {
-            Log.d(TAG, "thread "+Thread.currentThread().getId()+", null builder for id "+ NOTIFICATION_ID);
+            Log.d(TAG, "thread " + Thread.currentThread().getId() + ", null builder for id " + NOTIFICATION_ID);
             builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
             Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloaderActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(),0,intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
             builder.setContentIntent(pendingIntent);
             builder.setSmallIcon(R.drawable.downloading)
-                   .setContentTitle("Task ID "+ NOTIFICATION_ID)
-                   .setOnlyAlertOnce(true)
-            .setAutoCancel(true);
-            mIndexBuilders.put(NOTIFICATION_ID,builder);
-
+                    .setContentTitle(task.getFileTitle());
         }
 
-        builder.setContentText("State is " + AbsTask.getStateName(STATE)+", progress is "+PROGRESS)
-                .setOngoing(STATE == AbsTask.RUNNING);
+            // bind content text
+            String MIDDLE_DOT = " • ";
 
-        if(STATE!= AbsTask.SUCCESS) {
+            switch (STATE) {
+                case BaseTask.RUNNING:
+                    String speed;
+                        speed =MIDDLE_DOT+ Util.humanReadableByteCount((long) task.getSpeedInBytes(),true)+"/s";
+
+                    if(PROGRESS_SUPPORT) {
+                        builder.setContentText(INT_PROGRESS +"%"+speed+MIDDLE_DOT+ Util.humanReadableByteCount(task.getDownloadedInBytes(),true)+" of "+ Util.humanReadableByteCount(task.getFileContentLength(),true));
+                    } else builder.setContentText("Downloading"+speed+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
+                    builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
+                    break;
+                 case BaseTask.SUCCESS:
+                     builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
+                     builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
+                     break;
+                case BaseTask.PAUSED:
+                    if(PROGRESS_SUPPORT) {
+                        builder.setContentText("Paused"+MIDDLE_DOT+INT_PROGRESS +"%"+MIDDLE_DOT+ Util.humanReadableByteCount(task.getDownloadedInBytes(),true)+" of "+ Util.humanReadableByteCount(task.getFileContentLength(),true));
+                    } else builder.setContentText("Paused"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes(),true));
+                    builder.setColor(mService.getResources().getColor(R.color.FlatOrange));
+                    break;
+                case BaseTask.FAILURE_TERMINATED:
+                    builder.setContentText("Failed to download file. "+task.getMessage()+", tap for more info");
+                    builder.setColor(mService.getResources().getColor(R.color.FlatRed));
+                    break;
+                 default:
+                     builder.setContentText(BaseTask.getStateName(STATE));
+                     builder.setColor(mService.getResources().getColor(R.color.FlatTealBlue));
+            }
+
+            builder.setOnlyAlertOnce(true).setAutoCancel(true).setOngoing(STATE == BaseTask.RUNNING);
+            mIndexBuilders.put(NOTIFICATION_ID,builder);
+
+        if(STATE!= BaseTask.SUCCESS) {
             if(PROGRESS_SUPPORT)
-            builder.setProgress(100, (int) (PROGRESS * 100), false);
-            else if(STATE==AbsTask.RUNNING)
+            builder.setProgress(100, INT_PROGRESS, false);
+            else if(STATE== BaseTask.RUNNING)
                 builder.setProgress(100,0,true);
-            Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+((int)PROGRESS*100)+", false");
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+INT_PROGRESS+", false");
         }
         else {
             builder.setOnlyAlertOnce(false);
@@ -86,23 +122,27 @@ public class DownNotificationManager {
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 0, 0, false");
         }
 
-        postNotification(builder.build(), NOTIFICATION_ID, STATE== AbsTask.RUNNING);
-        if(STATE!= AbsTask.RUNNING) {
+        postNotificationAndroidO(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING);
+        if(STATE!= BaseTask.RUNNING) {
             mIndexBuilders.delete(NOTIFICATION_ID);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" from IndexBuilders");
         }
     }
 
-    public void notifyTaskNotificationChanged(AbsTask task) {
+    public void notifyTaskNotificationChanged(BaseTask task) {
 
         int NOTIFICATION_ID = task.getId();
         int STATE = task.getState();
-        float PROGRESS = task.getProgress();
-        notifyTaskNotificationChanged(NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
+        int PROGRESS = task.getProgressInteger();
+        notifyTaskNotificationChanged(task, NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
     }
     private int mFlagForegroundID = -1;
+    private void postNotification(Notification notification, int NOTIFICATION_ID) {
+        if(mStopped) return;
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
 
-    private void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
+    private void postNotificationAndroidO(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
         if(mStopped) return;
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
@@ -118,7 +158,8 @@ public class DownNotificationManager {
         }
 
          if ((mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND)
-         ||(newNotifyMode==NOTIFY_MODE_FOREGROUND&&mIndexBuilders.get(mFlagForegroundID)==null)) {
+         //||(newNotifyMode==NOTIFY_MODE_FOREGROUND&&mIndexBuilders.get(mFlagForegroundID)==null)
+         ) {
             mService.startForeground(NOTIFICATION_ID, notification);
             mFlagForegroundID = NOTIFICATION_ID;
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", start foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
