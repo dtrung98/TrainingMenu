@@ -15,6 +15,9 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
     private static final String TAG = "BaseTask";
 
+    public static final String RANGE_PROPERTY = "Range";
+    public static final String CONTENT_LENGTH = "content-length";
+
     public static final String EXTRA_TASK_ID = "notification_id";
     public static final String EXTRA_STATE = "state";
     public static final String EXTRA_PROGRESS ="progress";
@@ -185,6 +188,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
             case EXECUTE_MODE_NEW_DOWNLOAD:
             case EXECUTE_MODE_RESTART:
                 mFirstExecutedTime = mLastExecutedTime;
+                mRunningTime = 0;
                 break;
             case EXECUTE_MODE_RESUME:
                 if (mFirstExecutedTime == -1) mFirstExecutedTime = mLastExecutedTime;
@@ -208,7 +212,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private long mLastUpdatedSpeedDownloaded = 0;
     private boolean mProgressUpdateFlag = false;
 
-    protected void notifyTaskChanged() {
+    protected synchronized void notifyTaskChanged() {
         notifyTaskChanged(TASK_CHANGED);
     }
 
@@ -233,12 +237,12 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         }
     }
     private boolean mStopped = false;
-    public void releaseSafely() {
+    private void releaseSafely() {
         mStopped = true;
         notifyTaskChanged(TASK_CHANGED);
     }
 
-    public void release() {
+    private void release() {
         if (mNotifyHandler!= null) {
             final Looper looper = mNotifyHandler.getLooper();
             looper.quitSafely();
@@ -254,7 +258,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private HandlerThread mNotifyThread;
     private NotifyHandler mNotifyHandler;
 
-    public void startNotifier(){
+    private void startNotifier(){
         mStopped = false;
         mNotifyThread = new HandlerThread("HandlerThread"+getId());
         mNotifyThread.start();
@@ -262,15 +266,15 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     }
 
 
-    public String getMessage() {
+    public synchronized String getMessage() {
         return mMessage;
     }
 
-    public void setMessage(String message) {
+    public synchronized void setMessage(String message) {
         mMessage = message;
     }
 
-    public boolean isProgressSupport() {
+    public synchronized boolean isProgressSupport() {
         return mFileContentLength != -1;
     }
 
@@ -278,7 +282,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
 
     private boolean mUserPauseFlag = false;
 
-    protected final boolean isPausedOrCancelled() {
+    protected synchronized final boolean isPausedOrCancelled() {
         return mUserPauseFlag|| mUserCancelledFlag;
     }
 
@@ -303,7 +307,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         }
     }
 
-    protected final boolean shouldStopByUser() {
+    public synchronized final boolean isStopByUser() {
          if(mUserCancelledFlag) {
             setState(CANCELLED);
             notifyTaskChanged();
@@ -318,16 +322,20 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         return false;
     }
 
-    public long getDownloadedInBytes() {
+    public synchronized long getDownloadedInBytes() {
         return mDownloadedInBytes;
     }
 
-    public void setDownloadedInBytes(long downloadedInBytes) {
+    public synchronized void setDownloadedInBytes(long downloadedInBytes) {
         mDownloadedInBytes = downloadedInBytes;
     }
 
-    public void setDownloadedAndUpdateProgress(long bytes) {
-        setDownloadedInBytes(bytes);
+    public synchronized void appendDownloadedBytes(long bytes) {
+        setDownloadedInBytes(getDownloadedInBytes()+ bytes);
+        updateProgress();
+    }
+
+    private synchronized void updateProgress() {
         if(isProgressSupport()) {
             float newProgress = (mDownloadedInBytes+0.0f)/mFileContentLength;
             if(newProgress>1) newProgress = 0.99f;
@@ -341,23 +349,23 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         }
     }
 
-    public long getFileContentLength() {
+    public synchronized long getFileContentLength() {
         return mFileContentLength;
     }
 
-    public void setFileContentLength(long fileContentLength) {
+    public synchronized void setFileContentLength(long fileContentLength) {
         mFileContentLength = fileContentLength;
     }
 
-    public int getMode() {
+    public synchronized int getMode() {
         return mMode;
     }
 
-    public void setMode(int mode) {
+    public synchronized void setMode(int mode) {
         mMode = mode;
     }
 
-    public void resumeByUser() {
+    public synchronized void resumeByUser() {
         if(getState()==PAUSED) {
             setMode(EXECUTE_MODE_RESUME);
             setState(PENDING);
@@ -366,7 +374,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         }
     }
 
-    public void restartByUser() {
+    public synchronized void restartByUser() {
         setMode(EXECUTE_MODE_RESTART);
         setDownloadedInBytes(0);
         setState(PENDING);
@@ -374,7 +382,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         getTaskManager().executeExistedTask(this);
     }
 
-    public float getSpeedInBytes() {
+    public synchronized float getSpeedInBytes() {
         return mSpeedInBytes;
     }
 
@@ -408,13 +416,15 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
             }
         }
     }
-    protected void initSpeed() {
+
+
+    public synchronized void initSpeed() {
         mLastUpdatedSpeedTime = System.currentTimeMillis();
         mLastUpdatedSpeedDownloaded = getDownloadedInBytes();
         mSpeedInBytes = 0;
     }
 
-    protected void calculateSpeed() {
+    public synchronized void calculateSpeed() {
 
         long currentDownloaded = getDownloadedInBytes();
         long currentTime = System.currentTimeMillis();

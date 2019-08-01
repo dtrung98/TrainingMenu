@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.downloader.task.simpledownload;
+package com.zalo.servicetraining.downloader.task.simple;
 
 import android.os.Build;
 import android.util.Log;
@@ -6,7 +6,6 @@ import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
-import com.zalo.servicetraining.downloader.task.SimpleTaskManager;
 
 import java.io.Closeable;
 import java.io.DataOutput;
@@ -22,8 +21,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
     private static final String TAG = "SimpleDownloadTask";
-    private static final String RANGE_PROPERTY = "Range";
-    private static final String CONTENT_LENGTH = "content-length";
 
     public SimpleDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item) {
         super(id, manager, item);
@@ -35,7 +32,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
     }
 
     private void downloadFile() {
-        if(shouldStopByUser()) return;
+        if(isStopByUser()) return;
         setState(CONNECTING);
         notifyTaskChanged();
 
@@ -72,7 +69,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                     return;
                 }
 
-                connectAndDownload(fileWriter);
+                connectThenDownload(fileWriter);
                 break;
 
             case EXECUTE_MODE_RESUME:
@@ -100,7 +97,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                     return;
                 }
 
-                connectAndDownload(fileWriter);
+                connectThenDownload(fileWriter);
                 break;
         }
     }
@@ -141,7 +138,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
     }
 
 
-    private void connectAndDownload(DataOutput fileWriter) {
+    private void connectThenDownload(DataOutput fileWriter) {
 
         /*
             Tạo kết nối
@@ -194,8 +191,14 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                 }
 
                 Log.d(TAG, "can resume with downloadedSize "+downloadedSize+", downloadedInByte "+getDownloadedInBytes());
-                setDownloadedInBytes(downloadedSize);
-            } else urlConnection.connect();
+            } else {
+                urlConnection.connect();
+                if(urlConnection.getResponseCode()/100 !=2) {
+                    setState(FAILURE_TERMINATED,"Response code is invalid");
+                    notifyTaskChanged();
+                    return;
+                }
+            }
 
 
             inputStream = urlConnection.getInputStream();
@@ -231,7 +234,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
             Kiểm tra action dismiss từ người dùng
          */
 
-        if(shouldStopByUser()) {
+        if(isStopByUser()) {
             releaseConnection(urlConnection,inputStream,fileWriter);
             return;
         }
@@ -249,14 +252,14 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
             while ((bufferReadLength = inputStream.read(buffer)) != -1) {
                 fileWriter.write(buffer, 0, bufferReadLength);
                 totalReadLength += bufferReadLength;
-                setDownloadedAndUpdateProgress(getDownloadedInBytes()+bufferReadLength);
+                appendDownloadedBytes(bufferReadLength);
                 calculateSpeed();
                 Log.d(TAG, "downloadedInBytes " +getDownloadedInBytes());
                 /*
                     Kiểm tra action dismiss từ người dùng
                  */
 
-                if(shouldStopByUser()) {
+                if(isStopByUser()) {
                     releaseConnection(urlConnection,inputStream, fileWriter);
                     return;
                 }

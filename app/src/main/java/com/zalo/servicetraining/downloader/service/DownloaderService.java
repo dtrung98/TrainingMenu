@@ -15,7 +15,7 @@ import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
-import com.zalo.servicetraining.downloader.task.SimpleTaskManager;
+import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.util.ArrayList;
 

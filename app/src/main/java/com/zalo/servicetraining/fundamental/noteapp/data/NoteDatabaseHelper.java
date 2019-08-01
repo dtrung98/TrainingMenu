@@ -48,6 +48,7 @@ public class NoteDatabaseHelper extends SQLiteOpenHelper {
        db.close();
        return id;
     }
+
     public Note getNote(long id) {
         SQLiteDatabase db = getReadableDatabase();
 
@@ -86,6 +87,7 @@ public class NoteDatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return notes;
     }
+
     public void dropAndRecreateNoteTable() {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("DROP TABLE IF EXISTS "+Note.TABLE_NAME);
