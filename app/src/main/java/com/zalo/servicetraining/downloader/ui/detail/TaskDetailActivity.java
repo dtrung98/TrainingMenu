@@ -1,11 +1,6 @@
 package com.zalo.servicetraining.downloader.ui.detail;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.os.Bundle;
-import android.widget.Toast;
-
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.zalo.servicetraining.App;
@@ -70,8 +65,8 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         if(mTaskInfo!=null) {
             bind();
         }
-        getSwipeRefreshLayout().setRefreshing(false);
 
+        getSwipeRefreshLayout().setRefreshing(false);
     }
 
     @Override
@@ -83,6 +78,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         setTitle(mTaskInfo.getFileTitle());
         ArrayList<Item> list = new ArrayList<>();
         list.add(new Item().setTitle("Parent Folder").setDescription(mTaskInfo.getDirectory()));
+        list.add(new Item().setTitle("File Path").setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()));
         list.add(new Item().setTitle("Url Link").setDescription(mTaskInfo.getURLString()));
         list.add(new Item().setTitle("Status").setDescription(BaseTask.getStateName(mTaskInfo.getState())));
         list.add(new Item().setTitle("Message").setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()));

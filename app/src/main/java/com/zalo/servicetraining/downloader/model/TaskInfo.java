@@ -1,11 +1,16 @@
 package com.zalo.servicetraining.downloader.model;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.service.DownloaderService;
+import com.zalo.servicetraining.downloader.task.ranges.FileDownloadTask;
+import com.zalo.servicetraining.downloader.task.ranges.PartialDownloadTask;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskInfo {
     private static final String TAG = "TaskInfo";
@@ -18,19 +23,19 @@ public class TaskInfo {
     private final int mId;
     private int mState = BaseTask.PENDING;
 
-    private final long mCreatedTime;
+    private final long mCreatedTime ;
     private final String mFileTitle ;
     private final String mDirectory;
     private final String mURLString;
 
     private float mSpeedInBytes=0;
 
-    private String mMessage;
+    private String mMessage ="";
 
     private float mProgress = 0;
     private boolean mIsProgressSupport;
 
-    private long mDownloadedInBytes;
+    private long mDownloadedInBytes = 0;
     private long mFileContentLength = -1;
 
     private long mFirstExecutedTime = -1;
@@ -38,41 +43,53 @@ public class TaskInfo {
     private long mFinishedTime = -1;
     private long mRunningTime = 0;
 
+    private String mPartialListString = "";
+
     // Table Name
     public static final String TABLE_NAME = TAG+"s";
+
+    public ArrayList<PartialInfo> getPartialInfoList() {
+        return mPartialInfoList;
+    }
+
+    public void setPartialInfoList(ArrayList<PartialInfo> partialInfoList) {
+        mPartialInfoList = partialInfoList;
+    }
 
     private ArrayList<PartialInfo> mPartialInfoList = new ArrayList<>();
 
     public static final String EXTRA_ID = "id";
-    public static final String EXTRA_STATE ="state";
+    public static final String EXTRA_STATE ="state"; //2
 
     public static final String EXTRA_CREATED_TIME ="created_time";
     public static final String EXTRA_FILE_TITLE ="file_title";
     public static final String EXTRA_DIRECTORY ="directory";
-    public static final String EXTRA_URL_STRING ="url_string";
+    public static final String EXTRA_URL_STRING ="url_string"; // 6
 
-    public static final String EXTRA_SPEED_IN_BYTES ="speed_in_bytes";
+    public static final String EXTRA_SPEED_IN_BYTES ="speed_in_bytes"; //7
 
-    public static final String EXTRA_MESSAGE ="message";
+    public static final String EXTRA_MESSAGE ="message"; //8
 
     public static final String EXTRA_PROGRESS ="progress";
-    public static final String EXTRA_IS_PROGRESS_SUPPORT = "is_progress_support";
+    public static final String EXTRA_IS_PROGRESS_SUPPORT = "is_progress_support"; // 10
 
     public static final String EXTRA_DOWNLOADED_IN_BYTES = "downloaded_in_bytes";
-    public static final String EXTRA_FILE_CONTENT_LENGTH = "file_content_length";
+    public static final String EXTRA_FILE_CONTENT_LENGTH = "file_content_length"; // 12
 
     public static final String EXTRA_FIRST_EXECUTED_TIME = "first_executed_time";
     public static final String EXTRA_LAST_EXECUTED_TIME = "last_executed_time";
     public static final String EXTRA_FINISHED_TIME ="finished_time";
-    public static final String EXTRA_RUNNING_TIME ="running_time";
+    public static final String EXTRA_RUNNING_TIME ="running_time"; // 16
 
     public static final String EXTRA_PARTIAL_INFO_LIST = "partial_info_list";
+    public static final String EXTRA_DOWNLOAD_MODE = "download_mode"; // 18
 
     // Create table SQL Query
     public static final String CREATE_TABLE =
-            "CREATE TABLE "+TABLE_NAME + "("
-                     +EXTRA_ID +" INTEGER PRIMARY KEY, "
+            "CREATE TABLE "+TABLE_NAME + " ("
+                     +EXTRA_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "
                     +EXTRA_STATE +" INTEGER, "
+                    +EXTRA_DOWNLOAD_MODE+" INTEGER, "
                     +EXTRA_CREATED_TIME +" INTEGER, "
                     +EXTRA_FILE_TITLE +" TEXT, "
                     +EXTRA_DIRECTORY +" TEXT, "
@@ -88,7 +105,7 @@ public class TaskInfo {
                     +EXTRA_LAST_EXECUTED_TIME +" INTEGER, "
                     +EXTRA_FINISHED_TIME +" INTEGER, "
                     +EXTRA_RUNNING_TIME +" INTEGER, "
-                    + EXTRA_PARTIAL_INFO_LIST +" TEXT, "
+                    + EXTRA_PARTIAL_INFO_LIST +" TEXT "
                     +")";
 
     public static TaskInfo restoreInstance(SQLiteDatabase readableDb, Cursor taskInfoCursor) {
@@ -99,19 +116,20 @@ public class TaskInfo {
                 taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_FILE_TITLE)),
                 taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_DIRECTORY)),
                 taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_URL_STRING)));
+        info.mState =   taskInfoCursor.getInt(taskInfoCursor.getColumnIndex(EXTRA_STATE));
         info.mSpeedInBytes = taskInfoCursor.getFloat(taskInfoCursor.getColumnIndex(EXTRA_SPEED_IN_BYTES));
         info.mMessage = taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_MESSAGE));
         info.mProgress = taskInfoCursor.getFloat(taskInfoCursor.getColumnIndex(EXTRA_PROGRESS));
         info.mIsProgressSupport = taskInfoCursor.getInt(taskInfoCursor.getColumnIndex(EXTRA_IS_PROGRESS_SUPPORT)) != 0;
         info.mDownloadedInBytes = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_DOWNLOADED_IN_BYTES));
-        info.mFileContentLength = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_DOWNLOADED_IN_BYTES));
+        info.mFileContentLength = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_FILE_CONTENT_LENGTH));
         info.mFirstExecutedTime = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_FIRST_EXECUTED_TIME));
         info.mLastExecutedTime = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_LAST_EXECUTED_TIME));
-        info.mFinishedTime = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_FIRST_EXECUTED_TIME));
+        info.mFinishedTime = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_FINISHED_TIME));
+        info.mRunningTime = taskInfoCursor.getLong(taskInfoCursor.getColumnIndex(EXTRA_RUNNING_TIME));
 
-
-        String partialListString = taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_PARTIAL_INFO_LIST));
-        Cursor partialCursor = readableDb.query(PartialInfo.TABLE_NAME, null,PartialInfo._ID+" IN ("+partialListString+")",null,null,null,PartialInfo.EXTRA_ID);
+        info.mPartialListString = taskInfoCursor.getString(taskInfoCursor.getColumnIndex(EXTRA_PARTIAL_INFO_LIST));
+        Cursor partialCursor = readableDb.query(PartialInfo.TABLE_NAME, null,PartialInfo.EXTRA_ID+" IN ("+info.mPartialListString+")",null,null,null,PartialInfo.EXTRA_ID);
         info.mPartialInfoList.clear();
         if(partialCursor!=null) {
             if(partialCursor.moveToFirst()) {
@@ -126,6 +144,37 @@ public class TaskInfo {
         }
 
         return info;
+    }
+
+    public ContentValues getValues() {
+        ContentValues values = new ContentValues();
+      //  values.put(EXTRA_ID,getId());
+        values.put(EXTRA_STATE,mState);
+        values.put(EXTRA_CREATED_TIME,getCreatedTime());
+        values.put(EXTRA_FILE_TITLE,getFileTitle());
+        values.put(EXTRA_DIRECTORY,getDirectory());
+        values.put(EXTRA_URL_STRING,getURLString());
+        values.put(EXTRA_SPEED_IN_BYTES,getSpeedInBytes());
+        values.put(EXTRA_MESSAGE,getMessage());
+        values.put(EXTRA_PROGRESS,getProgress());
+        values.put(EXTRA_IS_PROGRESS_SUPPORT,isProgressSupport());
+        values.put(EXTRA_DOWNLOADED_IN_BYTES,getDownloadedInBytes());
+        values.put(EXTRA_FILE_CONTENT_LENGTH,getFileContentLength());
+        values.put(EXTRA_FIRST_EXECUTED_TIME,getFirstExecutedTime());
+        values.put(EXTRA_LAST_EXECUTED_TIME,getLastExecutedTime());
+        values.put(EXTRA_FINISHED_TIME,getFinishedTime());
+        values.put(EXTRA_PARTIAL_INFO_LIST,getPartialInfoIds());
+        return values;
+    }
+
+    private String getPartialInfoIds() {
+        StringBuilder builder = new StringBuilder();
+        int length = mPartialInfoList.size();
+        for (int i = 0; i < length; i++) {
+            if(i==0) builder.append(mPartialInfoList.get(i).getId());
+            else builder.append(", ").append(mPartialInfoList.get(i).getId());
+        }
+        return builder.toString();
     }
 
     public int getId() {
@@ -214,6 +263,16 @@ public class TaskInfo {
         info.mRunningTime = task.getRunningTime();
         info.mFileContentLength = task.getFileContentLength();
         info.mDownloadedInBytes = task.getDownloadedInBytes();
+
+        if(task instanceof FileDownloadTask) {
+            info.mPartialInfoList.clear();
+            List<PartialDownloadTask> list = ((FileDownloadTask)task).getPartialDownloadTasks();
+            for (PartialDownloadTask partialDownloadTask:
+                 list) {
+               info.mPartialInfoList.add(PartialInfo.newInstance(partialDownloadTask));
+            }
+        }
+
         return info;
     }
 
@@ -264,5 +323,26 @@ public class TaskInfo {
 
     public void setLastExecutedTime(long lastExecutedTime) {
         mLastExecutedTime = lastExecutedTime;
+    }
+
+    public synchronized int save(SQLiteDatabase db) {
+        // delete all partial info before
+        if(!mPartialListString.isEmpty()) {
+            String old = mPartialListString;
+            mPartialListString = getPartialInfoIds();
+
+            int deleteResult = db.delete(PartialInfo.TABLE_NAME,PartialInfo.EXTRA_ID+" in ("+old+" ) and not in ("+mPartialListString+" )",null);
+        }
+
+        // save task list
+        int result = db.update(TABLE_NAME,getValues(), EXTRA_ID +" = "+getId(),null);
+
+        // save partial info
+        for (PartialInfo partialInfo :
+                mPartialInfoList) {
+            partialInfo.save(db);
+        }
+
+        return 0;
     }
 }

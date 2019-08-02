@@ -34,6 +34,7 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
             mReceiver = new DownloaderBroadcastReceiver(this);
 
             final IntentFilter filter = new IntentFilter();
+            filter.addAction(DownloaderService.ACTION_TASK_MANAGER_CHANGED);
             filter.addAction(DownloaderService.ACTION_TASK_CHANGED);
 
             Log.d(TAG, "registered");
@@ -87,6 +88,10 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
 
             if (activity != null && action != null && !action.isEmpty()) {
                 switch (action) {
+                    case DownloaderService.ACTION_TASK_MANAGER_CHANGED:
+                        Log.d(TAG, "receive broad cast task manager changed ");
+                        activity.refreshData();
+                        break;
                     case DownloaderService.ACTION_TASK_CHANGED:
                         Bundle bundle = intent.getExtras();
                         if (bundle != null) {

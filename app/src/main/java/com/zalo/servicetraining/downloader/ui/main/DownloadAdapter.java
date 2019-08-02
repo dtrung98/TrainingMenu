@@ -387,7 +387,10 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 case BaseTask.PENDING:
                     mProgressBar.setVisibility(View.GONE);
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
-                    mStateTextView.setText(R.string.pending);
+
+                    if(progress!=0)
+                    mStateTextView.setText(progress+"% • "+mStateTextView.getResources().getString(R.string.pending));
+                    else mStateTextView.setText(R.string.pending);
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatGreen));
                     mImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
                     break;
@@ -396,8 +399,10 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
                     mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
-                    if(info.isProgressSupport()&&progress>=0 && progress <=100)
-                        mStateTextView.setText(progress+"%"+" • "+mStateTextView.getResources().getString(R.string.connecting));
+                    if(info.isProgressSupport()&&progress>=0 && progress <=100) {
+                        mStateTextView.setText(progress + "%" + " • " + mStateTextView.getResources().getString(R.string.connecting));
+                        mProgressBar.setProgress(progress);
+                    }
                     else {
                     mStateTextView.setText(R.string.connecting);
                     }
@@ -442,10 +447,10 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
                     if(info.isProgressSupport()&&progress>=0 && progress <=100) {
                         mProgressBar.setVisibility(View.VISIBLE);
-                        mStateTextView.setText(progress+"%"+" • Failure");
+                        mStateTextView.setText(progress+"%"+" • Failure, tap to see detail");
                     } else {
                         mProgressBar.setVisibility(View.GONE);
-                        mStateTextView.setText(R.string.failure);
+                        mStateTextView.setText(R.string.failure+", tap to see detail");
                     }
                     break;
             }

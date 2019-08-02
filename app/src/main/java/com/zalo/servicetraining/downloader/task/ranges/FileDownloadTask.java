@@ -5,7 +5,10 @@ import android.util.Log;
 import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.database.DownloadDBHelper;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
+import com.zalo.servicetraining.downloader.model.PartialInfo;
+import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.io.Closeable;
@@ -16,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -24,11 +28,51 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
 
     public FileDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item, int numberConnection) {
         super(id, manager, item);
+        if(numberConnection<=0)
+            mMaxConnectionNumber = 1;
+        else
         mMaxConnectionNumber = numberConnection;
     }
 
+    private FileDownloadTask(int id, SimpleTaskManager taskManager, String directory, String url, long createdTime, String fileTitle, int numberConnection) {
+        super(id, taskManager, directory, url, createdTime, fileTitle);
+        if(numberConnection<=0)
+            mMaxConnectionNumber = 1;
+        else
+            mMaxConnectionNumber = numberConnection;
+    }
+
     private final int mMaxConnectionNumber;
-    private final ArrayList<PartialDownloadTask> mPartialDownloadTask = new ArrayList<>();
+
+    public ArrayList<PartialDownloadTask> getPartialDownloadTasks() {
+        return mPartialDownloadTasks;
+    }
+
+    private final ArrayList<PartialDownloadTask> mPartialDownloadTasks = new ArrayList<>();
+
+    public static FileDownloadTask restoreInstance(SimpleTaskManager taskManager, TaskInfo info) {
+        FileDownloadTask task = new FileDownloadTask(info.getId(), taskManager,info.getDirectory(),info.getURLString(),info.getCreatedTime(),info.getFileTitle(), info.getPartialInfoList().size());
+
+        int state = info.getState();
+        if(state==BaseTask.RUNNING) state = PAUSED;
+        task.setState(state);
+        task.setDownloadedInBytes(info.getDownloadedInBytes());
+        task.setFileContentLength(info.getFileContentLength());
+        task.restoreProgress(info.getProgress());
+        task.setMessage(info.getMessage());
+        task.setFinishedTime(info.getFinishedTime());
+        task.setRunningTime(info.getRunningTime());
+
+        task.mPartialDownloadTasks.clear();
+        List<PartialInfo> partialInfoList = info.getPartialInfoList();
+        for (PartialInfo partialInfo:
+        partialInfoList) {
+            PartialDownloadTask partialTask = PartialDownloadTask.restoreInstance(task, partialInfo.getId(),partialInfo.getStartByte(),partialInfo.getEndByte(),partialInfo.getState(),partialInfo.getDownloadedInBytes());
+            task.mPartialDownloadTasks.add(partialTask);
+        }
+
+        return task;
+    }
 
     @Override
     public void runTask() {
@@ -125,10 +169,10 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
 
         // create new Partial Download Task
         // only the first running
-        if(mPartialDownloadTask.isEmpty()) {
-            mPartialDownloadTask.clear();
+        if(mPartialDownloadTasks.isEmpty()) {
+            mPartialDownloadTasks.clear();
             if(!isProgressSupport()) {
-                mPartialDownloadTask.add(new PartialDownloadTask(this,getId()));
+                mPartialDownloadTasks.add(new PartialDownloadTask(this, (int)DownloadDBHelper.getInstance().generateNewPartialTaskId(0,-1)));
                 Log.d(TAG, "file task id "+getId()+" does not support progress");
             } else {
                 long usualPartSize = fileSize / mMaxConnectionNumber;
@@ -140,26 +184,44 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
                     startByte = usualPartSize*i;
                     endByte = (i!=mMaxConnectionNumber-1) ? (i+1)*usualPartSize - 1 : fileSize - 1;
 
-                    Log.d(TAG, "file task id "+ getId()+" is create new partial task "+i+" to download from "+ startByte+" to "+ endByte);
-                    PartialDownloadTask partialTask = new PartialDownloadTask(this,  i + 1,startByte,endByte );
-                    mPartialDownloadTask.add(partialTask);
+                    Log.d(TAG, "file task id "+ getId()+" is creating new partial task "+i+" to download from "+ startByte+" to "+ endByte);
+                    PartialDownloadTask partialTask = new PartialDownloadTask(this,  (int)DownloadDBHelper.getInstance().generateNewPartialTaskId(startByte,endByte),startByte,endByte );
+                    mPartialDownloadTasks.add(partialTask);
                 }
             }
         }
 
-        Log.d(TAG, "executing "+mPartialDownloadTask.size()+" partial download task");
+        Log.d(TAG, "executing "+ mPartialDownloadTasks.size()+" partial download task");
 
-        for (int i = 0; i < mPartialDownloadTask.size(); i++) {
-            mPartialDownloadTask.get(i).execute();
+        for (int i = 0; i < mPartialDownloadTasks.size(); i++) {
+            mPartialDownloadTasks.get(i).execute();
         }
 
-        for (int i = 0; i < mPartialDownloadTask.size(); i++) {
-            mPartialDownloadTask.get(i).waitMeFinish();
+        for (int i = 0; i < mPartialDownloadTasks.size(); i++) {
+            mPartialDownloadTasks.get(i).waitMeFinish();
         }
 
+        // Check if state is running and all partial tasks were successful
+        boolean success = true;
+        for (PartialDownloadTask task :
+                mPartialDownloadTasks) {
+            if(task.getState()!=BaseTask.SUCCESS) {
+                success = false;
+                break;
+            }
+        }
+
+        // if success, set success state and notify it
+        if(success) {
+            setState(BaseTask.SUCCESS);
+        } else if(getState()==RUNNING)
+            setState(BaseTask.FAILURE_TERMINATED);
         notifyTaskChanged();
-        Log.d(TAG, "reach the end of file download task");
-        Log.d(PartialDownloadTask.TAG, "reach the end of file download task");
+
+        // else do nothing
+
+        Log.d(TAG, "reach the end of file download task with flag success is "+ success);
+        Log.d(PartialDownloadTask.TAG, "reach the end of file download task with flag success is "+success);
     }
 
     private void releaseConnection(HttpURLConnection urlConnection, InputStream inputStream, DataOutput fileWriter) {
@@ -182,33 +244,44 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
                 fileWriter.close();
             } catch (IOException ignored) {}
     }
+    public boolean isTaskFailed() {
+        return getState()==FAILURE_TERMINATED;
+    }
 
-    public void notifyPartialTaskChanged(int id) {
-        int position = id - 1;
-        if(position<0 || position > mPartialDownloadTask.size() - 1) {
-            Log.d(TAG, "notify id is not invalid");
-            return;
-        }
-        PartialDownloadTask task = mPartialDownloadTask.get(position);
+    public synchronized void notifyPartialTaskChanged(PartialDownloadTask task) {
+
         switch (task.getState()) {
-            case FAILURE_TERMINATED:
-                Log.d(TAG,"partial task "+task.getId()+" is failure terminated");
-                setState(BaseTask.FAILURE_TERMINATED);
+            case PENDING:
+                // do nothing
+                break;
+            case RUNNING:
+                // just notify progress
+                // do nothing
                 break;
             case SUCCESS:
-                for (int i = 0; i < mPartialDownloadTask.size(); i++) {
-                    if(mPartialDownloadTask.get(i).getState()!=BaseTask.SUCCESS) break;
-                    if(i==mPartialDownloadTask.size()-1) {
-                        setState(BaseTask.SUCCESS);
-                    }
+                // one partial task is success
+                // we still do nothing
+                break;
+            case FAILURE_TERMINATED:
+                // one failed
+                switch (getState()) {
+                    case RUNNING:
+                      // one failed means task failed
+                      setState(FAILURE_TERMINATED, task.getMessage());
+                      Log.d(TAG,"partial task "+task.getId()+" is failure terminated with message: "+task.getMessage());
+                        break;
+                    case FAILURE_TERMINATED:
+                    default:
+                        // do nothing
                 }
+                break;
         }
-        StringBuilder progress = new StringBuilder();
+ /*       StringBuilder progress = new StringBuilder();
         progress.append("log progress: ");
-        for (int i = 0; i < mPartialDownloadTask.size(); i++) {
-            progress.append(" task_").append(i + 1).append(" = ").append((int) (100*mPartialDownloadTask.get(i).getDownloadedInBytes() / mPartialDownloadTask.get(i).getDownloadLength()));
+        for (int i = 0; i < mPartialDownloadTasks.size(); i++) {
+            progress.append(" task_").append(i + 1).append(" = ").append((int) (100* mPartialDownloadTasks.get(i).getDownloadedInBytes() / mPartialDownloadTasks.get(i).getDownloadLength()));
         }
-        Log.d(TAG, progress.toString());
+        Log.d(TAG, progress.toString());*/
         notifyTaskChanged();
     }
 

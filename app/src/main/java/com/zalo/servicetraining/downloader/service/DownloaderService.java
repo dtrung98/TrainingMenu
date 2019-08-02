@@ -26,7 +26,11 @@ public class DownloaderService extends Service {
 
     private static final int UPDATE_FROM_TASK = 2;
 
+    public static int DOWNLOAD_MODE_SIMPLE = 0;
+    public static int DOWNLOAD_MODE_PARTIAL = 1;
+
     public static final String ACTION_TASK_CHANGED = "action_task_changed";
+    public static final String ACTION_TASK_MANAGER_CHANGED = "action_task_manager_changed";
 
     private BaseTaskManager mDownloadManager;
     private DownNotificationManager mNotificationManager;
@@ -35,6 +39,7 @@ public class DownloaderService extends Service {
         if(mDownloadManager==null) {
             mDownloadManager = new SimpleTaskManager();
             mDownloadManager.init(this);
+            mDownloadManager.restoreInstance();
         }
     }
 
@@ -44,13 +49,17 @@ public class DownloaderService extends Service {
     }
 
     public void updateFromTaskManager(BaseTaskManager manager) {
-
+        Intent intent = new Intent();
+        intent.setAction(ACTION_TASK_MANAGER_CHANGED);
+        Log.d(TAG, "service sends action task manager changed");
+        LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
     }
 
     public void updateFromTask(BaseTask task) {
        mNotificationManager.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
+        Log.d(TAG, "service sends action task id"+task.getId()+" changed");
         intent.putExtra(BaseTask.EXTRA_TASK_ID,task.getId());
         intent.putExtra(BaseTask.EXTRA_STATE,task.getState());
         intent.putExtra(BaseTask.EXTRA_PROGRESS,task.getProgress());

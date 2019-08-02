@@ -13,7 +13,7 @@ import com.zalo.servicetraining.ui.base.AbsListActivity;
 public abstract class PermissionActivity extends AbsListActivity {
     private static final String TAG = "PermissionActivity";
 
-    private static final int PERMISSION_WRITE_STORAGE = 1;
+    private static final int PERMISSION_STORAGE = 1;
     private static final String PERMISSION_RESULT = "permission_result";
     private Intent mRequestIntent = null;
 
@@ -37,22 +37,24 @@ public abstract class PermissionActivity extends AbsListActivity {
     }
 
     public boolean checkSelfPermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void requestPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (!checkSelfPermission()) {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, PERMISSION_WRITE_STORAGE);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+                }, PERMISSION_STORAGE);
 
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
                         },
-                        PERMISSION_WRITE_STORAGE);
+                        PERMISSION_STORAGE);
 
             }
         } else onPermissionResult(true);
@@ -62,7 +64,7 @@ public abstract class PermissionActivity extends AbsListActivity {
     public final void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
         Log.d(TAG, "onRequestPermissionsResult");
         switch (requestCode) {
-            case PERMISSION_WRITE_STORAGE:
+            case PERMISSION_STORAGE:
                 if (grantResult.length > 0) {
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                         // Granted
@@ -75,7 +77,7 @@ public abstract class PermissionActivity extends AbsListActivity {
 
     public final void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
         switch (requestCode) {
-            case PERMISSION_WRITE_STORAGE:
+            case PERMISSION_STORAGE:
                 if(permissions.length >0&& grantResult.length>0)
                         onPermissionResult(grantResult[0]==PackageManager.PERMISSION_GRANTED);
                 break;

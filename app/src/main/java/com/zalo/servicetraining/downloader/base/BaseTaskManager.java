@@ -1,9 +1,12 @@
 package com.zalo.servicetraining.downloader.base;
 
+import com.zalo.servicetraining.downloader.database.DownloadDBHelper;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.model.TaskList;
 import com.zalo.servicetraining.downloader.service.DownloaderService;
+import com.zalo.servicetraining.downloader.task.ranges.FileDownloadTask;
+import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +23,7 @@ public abstract class BaseTaskManager<T extends BaseTask> {
 
     private final static int WHAT_TASK_CHANGED = 1;
 
-    private ArrayList<T> mTaskList = new ArrayList<>();
+    protected ArrayList<T> mTaskList = new ArrayList<>();
 
     public BaseTaskManager() {
     }
@@ -31,6 +34,22 @@ public abstract class BaseTaskManager<T extends BaseTask> {
 
     public void updatePreference() {
 
+    }
+    private Runnable mRestoreInstanceRunnable = new Runnable() {
+        @Override
+        public void run() {
+            restoreInstanceInBackground();
+        }
+    };
+    private void restoreInstanceInBackground() {
+        mTaskList.clear();
+        List<TaskInfo> infos =DownloadDBHelper.getInstance().getSavedTaskFromDatabase();
+        if(this instanceof SimpleTaskManager)
+            for (TaskInfo info: infos) {
+                FileDownloadTask task = FileDownloadTask.restoreInstance((SimpleTaskManager) this,info);
+                ((SimpleTaskManager)this).mTaskList.add(task);
+            }
+        notifyManagerChanged();
     }
 
     public void addNewTask(DownloadItem item) {
@@ -67,6 +86,8 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         if(mService!=null) {
             mService.updateFromTask(task);
         }
+        TaskInfo info = TaskInfo.newInstance(task);
+        DownloadDBHelper.getInstance().saveTask(info);
     }
 
     public ArrayList<T> getAllTask() {
@@ -79,6 +100,10 @@ public abstract class BaseTaskManager<T extends BaseTask> {
             if(task.getState()== BaseTask.RUNNING) return true;
         }
         return false;
+    }
+
+    public synchronized void restoreInstance() {
+       mExecutor.execute(mRestoreInstanceRunnable);
     }
 
     public synchronized TaskList getSessionTaskList() {

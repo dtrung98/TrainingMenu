@@ -45,7 +45,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private final int mId;
     private String mMessage = "";
 
-    private T mTaskManager;
+    private final T mTaskManager;
 
     private float mProgress = 0;
 
@@ -108,23 +108,19 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
 
     public BaseTask(final int id, T t, DownloadItem item) {
         mId = id;
-        setTaskManager(t);
+        mTaskManager = t;
         mDirectory = item.getDirectoryPath();
         mURLString = item.getUrlString();
         mCreatedTime = System.currentTimeMillis();
         mFileTitle = item.getFileTitle();
     }
-
-    public BaseTask(final int id, DownloadItem item) {
+    protected BaseTask(final int id, T t, String directory, String url, long createdTime, String fileTitle) {
         mId = id;
-        mDirectory = item.getDirectoryPath();
-        mURLString = item.getUrlString();
-        mCreatedTime = System.currentTimeMillis();
-        mFileTitle = item.getFileTitle();
-    }
-
-    public void setTaskManager(T manager) {
-        this.mTaskManager = manager;
+        mTaskManager = t;
+        mDirectory = directory;
+        mURLString = url;
+        mCreatedTime = createdTime;
+        mFileTitle = fileTitle;
     }
 
     public T getTaskManager() {
@@ -152,7 +148,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     protected synchronized void setState(int state, String message) {
         this.mState = state;
         setMessage(message);
-        Log.d(TAG, "setState with message: "+ message);
+        //Log.d(TAG, "setState with message: "+ message);
     }
 
     private int mState = PENDING;
@@ -225,14 +221,14 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
             if (!mProgressUpdateFlag) {
                 mNotifyHandler.sendEmptyMessageDelayed(which, 1250);
                 mProgressUpdateFlag = true;
-                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " orders to update, plz wait for 1250ms");
+                //Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " orders to update, plz wait for 1250ms");
             } else if (mFirstTime) {
                 mFirstTime = false;
                 mNotifyHandler.sendEmptyMessage(which);
             } else {
                 // Nếu đã có order
                 // bỏ qua
-                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " is ignored, task will update soon");
+                //Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " is ignored, task will update soon");
             }
         }
     }
@@ -335,7 +331,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         updateProgress();
     }
 
-    private synchronized void updateProgress() {
+    protected synchronized void updateProgress() {
         if(isProgressSupport()) {
             float newProgress = (mDownloadedInBytes+0.0f)/mFileContentLength;
             if(newProgress>1) newProgress = 0.99f;
@@ -386,9 +382,9 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         return mSpeedInBytes;
     }
 
-    public String getSpeedInBytesString() {
-        if(isProgressSupport()) return Util.humanReadableByteCount((long) getSpeedInBytes())+"/s";
-        return "";
+
+    protected void restoreProgress(float progress) {
+        mProgress = progress;
     }
 
     private static class NotifyHandler extends Handler {
@@ -406,10 +402,10 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
                 case TASK_CHANGED:
 
                     task.mProgressUpdateFlag = false;
-                    Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+task.mId+" is updating with progress "+task.getProgress());
+                    //Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+task.mId+" is updating with progress "+task.getProgress());
                     task.getTaskManager().notifyTaskChanged(task);
                     if(task.mStopped) {
-                        Log.d(TAG, "and stop too");
+                        //Log.d(TAG, "and stop too");
                         task.release();
                     }
                     break;

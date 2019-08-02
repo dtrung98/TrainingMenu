@@ -6,30 +6,32 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.zalo.servicetraining.App;
+import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.PartialInfo;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
-import com.zalo.servicetraining.fundamental.noteapp.data.NoteDatabaseHelper;
+import com.zalo.servicetraining.downloader.task.ranges.PartialDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloaderDatabaseHelper extends SQLiteOpenHelper {
-    private static final String TAG = "DownloaderDatabaseHelper";
+public class DownloadDBHelper extends SQLiteOpenHelper {
+    private static final String TAG = "DownloadDBHelper";
 
     // Database Name
     public static final String DATABASE_NAME = "downloader_db";
     private static final int DATABASE_VERSION = 1;
-    private static DownloaderDatabaseHelper sDownloaderDatabaseHelper;
-    public static DownloaderDatabaseHelper getInstance() {
-        if(sDownloaderDatabaseHelper==null) sDownloaderDatabaseHelper = new DownloaderDatabaseHelper(App.getInstance().getApplicationContext());
-        return sDownloaderDatabaseHelper;
+    private static DownloadDBHelper sDownloadDBHelper;
+    public static DownloadDBHelper getInstance() {
+        if(sDownloadDBHelper ==null) sDownloadDBHelper = new DownloadDBHelper(App.getInstance().getApplicationContext());
+        return sDownloadDBHelper;
     }
     public static void destroy() {
-        sDownloaderDatabaseHelper.close();
-        sDownloaderDatabaseHelper = null;
+        sDownloadDBHelper.close();
+        sDownloadDBHelper = null;
     }
 
-    private DownloaderDatabaseHelper(Context context) {
+    private DownloadDBHelper(Context context) {
         super(context,DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -45,7 +47,7 @@ public class DownloaderDatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+PartialInfo.TABLE_NAME);
     }
 
-    public List<TaskInfo> getTaskInfoList() {
+    public List<TaskInfo> getSavedTaskFromDatabase() {
         List<TaskInfo> taskInfoList = new ArrayList<>();
 
         SQLiteDatabase db = getReadableDatabase();
@@ -62,4 +64,21 @@ public class DownloaderDatabaseHelper extends SQLiteOpenHelper {
         return taskInfoList;
     }
 
+    public synchronized int saveTask(TaskInfo info) {
+        SQLiteDatabase db = getWritableDatabase();
+        int result = info.save(db);
+        db.close();
+        return result;
+    }
+
+    public synchronized long generateNewTaskId(DownloadItem item) {
+        SQLiteDatabase db = getWritableDatabase();
+        TaskInfo sample = new TaskInfo(1,-1,item.getFileTitle(),item.getDirectoryPath(),item.getUrlString());
+        return db.insert(TaskInfo.TABLE_NAME,null,sample.getValues());
+    }
+    public synchronized long generateNewPartialTaskId(long startByte, long endByte) {
+        SQLiteDatabase db = getWritableDatabase();
+        PartialInfo info = new PartialInfo(startByte, endByte, 1);
+        return db.insert(PartialInfo.TABLE_NAME,null,info.getValues());
+    }
 }

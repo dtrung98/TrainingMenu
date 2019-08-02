@@ -59,7 +59,7 @@ public class PartialDownloadTask implements Runnable {
         return mDownloadLength!=-1;
     }
 
-    public PartialDownloadTask restoreInstance(FileDownloadTask fileTask, final int id, long startByte, long endByte, int state, long downloadedInBytes) {
+    public static PartialDownloadTask restoreInstance(FileDownloadTask fileTask, final int id, long startByte, long endByte, int state, long downloadedInBytes) {
     PartialDownloadTask task = new PartialDownloadTask(fileTask,id,startByte,endByte);
     task.mState = state;
     task.mDownloadedInBytes = downloadedInBytes;
@@ -81,7 +81,7 @@ public class PartialDownloadTask implements Runnable {
         mEndByte = endByte;
         mTask = fileTask;
         mId = id;
-        mDownloadLength = mEndByte - mStartByte;
+        mDownloadLength = mEndByte - mStartByte + 1;
     }
 
     @Override
@@ -97,11 +97,11 @@ public class PartialDownloadTask implements Runnable {
     }
 
     public final void waitMeFinish() {
-        Log.d(TAG, "Thread id "+ Thread.currentThread().getId()+" is waiting for thread "+mThread.getId()+" to finish");
+        //Log.d(TAG, "Thread id "+ Thread.currentThread().getId()+" is waiting for thread "+mThread.getId()+" to finish");
         try {
             mThread.join();
         } catch (InterruptedException e) {
-            Log.d(TAG, "could not join thread :"+e.getMessage());
+            //Log.d(TAG, "could not join thread :"+e.getMessage());
         }
     }
 
@@ -111,9 +111,9 @@ public class PartialDownloadTask implements Runnable {
     }
 
     private void download() {
-        Log.d(TAG, "thread id "+mThread.getId()+" or "+ Thread.currentThread().getId()+" is start downloading from "+ mStartByte+" to "+mEndByte);
+        //Log.d(TAG, "thread id "+mThread.getId()+" or "+ Thread.currentThread().getId()+" is start downloading from "+ mStartByte+" to "+mEndByte);
 
-        if(mTask.isStopByUser()) return;
+        if(mTask.isStopByUser()||mTask.isTaskFailed()) return;
 
         // Partial Download does not have connecting state
         // so remove it
@@ -131,14 +131,10 @@ public class PartialDownloadTask implements Runnable {
             fileWriter =new RandomAccessFile(fileToWrite, "rw");
 
         } catch (Exception e) {
-            fileWriter = null;
-            Log.d(TAG, "can't create new file writer");
-        }
-
-        if(fileWriter==null) {
-            setState(FAILURE_TERMINATED,"Could n't not create file to write");
+            setState(FAILURE_TERMINATED,"Could n't not create file to write.\n"+e.getMessage());
             notifyTaskChanged();
             return;
+            //Log.d(TAG, "can't create new file writer");
         }
 
         switch (mTask.getMode()) {
@@ -166,7 +162,7 @@ public class PartialDownloadTask implements Runnable {
                     fileSize = fileWriter.length();
                 } catch (IOException ignored) {}
 
-                Log.d(TAG, "resuming with downloaded "+ downloaded+", fileSize "+ fileSize);
+                //Log.d(TAG, "resuming with downloaded "+ downloaded+", fileSize "+ fileSize);
 
                 if(fileSize<getRealPositionInFile(downloaded)) {
                     closeFileWriter(fileWriter);
@@ -228,15 +224,15 @@ public class PartialDownloadTask implements Runnable {
 
             if(isPartialDownloadTask()) {
                 urlConnection.setRequestProperty(RANGE_PROPERTY, "bytes=" + getRealPositionInFile(getDownloadedInBytes()) + '-' + mEndByte);
-                Log.d(TAG, "partial task id "+ getId()+" is request range from "+ getRealPositionInFile(getDownloadedInBytes())+" - "+ mEndByte);
+                //Log.d(TAG, "partial task id "+ getId()+" is request range from "+ getRealPositionInFile(getDownloadedInBytes())+" - "+ mEndByte);
 
                 urlConnection.connect();
-                Log.d(TAG, "partial task id "+getId()+" connected");
+                //Log.d(TAG, "partial task id "+getId()+" connected");
                 if (urlConnection.getResponseCode() / 100 != 2) {
                     setState(FAILURE_TERMINATED, "Response code is invalid");
                     notifyTaskChanged();
                     return;
-                } else Log.d(TAG, "partial task id "+ getId()+" receives response code "+urlConnection.getResponseCode());
+                } //else //Log.d(TAG, "partial task id "+ getId()+" receives response code "+urlConnection.getResponseCode());
 
                 String rangeFields = urlConnection.getHeaderField("Content-Range");
                 if (rangeFields == null) {
@@ -244,12 +240,12 @@ public class PartialDownloadTask implements Runnable {
                     setState(FAILURE_TERMINATED, "Server does not accept single part download");
                     return;
                 }
-                Log.d(TAG, "partial task id "+getId()+" receives Content-Range : "+ rangeFields);
+                //Log.d(TAG, "partial task id "+getId()+" receives Content-Range : "+ rangeFields);
 
                 String[] connectionRanges = rangeFields.substring("bytes=".length()).split("[-/]");
                 long positionDownloadFromByServer = Long.valueOf(connectionRanges[0]);
                 long positionDownloadToByServer = Long.valueOf(connectionRanges[1]);
-                Log.d(TAG, "partial task id "+getId()+"server reply from "+positionDownloadFromByServer+" to " + positionDownloadToByServer );
+                //Log.d(TAG, "partial task id "+getId()+"server reply from "+positionDownloadFromByServer+" to " + positionDownloadToByServer );
                 if (positionDownloadFromByServer > getRealPositionInFile(getDownloadedInBytes()) || positionDownloadToByServer != mEndByte) {
                     urlConnection.disconnect();
                     setState(FAILURE_TERMINATED, "Could not resume or download partially because server replied wrong values");
@@ -257,7 +253,7 @@ public class PartialDownloadTask implements Runnable {
                     return;
                 }
 
-                Log.d(TAG, "can resume or download partially with downloadedSize " + positionDownloadFromByServer + ", downloadedInByte " + getDownloadedInBytes());
+                //Log.d(TAG, "can resume or download partially with downloadedSize " + positionDownloadFromByServer + ", downloadedInByte " + getDownloadedInBytes());
 
             } else {
                 setDownloadedInBytes(0);
@@ -275,7 +271,7 @@ public class PartialDownloadTask implements Runnable {
 
         } catch (Exception e) {
             if (urlConnection != null) urlConnection.disconnect();
-            Log.d(TAG, "exception: "+e.getMessage());
+            //Log.d(TAG, "exception: "+e.getMessage());
         }
 
         if(urlConnection==null||inputStream==null) {
@@ -298,7 +294,7 @@ public class PartialDownloadTask implements Runnable {
             Kiểm tra action dismiss từ người dùng
          */
 
-        if(mTask.isStopByUser()) {
+        if(mTask.isStopByUser()|| mTask.isTaskFailed()) {
             releaseConnection(urlConnection,inputStream,fileWriter);
             return;
         }
@@ -319,7 +315,7 @@ public class PartialDownloadTask implements Runnable {
 
         setState(RUNNING);
         notifyTaskChanged();
-        Log.d(TAG, "thread id "+mThread.getId()+" with task id"+getId()+" is going to running state");
+        //Log.d(TAG, "thread id "+mThread.getId()+" with task id"+getId()+" is going to running state");
 
         try {
             while ((bufferReadLength = inputStream.read(buffer)) != -1) {
@@ -327,17 +323,17 @@ public class PartialDownloadTask implements Runnable {
                 totalReadLength += bufferReadLength;
                 appendDownloadedBytes(bufferReadLength);
                 mTask.calculateSpeed();
-                Log.d(TAG, "partial id "+getId()+" with downloadedInBytes " +getDownloadedInBytes());
+                //Log.d(TAG, "partial id "+getId()+" with downloadedInBytes " +getDownloadedInBytes());
                 /*
                     Kiểm tra action dismiss từ người dùng
                  */
 
-                if(mTask.isStopByUser()) {
+                if(mTask.isStopByUser() || mTask.isTaskFailed()) {
                     releaseConnection(urlConnection,inputStream, fileWriter);
                     return;
                 }
             }
-            Log.d(TAG, "Success with downloaded "+getDownloadedInBytes());
+            //Log.d(TAG, "Success with downloaded "+getDownloadedInBytes());
 
 
             setState(BaseTask.SUCCESS);
@@ -372,6 +368,15 @@ public class PartialDownloadTask implements Runnable {
             } catch (IOException ignored) {}
     }
 
+    /**
+     * get current state of this partial task.
+     * @return <i>(4 types of task state)</i>
+     * <br>PENDING : Task is pending
+     * <br>RUNNING : Task is running
+     * <br>SUCCESS : Task is success
+     * <br>FAILURE : Task is failed.
+     *
+     */
     public int getState() {
         return mState;
     }
@@ -382,7 +387,7 @@ public class PartialDownloadTask implements Runnable {
     private synchronized void setState(int state, String message) {
         this.mState = state;
         setMessage(message);
-        Log.d(TAG, "partial id "+getId()+" set state with message: "+ message);
+        //Log.d(TAG, "partial id "+getId()+" set state with message: "+ message);
     }
 
     private String mMessage = "";
@@ -403,18 +408,16 @@ public class PartialDownloadTask implements Runnable {
         return mDownloadedInBytes;
     }
 
-
-
     private void notifyTaskChanged() {
         if(mTask!=null)
-            mTask.notifyPartialTaskChanged(mId);
+            mTask.notifyPartialTaskChanged(this);
     }
 
     private synchronized void appendDownloadedBytes(long bytes) {
         if(bytes>0) {
             mDownloadedInBytes += bytes;
             mTask.appendDownloadedBytes(bytes);
-            Log.d(TAG, "partial task id "+getId()+" is append with progress "+((int)(100*getDownloadedInBytes()/getDownloadLength())));
+            //Log.d(TAG, "partial task id "+getId()+" is append with progress "+((int)(100*getDownloadedInBytes()/getDownloadLength())));
         }
 
     }
