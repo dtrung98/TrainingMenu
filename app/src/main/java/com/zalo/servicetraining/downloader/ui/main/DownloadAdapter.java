@@ -49,7 +49,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mData;
     }
 
-    GridLayoutManager.SpanSizeLookup mSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
+    private GridLayoutManager.SpanSizeLookup mSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
         @Override
         public int getSpanSize(int position) {
             int type = getItemViewType(position);
@@ -59,11 +59,11 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     };
 
-    public GridLayoutManager.SpanSizeLookup getSpanSizeLookup() {
+    GridLayoutManager.SpanSizeLookup getSpanSizeLookup() {
         return mSpanSizeLookup;
     }
 
-    public boolean onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
+    boolean onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
         int size = mData.size();
         int posFound = -1;
         for (int i = 0; i < size; i++) {
@@ -135,13 +135,13 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
     }
 
-    public void onTaskAdded(TaskInfo info) {
+    void onTaskAdded(TaskInfo info) {
         Log.d(TAG, "onTaskAdded");
         mData.add(1,info);
         notifyItemInserted(1);
     }
 
-    public void onTaskCleared(int id) {
+    void onTaskCleared(int id) {
         for (int i = 0; i < mData.size(); i++) {
             Object object = mData.get(i);
             if(object instanceof TaskInfo && ((TaskInfo)object).getId()==id) {
@@ -152,19 +152,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    public interface ItemClickListener {
-        void onItemClick(Object object);
-    }
-
-    private ItemClickListener mListener;
-    public void setListener(ItemClickListener listener) {
-        mListener = listener;
-    }
-    public void removeListener() {
-        mListener = null;
-    }
-
-    public DownloadAdapter(Context context) {
+    DownloadAdapter(Context context) {
         this.mContext = context;
     }
 
@@ -176,14 +164,13 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         notifyDataSetChanged();
     }
 
-    public void destroy() {
+    void destroy() {
         mContext = null;
-        mListener = null;
     }
 
-    public static final int TYPE_DOWNLOADING_ITEM = 0;
-    public static final int TYPE_SECTION = 1;
-    public static final int TYPE_DOWNLOADED_ITEM = 2;
+    private static final int TYPE_DOWNLOADING_ITEM = 0;
+    private static final int TYPE_SECTION = 1;
+    private static final int TYPE_DOWNLOADED_ITEM = 2;
 
     @Override
     public int getItemViewType(int position) {
@@ -195,7 +182,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         switch (viewType) {
@@ -222,12 +209,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemCount() {
        return mData.size();
     }
-    public int getSpanCount(){
+    int getSpanCount(){
         return 2;
     }
 
 
-    public void onMenuButtonClick(int position, Object object) {
+    private void onMenuButtonClick(int position, Object object) {
         Toasty.info(App.getInstance().getApplicationContext(),"Menu Clicked but this feature's not written yet :)").show();
         if(object instanceof TaskInfo) {
             TaskInfo latest = DownloaderRemote.getTaskInfoWithTaskId(((TaskInfo)object).getId());
@@ -243,7 +230,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    public void onIconClick(int position, Object object) {
+    private void onIconClick(int position, Object object) {
         if(object instanceof TaskInfo) {
             TaskInfo info = ((TaskInfo)object);
             switch (info.getState()) {
@@ -272,7 +259,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Toasty.info(App.getInstance().getApplicationContext(),"Icon Clicked but this feature's not written yet :)").show();
     }
 
-    public void onItemClick(int position, Object object) {
+    private void onItemClick(int position, Object object) {
        if(object instanceof TaskInfo && mContext instanceof Activity && ((TaskInfo)object).getState()== BaseTask.SUCCESS) {
            TaskInfo info = (TaskInfo) object;
 
@@ -309,7 +296,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public class SectionItemHolder extends RecyclerView.ViewHolder {
         TextView mTextView;
 
-        public SectionItemHolder(View itemView) {
+        SectionItemHolder(View itemView) {
             super(itemView);
             mTextView = (TextView)itemView;
 
@@ -358,7 +345,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public class DownloadingItemHolder extends TaskInfoItemHolder {
         ProgressBar mProgressBar;
 
-        public void bindProgress(TaskInfo info) {
+        void bindProgress(TaskInfo info) {
             String stateText;
             String speed;
             String MIDDLE_DOT = " • ";
@@ -374,7 +361,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             mStateTextView.setText(stateText);
         }
-        public void bindProgressSupport(TaskInfo info) {
+        void bindProgressSupport(TaskInfo info) {
             if(info.isProgressSupport()) {
                 mProgressBar.setIndeterminate(false);
             } else {
@@ -391,7 +378,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         @SuppressLint("SetTextI18n")
-        public void bindState(TaskInfo info) {
+        void bindState(TaskInfo info) {
             int progress  = (int)(info.getProgress()*100);
 
             switch (info.getState()) {

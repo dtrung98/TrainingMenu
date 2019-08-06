@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.model.LocalArea;
-import com.zalo.servicetraining.ui.base.AbsListActivity;
+import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

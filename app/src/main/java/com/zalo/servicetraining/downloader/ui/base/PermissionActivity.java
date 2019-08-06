@@ -7,9 +7,8 @@ import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.loader.app.LoaderManager;
 
-import com.zalo.servicetraining.ui.base.AbsListActivity;
+import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
 public abstract class PermissionActivity extends AbsListActivity {
     private static final String TAG = "PermissionActivity";

@@ -14,7 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.fundamental.noteapp.data.NoteDatabaseHelper;
 import com.zalo.servicetraining.model.Note;
-import com.zalo.servicetraining.ui.base.AbsListActivity;
+import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
 import java.util.List;
 

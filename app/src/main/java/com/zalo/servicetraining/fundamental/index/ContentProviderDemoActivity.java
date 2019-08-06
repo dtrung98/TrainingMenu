@@ -4,7 +4,7 @@ package com.zalo.servicetraining.fundamental.index;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.fundamental.noteapp.DemoNoteActivity;
 import com.zalo.servicetraining.model.Item;
-import com.zalo.servicetraining.ui.base.AbsMenuActivity;
+import com.zalo.servicetraining.mainui.base.AbsMenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;

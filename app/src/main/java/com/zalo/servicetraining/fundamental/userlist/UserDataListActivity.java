@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.servicetraining.model.UserData;
-import com.zalo.servicetraining.ui.base.AbsListActivity;
+import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

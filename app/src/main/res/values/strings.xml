@@ -66,4 +66,5 @@
     <string name="string_false">false</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="preference">Preference</string>
 </resources>

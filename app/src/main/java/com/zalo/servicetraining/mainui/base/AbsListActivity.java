@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.base;
+package com.zalo.servicetraining.mainui.base;
 
 
 import android.os.Bundle;
@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;

@@ -13,7 +13,7 @@ import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 import com.zalo.servicetraining.downloader.ui.base.BaseActivity;
 import com.zalo.servicetraining.model.Item;
-import com.zalo.servicetraining.ui.base.MenuAdapter;
+import com.zalo.servicetraining.mainui.base.MenuAdapter;
 import com.zalo.servicetraining.util.Util;
 
 import java.util.ArrayList;

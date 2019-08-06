@@ -1,19 +1,13 @@
 package com.zalo.servicetraining.downloader.ui.detail;
 
-import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.servicetraining.R;
-import com.zalo.servicetraining.ui.base.MenuAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.zalo.servicetraining.mainui.base.MenuAdapter;
 
 public class DetailAdapter extends MenuAdapter {
     @NonNull

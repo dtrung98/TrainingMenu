@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.base;
+package com.zalo.servicetraining.mainui.base;
 
 import android.content.Intent;
 

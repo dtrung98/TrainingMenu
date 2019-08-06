@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui;
+package com.zalo.servicetraining.mainui;
 
 
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.ui.main.DownloadActivity;
 import com.zalo.servicetraining.model.Item;
-import com.zalo.servicetraining.ui.base.AbsMenuActivity;
+import com.zalo.servicetraining.mainui.base.AbsMenuActivity;
 import com.zalo.servicetraining.fundamental.FundamentalActivity;
 
 import java.util.ArrayList;

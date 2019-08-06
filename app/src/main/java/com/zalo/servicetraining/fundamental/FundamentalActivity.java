@@ -8,7 +8,7 @@ import com.zalo.servicetraining.fundamental.index.ContentProviderDemoActivity;
 import com.zalo.servicetraining.fundamental.index.MultithreadingActivity;
 import com.zalo.servicetraining.model.Item;
 import com.zalo.servicetraining.fundamental.servicedemo.ServiceDemoActivity;
-import com.zalo.servicetraining.ui.base.AbsMenuActivity;
+import com.zalo.servicetraining.mainui.base.AbsMenuActivity;
 import com.zalo.servicetraining.fundamental.index.NetworkMenuActivity;
 
 import java.util.ArrayList;

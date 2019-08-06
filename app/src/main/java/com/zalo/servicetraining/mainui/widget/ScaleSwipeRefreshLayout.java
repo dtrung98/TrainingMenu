@@ -1,4 +1,4 @@
-package com.zalo.servicetraining.ui.widget;
+package com.zalo.servicetraining.mainui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
