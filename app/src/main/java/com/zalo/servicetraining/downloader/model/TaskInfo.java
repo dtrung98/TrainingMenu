@@ -163,6 +163,7 @@ public class TaskInfo {
         values.put(EXTRA_FIRST_EXECUTED_TIME,getFirstExecutedTime());
         values.put(EXTRA_LAST_EXECUTED_TIME,getLastExecutedTime());
         values.put(EXTRA_FINISHED_TIME,getFinishedTime());
+        values.put(EXTRA_RUNNING_TIME,getRunningTime());
         values.put(EXTRA_PARTIAL_INFO_LIST,getPartialInfoIds());
         return values;
     }
@@ -343,6 +344,6 @@ public class TaskInfo {
             partialInfo.save(db);
         }
 
-        return 0;
+        return result;
     }
 }

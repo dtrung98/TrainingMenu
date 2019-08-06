@@ -116,7 +116,7 @@ public class DownloadActivity extends BaseActivity {
     }
 
     @Override
-    protected void taskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
+    protected void onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
         if(!mAdapter.onTaskUpdated(id,state, progress, progress_support,downloaded, fileContentLength, speed))
           mAdapter.onTaskAdded(DownloaderRemote.getTaskInfoWithTaskId(id));
     }

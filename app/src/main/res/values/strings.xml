@@ -8,7 +8,7 @@
     <string name="notes">Notes</string>
     <string name="weather">Weather</string>
     <string name="network">Network</string>
-    <string name="message">MESSAGE</string>
+    <string name="message">Message</string>
     <string name="banner">A banner</string>
     <string name="service">Service</string>
     <string name="users">Users</string>
@@ -50,4 +50,20 @@
     <string name="three_dot">… </string>
     <string name="cancelled">Cancelled</string>
     <string name="paused">Paused</string>
+    <string name="parent_folder">Parent folder</string>
+    <string name="path">Path</string>
+    <string name="link">Link</string>
+    <string name="state">State</string>
+    <string name="size">Size</string>
+    <string name="downloaded_size">Downloaded Size</string>
+    <string name="support_resuming">Support resuming</string>
+    <string name="progress">Progress</string>
+    <string name="creation_time">Creation time</string>
+    <string name="execution_time">Execution time</string>
+    <string name="finishing_time">Finishing time</string>
+    <string name="running">Running</string>
+    <string name="string_true">True</string>
+    <string name="string_false">false</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

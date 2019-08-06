@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.loader.app.LoaderManager;
 
 import com.zalo.servicetraining.ui.base.AbsListActivity;
 
@@ -24,7 +25,6 @@ public abstract class PermissionActivity extends AbsListActivity {
     }
 
     public void onPermissionResult(Intent intent, boolean granted) {
-
     }
 
     private void onPermissionResult(boolean granted) {

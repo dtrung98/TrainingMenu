@@ -102,7 +102,7 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
                             final long downloaded = bundle.getLong(BaseTask.EXTRA_DOWNLOADED_IN_BYTES);
                             final long fileLength = bundle.getLong(BaseTask.EXTRA_FILE_CONTENT_LENGTH);
                             final float speedInBytes = bundle.getFloat(BaseTask.EXTRA_SPEED);
-                            activity.taskUpdated(id, state, progress, progress_support, downloaded, fileLength, speedInBytes);
+                            activity.onTaskUpdated(id, state, progress, progress_support, downloaded, fileLength, speedInBytes);
                         }
                         Log.d(TAG, "onReceive: action_task_changed");
                         break;
@@ -124,7 +124,7 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
 
     }
 
-    protected void taskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
+    protected void onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
 
     }
 }

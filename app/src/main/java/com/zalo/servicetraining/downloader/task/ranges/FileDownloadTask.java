@@ -61,6 +61,8 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
         task.restoreProgress(info.getProgress());
         task.setMessage(info.getMessage());
         task.setFinishedTime(info.getFinishedTime());
+        task.restoreFirstExecutedTime(info.getFirstExecutedTime());
+        task.restoreLastExecutedTime(info.getLastExecutedTime());
         task.setRunningTime(info.getRunningTime());
 
         task.mPartialDownloadTasks.clear();

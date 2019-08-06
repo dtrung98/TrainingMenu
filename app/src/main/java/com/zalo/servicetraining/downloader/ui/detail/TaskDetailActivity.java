@@ -1,6 +1,9 @@
 package com.zalo.servicetraining.downloader.ui.detail;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.zalo.servicetraining.App;
@@ -23,7 +26,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
     public static final String VIEW_TASK_DETAIL ="view_task_detail";
     private int mTaskId = -1;
     private TaskInfo mTaskInfo;
-
+    private ImageView mIconImageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +50,8 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
 
     @Override
     protected void onInitRecyclerView() {
+        mIconImageView = findViewById(R.id.icon);
+        mIconImageView.setVisibility(View.VISIBLE);
         mAdapter = new DetailAdapter();
         mAdapter.setListener(this);
         getRecyclerView().setAdapter(mAdapter);
@@ -76,26 +81,40 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
 
     private void bind() {
         setTitle(mTaskInfo.getFileTitle());
+        bindIcon();
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle("Parent Folder").setDescription(mTaskInfo.getDirectory()));
-        list.add(new Item().setTitle("File Path").setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()));
-        list.add(new Item().setTitle("Url Link").setDescription(mTaskInfo.getURLString()));
-        list.add(new Item().setTitle("Status").setDescription(BaseTask.getStateName(mTaskInfo.getState())));
-        list.add(new Item().setTitle("Message").setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()));
-        list.add(new Item().setTitle("File Size").setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())));
-        list.add(new Item().setTitle("Downloaded").setDescription(Util.humanReadableByteCount(mTaskInfo.getDownloadedInBytes())));
-        list.add(new Item().setTitle("Support Progress").setDescription(mTaskInfo.isProgressSupport()+""));
-        list.add(new Item().setTitle("Progress").setDescription(((int)(mTaskInfo.getProgress()*100))+"%"));
-        list.add(new Item().setTitle("Created At").setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getCreatedTime())));
-        list.add(new Item().setTitle("Executed At").setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFirstExecutedTime())));
-        list.add(new Item().setTitle("Finished At").setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFinishedTime())));
-        list.add(new Item().setTitle("Running Time").setDescription(Util.formatDuration(mTaskInfo.getRunningTime())));
+        list.add(new Item().setTitle(R.string.parent_folder).setDescription(mTaskInfo.getDirectory()));
+        list.add(new Item().setTitle(R.string.path).setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()));
+        list.add(new Item().setTitle(R.string.link).setDescription(mTaskInfo.getURLString()));
+        list.add(new Item().setTitle(R.string.support_resuming).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no));
+        list.add(new Item().setTitle(R.string.state).setDescription(BaseTask.getStateName(mTaskInfo.getState())));
+        list.add(new Item().setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()));
+        list.add(new Item().setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())));
+        list.add(new Item().setTitle(R.string.downloaded_size).setDescription(Util.humanReadableByteCount(mTaskInfo.getDownloadedInBytes())));
+        list.add(new Item().setTitle(R.string.progress).setDescription(((int)(mTaskInfo.getProgress()*100))+"%"));
+        list.add(new Item().setTitle(R.string.creation_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getCreatedTime())));
+        list.add(new Item().setTitle(R.string.execution_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFirstExecutedTime())));
+        list.add(new Item().setTitle(R.string.finishing_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFinishedTime())));
+        list.add(new Item().setTitle(R.string.running).setDescription(Util.formatDuration(mTaskInfo.getRunningTime())));
         mAdapter.setData(list);
+    }
+    private void bindIcon() {
+        switch (mTaskInfo.getState()) {
+            case BaseTask.SUCCESS:
+                mIconImageView.setImageResource(R.drawable.tick);
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FlatGreen));
+                break;
+            case BaseTask.RUNNING:
+            default:
+                mIconImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FocusColorTwo));
+                break;
+        }
     }
 
     @Override
-    protected void taskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
-        super.taskUpdated(id, state, progress, progress_support, downloaded, fileContentLength, speed);
+    protected void onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
+        super.onTaskUpdated(id, state, progress, progress_support, downloaded, fileContentLength, speed);
         if(mTaskInfo!=null && mTaskId == id) {
          refreshData();
         }

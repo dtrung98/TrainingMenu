@@ -232,7 +232,7 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
             }
         }
     }
-    private boolean mStopped = false;
+    private boolean mStopped = true;
     private void releaseSafely() {
         mStopped = true;
         notifyTaskChanged(TASK_CHANGED);
@@ -385,6 +385,14 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
 
     protected void restoreProgress(float progress) {
         mProgress = progress;
+    }
+
+    protected void restoreFirstExecutedTime(long firstExecutedTime) {
+        mFirstExecutedTime = firstExecutedTime;
+    }
+
+    protected void restoreLastExecutedTime(long lastExecutedTime) {
+        mLastExecutedTime = lastExecutedTime;
     }
 
     private static class NotifyHandler extends Handler {
