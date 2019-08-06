@@ -24,8 +24,8 @@ public class SimpleTaskManager extends BaseTaskManager<FileDownloadTask> {
 
 
     @Override
-    public void init(DownloaderService service) {
-        super.init(service);
+    public void init(CallBack callBack) {
+        super.init(callBack);
 
         // setting the thread factory
         ThreadFactory backgroundPriorityThreadFactory = new

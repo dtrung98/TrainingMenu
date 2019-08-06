@@ -29,6 +29,8 @@ import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,11 +42,11 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
 
     private TextInputEditText mUrlEditText;
     private TextView mDownloadButton;
-    View mCloseButton;
+    private View mCloseButton;
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
 
-    public static AddDownloadDialog newInstance() {
+    static AddDownloadDialog newInstance() {
         return new AddDownloadDialog();
     }
 
@@ -64,12 +66,10 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         bind(view);
-        if(getContext()!=null) {
-            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboardManager = (ClipboardManager) App.getInstance().getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboardManager != null) {
                 clipboardManager.addPrimaryClipChangedListener(this);
             }
-        }
         updateDownloadButton();
         updatePasteButton();
         showKeyboard();
@@ -121,21 +121,17 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         }
     }
 
-    public void showKeyboard(){
+    private void showKeyboard(){
         mUrlEditText.requestFocus();
-        if(getContext()!=null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager inputMethodManager = (InputMethodManager) App.getInstance().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if(inputMethodManager!=null&&!inputMethodManager.isAcceptingText())
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-        }
     }
 
-    public void closeKeyboard(){
-        if(getContext()!=null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    private void closeKeyboard(){
+            InputMethodManager inputMethodManager = (InputMethodManager) App.getInstance().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if(inputMethodManager!=null&&inputMethodManager.isAcceptingText())
             inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-        }
     }
 
     private void addToDownload() {
@@ -151,8 +147,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     private void pasteAndGo() {
-        if(getContext()!=null) {
-            ClipboardManager clipboardManager = (ClipboardManager)getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboardManager = (ClipboardManager)App.getInstance().getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
             if(clipboardManager !=null&& clipboardManager.getPrimaryClip()!=null) {
                 ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
 
@@ -175,7 +170,6 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                     Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
                 } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
             }
-        }
 
     }
     private void addTask(String url) {
@@ -213,7 +207,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     @Override
-    public void show(FragmentManager manager, String tag) {
+    public void show(@NotNull FragmentManager manager, String tag) {
         FragmentTransaction fragmentTransaction = manager.beginTransaction();
         fragmentTransaction.add(this, TAG);
         fragmentTransaction.commitAllowingStateLoss();
@@ -237,28 +231,26 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     private void updatePasteButton() {
-        if(getContext()!=null) {
-            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            if(clipboardManager !=null&& clipboardManager.getPrimaryClip()!=null) {
-                ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
+        ClipboardManager clipboardManager = (ClipboardManager) App.getInstance().getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if(clipboardManager !=null&& clipboardManager.getPrimaryClip()!=null) {
+            ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
 
-                CharSequence pasteData = item.getText();
+            CharSequence pasteData = item.getText();
 
-                if (pasteData == null) {
-                    Uri pasteUri = item.getUri();
+            if (pasteData == null) {
+                Uri pasteUri = item.getUri();
 
-                    if (pasteUri != null) {
+                if (pasteUri != null) {
 
-                        pasteData = pasteUri.toString();
-                    }
+                    pasteData = pasteUri.toString();
                 }
-                if(pasteData!=null && URLUtil.isValidUrl(pasteData.toString())) {
-                    mPasteIcon.setColorFilter(getResources().getColor(R.color.FlatTealBlue));
-                    mPasteAndGoButton.setBackgroundResource(R.drawable.background_round_teal_blue_border);
-                    mPasteAndGoButton.setTextColor(getResources().getColor(R.color.FlatTealBlue));
-                    mPasteAndGoButton.setEnabled(true);
-                    return;
-                }
+            }
+            if(pasteData!=null && URLUtil.isValidUrl(pasteData.toString())) {
+                mPasteIcon.setColorFilter(getResources().getColor(R.color.FlatTealBlue));
+                mPasteAndGoButton.setBackgroundResource(R.drawable.background_round_teal_blue_border);
+                mPasteAndGoButton.setTextColor(getResources().getColor(R.color.FlatTealBlue));
+                mPasteAndGoButton.setEnabled(true);
+                return;
             }
         }
 
@@ -292,11 +284,9 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
 
     @Override
     public void onDestroyView() {
-        if(getContext()!=null) {
-            ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            if(clipboardManager!=null)
+        ClipboardManager clipboardManager = (ClipboardManager) App.getInstance().getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if(clipboardManager!=null)
             clipboardManager.removePrimaryClipChangedListener(this);
-        }
         mDownloadButton.setOnClickListener(null);
         mCloseButton.setOnClickListener(null);
         mPasteAndGoButton.setOnClickListener(null);

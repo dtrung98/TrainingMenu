@@ -142,6 +142,10 @@ public class DownloaderRemote {
         if(mService!=null) mService.restartTaskWithTaskId(id);
     }
 
+    public static void clearTask(int id) {
+        if(mService!=null) mService.clearTask(id);
+    }
+
 
     public static class RemoteServiceBinder implements ServiceConnection {
         private final ServiceConnection mCallback;

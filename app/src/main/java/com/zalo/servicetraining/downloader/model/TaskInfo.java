@@ -146,6 +146,7 @@ public class TaskInfo {
         return info;
     }
 
+
     public ContentValues getValues() {
         ContentValues values = new ContentValues();
       //  values.put(EXTRA_ID,getId());
@@ -168,7 +169,7 @@ public class TaskInfo {
         return values;
     }
 
-    private String getPartialInfoIds() {
+    public String getPartialInfoIds() {
         StringBuilder builder = new StringBuilder();
         int length = mPartialInfoList.size();
         for (int i = 0; i < length; i++) {
@@ -326,7 +327,7 @@ public class TaskInfo {
         mLastExecutedTime = lastExecutedTime;
     }
 
-    public synchronized int save(SQLiteDatabase db) {
+    public synchronized void save(SQLiteDatabase db) {
         // delete all partial info before
         if(!mPartialListString.isEmpty()) {
             String old = mPartialListString;
@@ -336,7 +337,7 @@ public class TaskInfo {
         }
 
         // save task list
-        int result = db.update(TABLE_NAME,getValues(), EXTRA_ID +" = "+getId(),null);
+        db.update(TABLE_NAME,getValues(), EXTRA_ID +" = "+getId(),null);
 
         // save partial info
         for (PartialInfo partialInfo :
@@ -344,6 +345,5 @@ public class TaskInfo {
             partialInfo.save(db);
         }
 
-        return result;
     }
 }

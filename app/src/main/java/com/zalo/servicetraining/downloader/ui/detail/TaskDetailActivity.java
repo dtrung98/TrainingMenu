@@ -86,7 +86,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         list.add(new Item().setTitle(R.string.parent_folder).setDescription(mTaskInfo.getDirectory()));
         list.add(new Item().setTitle(R.string.path).setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()));
         list.add(new Item().setTitle(R.string.link).setDescription(mTaskInfo.getURLString()));
-        list.add(new Item().setTitle(R.string.support_resuming).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no));
+        list.add(new Item().setTitle(R.string.support_resume).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no));
         list.add(new Item().setTitle(R.string.state).setDescription(BaseTask.getStateName(mTaskInfo.getState())));
         list.add(new Item().setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()));
         list.add(new Item().setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())));
@@ -105,9 +105,20 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
                 mIconImageView.setColorFilter(getResources().getColor(R.color.FlatGreen));
                 break;
             case BaseTask.RUNNING:
+                mIconImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FlatTealBlue));
+                break;
+            case BaseTask.PENDING:
+                mIconImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FlatGreen));
+                break;
+            case BaseTask.FAILURE_TERMINATED:
+                mIconImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FlatRed));
+                break;
             default:
                 mIconImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-                mIconImageView.setColorFilter(getResources().getColor(R.color.FocusColorTwo));
+                mIconImageView.setColorFilter(getResources().getColor(R.color.FlatOrange));
                 break;
         }
     }
@@ -118,6 +129,12 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         if(mTaskInfo!=null && mTaskId == id) {
          refreshData();
         }
+    }
+
+    @Override
+    protected void onClearTask(int id) {
+        Toasty.warning(App.getInstance().getApplicationContext(),"Task was removed!").show();
+        finish();
     }
 
     @Override

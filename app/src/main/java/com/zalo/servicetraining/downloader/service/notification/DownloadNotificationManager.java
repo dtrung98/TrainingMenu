@@ -22,8 +22,8 @@ import com.zalo.servicetraining.downloader.ui.main.DownloadActivity;
 import com.zalo.servicetraining.util.Util;
 
 
-public class DownNotificationManager {
-    private static final String TAG = "DownNotificationManager";
+public class DownloadNotificationManager {
+    private static final String TAG = "NotificationManager";
     private static final String NOTIFICATION_CHANNEL_ID = "downloader_service_notification";
 
     public static final int NOTIFY_MODE_BACKGROUND = 0;
@@ -121,7 +121,7 @@ public class DownNotificationManager {
         if(STATE!= BaseTask.SUCCESS) {
             if(PROGRESS_SUPPORT)
             builder.setProgress(100, INT_PROGRESS, false);
-            else if(STATE== BaseTask.RUNNING)
+            else if(STATE == BaseTask.RUNNING)
                 builder.setProgress(100,0,true);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+INT_PROGRESS+", false");
         }
@@ -203,5 +203,10 @@ public class DownNotificationManager {
     public void cancelAll() {
         mStopped = true;
         mNotificationManager.cancelAll();
+    }
+
+    public void notifyTaskClear(int id) {
+        mNotificationManager.cancel(id);
+        mIndexBuilders.delete(id);
     }
 }

@@ -14,12 +14,12 @@ import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
-import com.zalo.servicetraining.downloader.service.notification.DownNotificationManager;
+import com.zalo.servicetraining.downloader.service.notification.DownloadNotificationManager;
 import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.util.ArrayList;
 
-public class DownloaderService extends Service {
+public class DownloaderService extends Service implements BaseTaskManager.CallBack {
     public static final String TAG = "DownloaderService";
 
     public static final String PACKAGE_NAME = "com.zalo.servicetraining.downloader.mService";
@@ -30,10 +30,11 @@ public class DownloaderService extends Service {
     public static int DOWNLOAD_MODE_PARTIAL = 1;
 
     public static final String ACTION_TASK_CHANGED = "action_task_changed";
+    public static final String ACTION_TASK_CLEAR = "action_task_clear";
     public static final String ACTION_TASK_MANAGER_CHANGED = "action_task_manager_changed";
 
     private BaseTaskManager mDownloadManager;
-    private DownNotificationManager mNotificationManager;
+    private DownloadNotificationManager mNotificationManager;
 
     public void initManager() {
         if(mDownloadManager==null) {
@@ -48,14 +49,16 @@ public class DownloaderService extends Service {
         mDownloadManager.addNewTask(item);
     }
 
-    public void updateFromTaskManager(BaseTaskManager manager) {
+    @Override
+    public void onUpdateTaskManager(BaseTaskManager manager) {
         Intent intent = new Intent();
         intent.setAction(ACTION_TASK_MANAGER_CHANGED);
         Log.d(TAG, "service sends action task manager changed");
         LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
     }
 
-    public void updateFromTask(BaseTask task) {
+    @Override
+    public void onUpdateTask(BaseTask task) {
        mNotificationManager.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
@@ -68,6 +71,17 @@ public class DownloaderService extends Service {
         intent.putExtra(BaseTask.EXTRA_FILE_CONTENT_LENGTH,task.getFileContentLength());
         intent.putExtra(BaseTask.EXTRA_SPEED,task.getSpeedInBytes());
         LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public void onClearTask(int id) {
+        mNotificationManager.notifyTaskClear(id);
+        Intent intent = new Intent();
+        intent.setAction(ACTION_TASK_CLEAR);
+        intent.putExtra(BaseTask.EXTRA_TASK_ID, id);
+        Log.d(TAG, "service sends action task id"+id+" deleted");
+        LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext())
+                .sendBroadcast(intent);
     }
 
     public BaseTaskManager getDownloadManager() {
@@ -90,7 +104,7 @@ public class DownloaderService extends Service {
 
     private void initNotification() {
         if(mNotificationManager ==null) {
-            mNotificationManager = new DownNotificationManager();
+            mNotificationManager = new DownloadNotificationManager();
             mNotificationManager.init(this);
         }
     }
@@ -120,7 +134,7 @@ public class DownloaderService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
     public void stopIfModeBackground() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O &&mNotificationManager!=null && mNotificationManager.getNotifyMode()==DownNotificationManager.NOTIFY_MODE_BACKGROUND)
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O &&mNotificationManager!=null && mNotificationManager.getNotifyMode()== DownloadNotificationManager.NOTIFY_MODE_BACKGROUND)
             stopSelf();
     }
 
@@ -157,6 +171,10 @@ public class DownloaderService extends Service {
     }
 
     public IBinder mBinder = new Binder();
+
+    public void clearTask(int id) {
+        if(mDownloadManager!=null) mDownloadManager.clearTask(id);
+    }
 
     public class Binder extends android.os.Binder {
         @NonNull

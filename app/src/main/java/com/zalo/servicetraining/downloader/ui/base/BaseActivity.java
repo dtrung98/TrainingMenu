@@ -36,6 +36,7 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
             final IntentFilter filter = new IntentFilter();
             filter.addAction(DownloaderService.ACTION_TASK_MANAGER_CHANGED);
             filter.addAction(DownloaderService.ACTION_TASK_CHANGED);
+            filter.addAction(DownloaderService.ACTION_TASK_CLEAR);
 
             Log.d(TAG, "registered");
             try {
@@ -106,10 +107,18 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
                         }
                         Log.d(TAG, "onReceive: action_task_changed");
                         break;
+                    case DownloaderService.ACTION_TASK_CLEAR:
+                        int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                        if(id!=-1)
+                        activity.onClearTask(id);
                 }
             }
         }
     }
+
+    protected void onClearTask(int id) {
+    }
+
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Log.d(TAG, "onServiceConnected: receive mService");

@@ -52,11 +52,11 @@
     <string name="paused">Paused</string>
     <string name="parent_folder">Parent folder</string>
     <string name="path">Path</string>
-    <string name="link">Link</string>
+    <string name="link">URL Link</string>
     <string name="state">State</string>
     <string name="size">Size</string>
     <string name="downloaded_size">Downloaded Size</string>
-    <string name="support_resuming">Support resuming</string>
+    <string name="support_resume">Support resume</string>
     <string name="progress">Progress</string>
     <string name="creation_time">Creation time</string>
     <string name="execution_time">Execution time</string>

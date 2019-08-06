@@ -19,7 +19,6 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     public static final int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
 
     public ThreadPoolExecutor mExecutor;
-    private DownloaderService mService;
 
     private final static int WHAT_TASK_CHANGED = 1;
 
@@ -28,8 +27,8 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     public BaseTaskManager() {
     }
 
-    public void init(DownloaderService service) {
-        mService = service;
+    public void init(CallBack callBack) {
+        mCallBack = callBack;
     }
 
     public void updatePreference() {
@@ -71,20 +70,18 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     public abstract T newInstance(DownloadItem item);
 
     public void destroy() {
-        mService = null;
+        mCallBack = null;
         mTaskList.clear();
     }
 
     public void notifyManagerChanged(){
-        if(mService!=null) {
-            mService.updateFromTaskManager(this);
-        }
-
+        if(mCallBack!=null)
+            mCallBack.onUpdateTaskManager(this);
     }
 
     public void notifyTaskChanged(BaseTask task) {
-        if(mService!=null) {
-            mService.updateFromTask(task);
+        if(mCallBack!=null) {
+            mCallBack.onUpdateTask(task);
         }
         TaskInfo info = TaskInfo.newInstance(task);
         DownloadDBHelper.getInstance().saveTask(info);
@@ -192,4 +189,34 @@ public abstract class BaseTaskManager<T extends BaseTask> {
             task.restartByUser();
         }
     }
+
+    private T findTaskById(int id) {
+        T task = null;
+        for (T t:
+                mTaskList) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        return task;
+    }
+
+    public synchronized void clearTask(int id) {
+        T task = findTaskById(id);
+
+        if(task!=null&&task.getState()!=BaseTask.RUNNING) {
+            if(mCallBack!=null) mCallBack.onClearTask(task.getId());
+            mTaskList.remove(task);
+            DownloadDBHelper.getInstance().deleteTask(TaskInfo.newInstance(task));
+        }
+    }
+
+    public interface CallBack {
+        void onClearTask(int id);
+        void onUpdateTask(BaseTask task);
+        void onUpdateTaskManager(BaseTaskManager tBaseTaskManager);
+    }
+
+    private CallBack mCallBack;
 }

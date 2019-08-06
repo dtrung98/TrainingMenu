@@ -78,12 +78,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             TaskInfo info = (TaskInfo) mData.get(posFound);
             if ((info.getState() != BaseTask.SUCCESS && state == BaseTask.SUCCESS) || (info.getState() == BaseTask.SUCCESS && state != BaseTask.SUCCESS)) {
                 if(mContext instanceof DownloadActivity) {
-                    Log.d(TAG, "onTaskUpdated: need to refresh");
+                    Log.d(TAG, "onUpdateTask: need to refresh");
                     ((DownloadActivity) mContext).refreshData();
                 }
             } else {
                // info.setState(state).setProgress(progress).setProgressSupport(progress_support);
-                Log.d(TAG, "onTaskUpdated: just update");
+                Log.d(TAG, "onUpdateTask: just update");
                 info.setDownloadedInBytes(downloaded);
                 info.setFileContentLength(fileContentLength);
                 info.setSpeedInBytes(speed);
@@ -103,7 +103,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     notifyItemChanged(posFound,BIND_STATE_CHANGED);
                 }
             }
-            Log.d(TAG, "onTaskUpdated posFound = "+posFound);
+            Log.d(TAG, "onUpdateTask posFound = "+posFound);
             return true;
         } else {
             // not in list
@@ -139,6 +139,17 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Log.d(TAG, "onTaskAdded");
         mData.add(1,info);
         notifyItemInserted(1);
+    }
+
+    public void onTaskCleared(int id) {
+        for (int i = 0; i < mData.size(); i++) {
+            Object object = mData.get(i);
+            if(object instanceof TaskInfo && ((TaskInfo)object).getId()==id) {
+                mData.remove(i);
+                notifyItemRemoved(i);
+                break;
+            }
+        }
     }
 
     public interface ItemClickListener {
@@ -335,7 +346,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super.onClick(view);
             switch (view.getId()) {
                 case R.id.clear:
-                    Toasty.info(App.getInstance().getApplicationContext(),"Clear!").show();
+                    DownloaderRemote.clearTask(((TaskInfo)mData.get(getAdapterPosition())).getId());
                     break;
                 case R.id.restart:
                     DownloaderRemote.restartTaskWithTaskId(((TaskInfo)mData.get(getAdapterPosition())).getId());
@@ -447,17 +458,14 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
                     if(info.isProgressSupport()&&progress>=0 && progress <=100) {
                         mProgressBar.setVisibility(View.VISIBLE);
-                        mStateTextView.setText(progress+"%"+" • Failure, tap to see detail");
+                        mStateTextView.setText(progress+"%"+" • "+mStateTextView.getResources().getString(R.string.failure)+", tap to see detail");
                     } else {
                         mProgressBar.setVisibility(View.GONE);
-                        mStateTextView.setText(R.string.failure+", tap to see detail");
+                        mStateTextView.setText(mStateTextView.getResources().getString(R.string.failure)+", tap to see detail");
                     }
                     break;
             }
         }
-
-
-
 
         @Override
         public void bind(TaskInfo info) {

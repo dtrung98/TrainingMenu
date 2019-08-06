@@ -64,11 +64,11 @@ public class DownloadDBHelper extends SQLiteOpenHelper {
         return taskInfoList;
     }
 
-    public synchronized int saveTask(TaskInfo info) {
+    public synchronized void saveTask(TaskInfo info) {
         SQLiteDatabase db = getWritableDatabase();
-        int result = info.save(db);
+        info.save(db);
         db.close();
-        return result;
+
     }
 
     public synchronized long generateNewTaskId(DownloadItem item) {
@@ -80,5 +80,14 @@ public class DownloadDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         PartialInfo info = new PartialInfo(startByte, endByte, 1);
         return db.insert(PartialInfo.TABLE_NAME,null,info.getValues());
+    }
+
+    public synchronized void deleteTask(TaskInfo info) {
+        String partial_ids = info.getPartialInfoIds();
+        SQLiteDatabase db = getWritableDatabase();
+
+        // delete partial list
+        db.delete(PartialInfo.TABLE_NAME,PartialInfo.EXTRA_ID+" IN ("+partial_ids+" )",null);
+        db.delete(TaskInfo.TABLE_NAME,TaskInfo.EXTRA_ID+" = "+ info.getId(),null);
     }
 }

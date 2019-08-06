@@ -62,7 +62,7 @@
         android:id="@+id/state_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="24Mb | 08:45 Monday 22 Feb 2019"
+        tools:text="24Mb | 08:45 Monday 22 Feb 2019"
         android:textColor="#5AC8FA"
         android:textSize="13sp"
         android:maxLines="1"
@@ -122,7 +122,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         android:src="@drawable/ic_more_vert_black_24dp"
-        android:background="@drawable/ripple_effect_16dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:padding="12dp"
         android:layout_marginEnd="10dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
