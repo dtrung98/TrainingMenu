@@ -8,7 +8,24 @@
         <item name="android:windowBackground">@color/DarkerBlack</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/DarkerBlack</item>
+        <item name="android:dialogTheme">@style/DialogDimDisabled</item>
     </style>
+    <style name="PreferenceAppTheme" parent="AppTheme">
+        <item name="android:dialogTheme">@style/MyDialogStyle</item>
+        <item name="android:alertDialogTheme">@style/MyDialogStyle</item>
+        <item name="android:dialogPreferenceStyle">@style/MyDialogStyle</item>
+    </style>
+
+<style name="MyDialogStyle" parent="Theme.AppCompat.Dialog">
+    <!-- Used for the title and text -->
+    <item name="android:textColorPrimary">@color/FlatTealBlue</item>
+    <!-- Used for the background -->
+<item name="colorPrimary">@color/FocusYellowColor</item>
+<item name="colorPrimaryDark">@color/FocusColorTwo</item>
+<item name="colorAccent">@color/FlatTealBlue</item>
+<item name="android:background">@color/DarkerColorL3</item>
+<item name="android:windowBackground">@android:color/transparent</item>
+</style>
 
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -54,7 +71,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog" />
+    <style name="LowDimBottomSheetDialog" parent="BaseBottomSheetDialog" >
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.25</item>
+    </style>
     <style name="DialogDimDisabled" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>

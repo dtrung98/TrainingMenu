@@ -2,12 +2,15 @@ package com.zalo.servicetraining.downloader.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
 
 import com.zalo.servicetraining.App;
 import com.zalo.servicetraining.downloader.base.BaseTask;
@@ -19,7 +22,7 @@ import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.util.ArrayList;
 
-public class DownloaderService extends Service implements BaseTaskManager.CallBack {
+public class DownloaderService extends Service implements BaseTaskManager.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "DownloaderService";
 
     public static final String PACKAGE_NAME = "com.zalo.servicetraining.downloader.mService";
@@ -98,6 +101,7 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
+        PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).registerOnSharedPreferenceChangeListener(this);
         initManager();
         initNotification();
     }
@@ -122,6 +126,7 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
         mDownloadManager.destroy();
         mNotificationManager = null;
         mDownloadManager = null;
+        PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
 
@@ -175,6 +180,12 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
     public void clearTask(int id) {
         if(mDownloadManager!=null) mDownloadManager.clearTask(id);
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
+    }
+
 
     public class Binder extends android.os.Binder {
         @NonNull

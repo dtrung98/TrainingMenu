@@ -2,11 +2,9 @@ package com.zalo.servicetraining.downloader.ui.main;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,10 +24,10 @@ import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
+import com.zalo.servicetraining.downloader.ui.base.OptionBottomSheet;
 import com.zalo.servicetraining.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.servicetraining.util.Util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -213,22 +211,135 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return 2;
     }
 
+    private int[] mPendingOptionIDs = new int[] {
+            R.string.cancel,
+            R.string.warning_divider,
+            R.string.clear,
+            R.string.focus_divider,
+            R.string.properties
+    };
 
+    private int[] mRunningOptionIDs = new int[] {
+            R.string.pause,
+            R.string.warning_divider,
+            R.string.cancel,
+            R.string.focus_divider,
+            R.string.properties
+    };
+
+    private int[] mPausedOptionIDs = new int[] {
+            R.string.resume,
+            R.string.restart,
+            R.string.warning_divider,
+            R.string.clear,
+            R.string.focus_divider,
+            R.string.properties,
+
+    };
+
+    private int[] mStoppedOptionIDs = new int[] {
+            R.string.restart,
+            R.string.warning_divider,
+            R.string.clear,
+            R.string.focus_divider,
+            R.string.properties
+    };
+    private int[] mFinishedOptionIDs = new int[] {
+            R.string.open,
+            R.string.restart,
+            R.string.warning_divider,
+            R.string.clear,
+            R.string.focus_divider,
+            R.string.properties
+    };
     private void onMenuButtonClick(int position, Object object) {
-        Toasty.info(App.getInstance().getApplicationContext(),"Menu Clicked but this feature's not written yet :)").show();
         if(object instanceof TaskInfo) {
-            TaskInfo latest = DownloaderRemote.getTaskInfoWithTaskId(((TaskInfo)object).getId());
-            if(latest!=null) {
-                String log = "TaskInfo:"
-                        + "\nCreated Time: " + Util.formatPrettyDateTimeWithSecond(latest.getCreatedTime())
-                        + "\nFirst Execute Time: " + Util.formatPrettyDateTimeWithSecond(latest.getFirstExecutedTime())
-                        + "\nLast Execute Time: " + Util.formatPrettyDateTimeWithSecond(latest.getLastExecutedTime())
-                        + "\nRunning Time: " + Util.formatDuration(latest.getRunningTime())
-                        + "\nFinish Time: " + Util.formatPrettyDateTimeWithSecond(latest.getFinishedTime());
-                Log.d(TAG, log);
-            }
+            final TaskInfo info = (TaskInfo)object;
+            showOptionsForTask(info);
         }
     }
+
+    private void showOptionsForTask(final TaskInfo info) {
+        int[] optionIDs;
+        switch (info.getState()) {
+            case BaseTask.PENDING:
+                optionIDs = mPendingOptionIDs;
+                break;
+            case BaseTask.RUNNING:
+            case BaseTask.CONNECTING:
+                optionIDs = mRunningOptionIDs;
+                break;
+            case BaseTask.CANCELLED:
+            case BaseTask.FAILURE_TERMINATED:
+                optionIDs = mStoppedOptionIDs;
+                break;
+
+            case BaseTask.PAUSED:
+                optionIDs = mPausedOptionIDs;
+                break;
+
+            case BaseTask.SUCCESS:
+                optionIDs = mFinishedOptionIDs;
+                break;
+            default:
+                optionIDs = null;
+        }
+
+        if(optionIDs!=null && mContext instanceof AppCompatActivity) {
+            OptionBottomSheet.newInstance(optionIDs, mOptionTaskInfoCallBack.attach(mContext,info))
+                    .show(((AppCompatActivity)mContext).getSupportFragmentManager(),OptionBottomSheet.TAG);
+        }
+    }
+    private OptionTaskInfoCallBack mOptionTaskInfoCallBack = new OptionTaskInfoCallBack();
+
+    private static class OptionTaskInfoCallBack implements OptionBottomSheet.CallBack {
+        private TaskInfo mActiveTaskInfo;
+        private Context mContext;
+        OptionBottomSheet.CallBack attach(Context context, TaskInfo info) {
+            mActiveTaskInfo = info;
+            mContext = context;
+            return this;
+        }
+
+        void detach() {
+            mActiveTaskInfo = null;
+            mContext = null;
+        }
+
+        @Override
+        public boolean onOptionClicked(int optionID) {
+            if(mActiveTaskInfo!=null&&mContext!=null) {
+                switch (optionID) {
+                    case R.string.open:
+                        DownloaderRemote.openFinishedTaskInfo(mContext, mActiveTaskInfo);
+                        break;
+                    case R.string.pause:
+                        DownloaderRemote.pauseTaskWithTaskId(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.resume:
+                        DownloaderRemote.resumeTaskWithTaskId(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.cancel:
+                        DownloaderRemote.cancelTaskWithTaskId(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.clear:
+                        DownloaderRemote.clearTask(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.restart:
+                        DownloaderRemote.restartTaskWithTaskId(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.properties:
+                        Intent intent = new Intent(mContext, TaskDetailActivity.class);
+                        intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
+                        intent.putExtra(BaseTask.EXTRA_TASK_ID, mActiveTaskInfo.getId());
+                        mContext.startActivity(intent);
+                        break;
+                }
+                detach();
+            }
+            return true;
+        }
+    };
 
     private void onIconClick(int position, Object object) {
         if(object instanceof TaskInfo) {
@@ -262,29 +373,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private void onItemClick(int position, Object object) {
        if(object instanceof TaskInfo && mContext instanceof Activity && ((TaskInfo)object).getState()== BaseTask.SUCCESS) {
            TaskInfo info = (TaskInfo) object;
+           DownloaderRemote.openFinishedTaskInfo(mContext, info);
 
-          try {
-              File filePath = new File(info.getDirectory());
-              File fileToWrite = new File(filePath, info.getFileTitle());
-              final Uri data = FileProvider.getUriForFile(mContext, "com.zalo.servicetraining.provider", fileToWrite);
-              mContext.grantUriPermission(mContext.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-              String fileExtension = info.getFileTitle().substring(info.getFileTitle().lastIndexOf("."));
-              Log.d(TAG, "onItemClick: extension " + fileExtension);
-              final Intent intent = new Intent(Intent.ACTION_VIEW);
-              if (fileExtension.contains("apk")) {
-                  Log.d(TAG, "open as apk");
-                  intent.setDataAndType(data, "application/vnd.android.package-archive");
-             // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              }
-              else
-              intent.setData(data);
-              intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-              mContext.startActivity(intent);
-          } catch (ActivityNotFoundException e) {
-              Toasty.error(App.getInstance().getApplicationContext(),"Not found any app that could open this file").show();
-          } catch (Exception e) {
-              Toasty.error(App.getInstance().getApplicationContext(),"Sorry, something went wrong").show();
-          }
        } else if(object instanceof TaskInfo) {
            Intent intent = new Intent(mContext, TaskDetailActivity.class);
            intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);

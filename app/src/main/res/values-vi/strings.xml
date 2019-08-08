@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="add_new_download">Thêm nhiệm vụ tải</string>
+    <string name="add_to_download">Tải ngay</string>
+
+    <string name="another">Khác</string>
+
+    <string name="app_language">Ngôn ngữ</string>
+
+    <string name="banner">một banner</string>
+
+    <string name="basic">Cơ bản</string>
+
+    <string name="cancel">Hủy bỏ</string>
+    <string name="cancel_all">Hủy tất cả</string>
+
+    <string name="cancelled">Đã hủy</string>
+
+    <string name="catch_it">Bắt</string>
+
+    <string name="clear">Xóa nhiệm vụ</string>
+    <string name="clear_all">Xóa tất cả nhiệm vụ</string>
+
+    <string name="connecting">Đang kết nối…</string>
+
+    <string name="content_provider">Content Provider</string>
+    <string name="content_provider_description">Một ứng dụng ghi chú đơn giản</string>
+
+    <string name="create_new_task">Tạo mới nhiệm vụ</string>
+
+    <string name="creation_time">Được tạo lúc</string>
+
+    <string name="downloaded_size">Kích thước đã tải</string>
+
+    <string name="downloader">Trình tải xuống</string>
+    <string name="downloader_notification_chanel_description">Dịch vụ Trình Tải được tạo bởi Service Training</string>
+    <string name="downloader_notification_chanel_name">Downloader Service</string>
+    <string name="downloader_service">Downloader Service</string>
+
+    <string name="downloading">Đang thực thi</string>
+    <string name="downloaded">Đã hoàn tất</string>
+
+    <string name="downloads_description">A file downloader application</string>
+
+    <string name="execution_time">Thực thi lúc</string>
+
+    <string name="failure">Thất bại</string>
+
+    <string name="finish_service">Dừng dịch vụ</string>
+
+    <string name="finishing_time">Kết thúc</string>
+
+    <string name="fundamental">Cơ bản</string>
+
+    <string name="go_to_download_folder">Đi tới thư mục tải xuống</string>
+
+    <string name="invalid_section">Invalid Section</string>
+    <string name="invalid_url">Invalid Url</string>
+
+    <string name="link">Địa chỉ liên kết</string>
+
+    <string name="message">Thông điệp</string>
+
+    <string name="multithreading">Đa luồng</string>
+    <string name="multithreading_description">"Chạy ngầm một vài thứ "</string>
+
+    <string name="network">Mạng</string>
+    <string name="network_description">Xử lý kết nối mạng và phân tích JSON</string>
+
+    <string name="new_task">Nhiệm vụ mới</string>
+
+    <string name="no">Không</string>
+
+    <string name="note_app_description">Ứng dụng ghi chú đơn giản</string>
+
+    <string name="notes">Ghi chú</string>
+
+    <string name="notification_channel_description">Dịch vụ đếm thời gian, tạo bở Menu Training</string>
+
+    <string name="notify_will_appear_here">Thông báo sẽ xuất hiện tại đây</string>
+
+    <string name="open">Mở</string>
+
+    <string name="or">Hoặc</string>
+
+    <string name="parent_folder">Thư mục chứa</string>
+
+    <string name="paste_and_go">Tải từ Clipboard</string>
+
+    <string name="path">Đường dẫn</string>
+
+    <string name="pause">Tạm ngưng</string>
+
+    <string name="paused">Đã tạm ngưng</string>
+
+    <string name="pending">Đang chờ tải</string>
+
+    <string name="preference">Tùy chỉnh</string>
+
+    <string name="progress">Tiến độ</string>
+
+    <string name="properties">Thuộc tính</string>
+
+    <string name="restart">Tải lại</string>
+    <string name="restart_all">Tải lại toàn bộ</string>
+
+    <string name="resume">Tiếp tục tải</string>
+
+    <string name="running">Đang tải</string>
+
+    <string name="service">Dịch vụ</string>
+    <string name="service_description">Tạo một dịch vụ chạy ngầm</string>
+
+    <string name="settings">Cài đặt</string>
+
+    <string name="size">Kích thước</string>
+
+    <string name="sqlite_note_app">SQLite Note App</string>
+
+    <string name="start_new_service">Chạy dịch vụ</string>
+
+    <string name="state">Trạng thái</string>
+
+    <string name="stop_all">Dừng tất cả</string>
+
+    <string name="string_false">Sai</string>
+    <string name="string_true">Đúng</string>
+
+    <string name="support_resume">Hỗ trợ tạm ngưng/tiếp tục</string>
+
+    <string name="task_not_exist">Task không còn tồn tại</string>
+
+    <string name="three_dot">… </string>
+
+    <string name="time_track_service">Time Track Service</string>
+
+    <string name="type_the_url">Nhập địa chỉ liên kết…</string>
+
+    <string name="users">Người dùng</string>
+
+    <string name="warning_divider">warning_divider</string>
+
+    <string name="weather">Thời tiết</string>
+
+    <string name="yes">Có</string>
+    <string name="connections_per_task">Số kết nối mở cùng lúc mỗi nhiệm vụ tải</string>
+    <string name="downloads_folder">Thư mục tải xuống</string>
+    <string name="layout">Giao diện</string>
+    <string name="simultaneous_downloads">Tải nhiều tập tin cùng lúc</string>
+    <string name="connections">kết nối</string>
+    <string name="downloads_same_time"> nhiệm vụ</string>
+    <string name="choose_folders">Chọn thư mục</string>
+    <string name="choose_number_connections">Chọn số kết nối đồng thời</string>
+    <string name="choose_number_downloads">Chọn số lượng tải đồng thời</string>
+</resources>

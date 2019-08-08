@@ -3,7 +3,9 @@ package com.zalo.servicetraining.downloader.ui.main;
 
 import android.content.Intent;
 
+import android.util.TypedValue;
 import android.view.Gravity;
+import android.widget.ImageView;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -14,6 +16,8 @@ import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.DownloaderRemote;
 import com.zalo.servicetraining.downloader.ui.base.BaseActivity;
+import com.zalo.servicetraining.downloader.ui.base.OptionBottomSheet;
+import com.zalo.servicetraining.downloader.ui.setting.SettingActivity;
 
 import java.util.ArrayList;
 
@@ -29,6 +33,7 @@ public class DownloadActivity extends BaseActivity {
 
 
     FloatingActionButton mAddButton;
+    ImageView mMenuButton;
     DownloadAdapter mAdapter;
     GridLayoutManager mGridLayoutManager;
 
@@ -54,9 +59,10 @@ public class DownloadActivity extends BaseActivity {
         }
     }
 
-    private void addPlusButton() {
+    private void addButtons() {
         CoordinatorLayout mRoot = findViewById(R.id.root);
 
+        // Add new-task button
         mAddButton = new FloatingActionButton(this);
         mAddButton.setImageResource(R.drawable.ic_add_black_24dp);
         float oneDP = getResources().getDimension(R.dimen.oneDp);
@@ -67,12 +73,68 @@ public class DownloadActivity extends BaseActivity {
         params.setMarginEnd(params.bottomMargin);
         mAddButton.setOnClickListener(view -> addNewTask());
         mRoot.addView(mAddButton,params);
+        // Add menu button
+        mMenuButton = new ImageView(this);
+        mMenuButton.setImageResource(R.drawable.ic_menu_24dp);
+        CoordinatorLayout.LayoutParams menuParams = new CoordinatorLayout.LayoutParams((int)(50*oneDP),(int)(50*oneDP));
+        menuParams.gravity = Gravity.TOP | Gravity.END;
+        menuParams.topMargin = (int)(16*oneDP);
+        menuParams.setMarginEnd(menuParams.topMargin);
+
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+        mMenuButton.setBackgroundResource(R.drawable.circle_background_support_touch);
+        mMenuButton.setColorFilter(getResources().getColor(R.color.FlatWhite));
+        int dpTwelve = (int)(15*oneDP);
+        mMenuButton.setPadding(dpTwelve,dpTwelve,dpTwelve,dpTwelve);
+        mMenuButton.setOnClickListener(view -> showMenu());
+        mRoot.addView(mMenuButton,menuParams);
+
     }
+
+    private int[] mMenuIDs = new int[] {
+
+            R.string.normal,
+            R.string.add_new_download,
+            R.string.go_to_download_folder,
+            R.string.warning_divider,
+            R.string.restart_all,
+            R.string.dangerous_divider,
+            R.string.clear_all,
+            R.string.focus_divider,
+            R.string.settings,
+
+    };
+
+    private void showMenu() {
+        OptionBottomSheet.newInstance(mMenuIDs,mMenuCallBack).showNow(getSupportFragmentManager(),OptionBottomSheet.TAG+"_MENU");
+    }
+
+    private OptionBottomSheet.CallBack mMenuCallBack = new OptionBottomSheet.CallBack() {
+        @Override
+        public boolean onOptionClicked(int optionID) {
+            switch (optionID) {
+                case R.string.add_new_download:
+                    addNewTask();
+                    break;
+                case R.string.go_to_download_folder:
+                    break;
+                case R.string.settings:
+                    DownloadActivity.this.startActivity(new Intent(DownloadActivity.this, SettingActivity.class));
+                    break;
+                case R.string.restart_all:
+                    break;
+                case R.string.clear_all:
+                    break;
+            }
+            return true;
+        }
+    };
 
 
     @Override
     protected void onInitRecyclerView() {
-        addPlusButton();
+        addButtons();
         mAdapter = new DownloadAdapter(this);
         getRecyclerView().setAdapter(mAdapter);
 
@@ -92,7 +154,7 @@ public class DownloadActivity extends BaseActivity {
     protected void refreshData() {
         ArrayList<Object> list = new ArrayList<>();
         List<TaskInfo> task_list = DownloaderRemote.getSessionTaskList();
-        list.add("Downloading");
+        list.add(getString(R.string.downloading));
 
         if(task_list!=null&&!task_list.isEmpty()) {
 
@@ -102,14 +164,14 @@ public class DownloadActivity extends BaseActivity {
                 if (info.getSectionState() == TaskInfo.SECTION_DOWNLOADING)
                     list.add(info);
             }
-            list.add("Downloaded");
+            list.add(getString(R.string.downloaded));
 
             for (TaskInfo info :
                     task_list) {
                 if (info.getSectionState() != TaskInfo.SECTION_DOWNLOADING)
                     list.add(info);
             }
-        } else list.add("Downloaded");
+        } else list.add(getString(R.string.downloaded));
         mAdapter.setData(list);
         getSwipeRefreshLayout().setRefreshing(false);
     }

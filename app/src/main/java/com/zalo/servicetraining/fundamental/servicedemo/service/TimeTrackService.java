@@ -151,8 +151,8 @@ public class TimeTrackService extends Service {
 
         if(channel==null) {
             // create new chanel
-            channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,getString(R.string.notification_chanel_name),NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription(getString(R.string.notification_chanel_description));
+            channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,getString(R.string.time_track_service_channel),NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(getString(R.string.notification_channel_description));
             channel.enableLights(true);
             channel.enableVibration(true);
         }

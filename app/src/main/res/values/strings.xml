@@ -1,70 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="app_name">Training Menu</string>
-    <string name="accessibility_overflow">Accessibility Overflow</string>
-    <string name="notification_chanel_name">Service Training Channel</string>
-    <string name="notification_chanel_description">Timer listening service created by Service Training</string>
-    <string name="downloader_notification_chanel_description">Downloader Service created by Service Training</string>
-    <string name="content_provider">Content Provider</string>
-    <string name="notes">Notes</string>
-    <string name="weather">Weather</string>
-    <string name="network">Network</string>
-    <string name="message">Message</string>
-    <string name="banner">A banner</string>
-    <string name="service">Service</string>
-    <string name="users">Users</string>
-    <string name="menu">@string/app_name</string>
-    <string name="notify_will_appear_here">Notify will appear here!</string>
-    <string name="start_new_service">Start New Service</string>
-    <string name="finish_service">Finish Service</string>
-    <string name="multithreading">Multithreading</string>
-    <string name="downloader">Downloader</string>
-    <string name="downloads_description">A file downloader application</string>
-    <string name="service_description">Create a simple foreground service</string>
-    <string name="content_provider_description">A note app using SQLite to store data</string>
-    <string name="network_description">Network handler and JSON Parsing</string>
-    <string name="multithreading_description">Do something in background</string>
-    <string name="sqlite_note_app">SQLite Note App</string>
-    <string name="note_app_description">A simple note app using SQLite to store data</string>
-    <string name="another">Another</string>
-    <string name="basic">Basic</string>
-    <string name="fundamental">Fundamental</string>
-    <string name="type_the_url">Put the download link here…</string>
-    <string name="create_new_task">Create new task</string>
-    <string name="catch_it">Catch it</string>
+    <string name="accessibility_overflow" translatable="false">Accessibility Overflow</string>
+
     <string name="add_new_download">Add new download</string>
-    <string name="new_task">New Task</string>
-    <string name="or">Or</string>
     <string name="add_to_download">Add to download</string>
-    <string name="paste_and_go">Paste and go</string>
-    <string name="time_track_service">Time Track Service</string>
-    <string name="downloader_service">Downloader Service</string>
-    <string name="downloader_notification_chanel_name">Downloader Service</string>
-    <string name="invalid_url">Invalid Url</string>
-    <string name="restart">Restart</string>
-    <string name="clear">Clear</string>
-    <string name="invalid_section">Invalid Section</string>
-    <string name="downloading">Downloading</string>
-    <string name="pending">Pending</string>
-    <string name="failure">Failure</string>
-    <string name="connecting">Connecting…</string>
-    <string name="three_dot">… </string>
+
+    <string name="another">Another</string>
+
+    <string name="app_language">Language</string>
+
+    <string name="banner">A banner</string>
+
+    <string name="basic">Basic</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="cancel_all">Cancel all</string>
+
     <string name="cancelled">Cancelled</string>
-    <string name="paused">Paused</string>
-    <string name="parent_folder">Parent folder</string>
-    <string name="path">Path</string>
-    <string name="link">URL Link</string>
-    <string name="state">State</string>
-    <string name="size">Size</string>
-    <string name="downloaded_size">Downloaded Size</string>
-    <string name="support_resume">Support resume</string>
-    <string name="progress">Progress</string>
+
+    <string name="catch_it">Catch it</string>
+
+    <string name="choose_folders">Choose folders</string>
+    <string name="choose_number_connections">Choose number connections</string>
+    <string name="choose_number_downloads">Choose max number simultaneous downloads</string>
+
+    <string name="clear">Clear</string>
+    <string name="clear_all">Clear all tasks</string>
+
+    <string name="connecting">Connecting…</string>
+
+    <string name="connections">connections</string>
+    <string name="connections_per_task">Connections Per Task</string>
+
+    <string name="content_provider">Content Provider</string>
+    <string name="content_provider_description">A note app using SQLite to store data</string>
+
+    <string name="create_new_task">Create new task</string>
+
     <string name="creation_time">Creation time</string>
+
+    <string name="dangerous_divider" translatable="false">dangerous_divider</string>
+
+    <string name="downloaded">Downloaded</string>
+    <string name="downloaded_size">Downloaded Size</string>
+
+    <string name="downloader">Downloader</string>
+    <string name="downloader_notification_chanel_description">Downloader Service created by Service Training</string>
+    <string name="downloader_notification_chanel_name">Downloader Service</string>
+    <string name="downloader_service">Downloader Service</string>
+
+    <string name="downloading">Downloading</string>
+
+    <string name="downloads_description">A file downloader application</string>
+    <string name="downloads_folder">Downloads Folder</string>
+    <string name="downloads_same_time">downloads</string>
+
     <string name="execution_time">Execution time</string>
+
+    <string name="failure">Failure</string>
+
+    <string name="finish_service">Finish Service</string>
+
     <string name="finishing_time">Finishing time</string>
-    <string name="running">Running</string>
-    <string name="string_true">True</string>
-    <string name="string_false">false</string>
-    <string name="yes">Yes</string>
+
+    <string name="focus_divider" translatable="false">focus</string>
+
+    <string name="fundamental">Fundamental</string>
+
+    <string name="go_to_download_folder">Go to downloads folder</string>
+
+    <string name="invalid_section">Invalid Section</string>
+    <string name="invalid_url">Invalid Url</string>
+
+    <string name="layout">Layout</string>
+
+    <string name="link">URL Link</string>
+
+    <string name="menu" translatable="false">@string/app_name</string>
+
+    <string name="message">Message</string>
+
+    <string name="multithreading">Multithreading</string>
+    <string name="multithreading_description">Do something in background</string>
+
+    <string name="network">Network</string>
+    <string name="network_description">Network handler and JSON Parsing</string>
+
+    <string name="new_task">New Task</string>
+
     <string name="no">No</string>
+
+    <string name="normal" translatable="false">normal</string>
+
+    <string name="note_app_description">A simple note app using SQLite to store data</string>
+
+    <string name="notes">Notes</string>
+
+    <string name="notification_channel_description">Dịch vụ lắng nghe thời gian được tạo bởi Service Training</string>
+
+    <string name="notify_will_appear_here">Notify will appear here!</string>
+
+    <string name="open">Open</string>
+
+    <string name="or">Or</string>
+
+    <string name="parent_folder">Parent folder</string>
+
+    <string name="paste_and_go">Paste and go</string>
+
+    <string name="path">Path</string>
+
+    <string name="pause">Pause</string>
+
+    <string name="paused">Paused</string>
+
+    <string name="pending">Pending</string>
+
     <string name="preference">Preference</string>
+
+    <string name="progress">Progress</string>
+
+    <string name="properties">Properties</string>
+
+    <string name="restart">Restart</string>
+    <string name="restart_all">Restart all tasks</string>
+
+    <string name="resume">Resume</string>
+
+    <string name="running">Running</string>
+
+    <string name="service">Service</string>
+    <string name="service_description">Create a simple foreground service</string>
+
+    <string name="settings">Settings</string>
+
+    <string name="simultaneous_downloads">Simultaneous downloads</string>
+
+    <string name="size">Size</string>
+
+    <string name="sqlite_note_app">SQLite Note App</string>
+
+    <string name="start_new_service">Start New Service</string>
+
+    <string name="state">State</string>
+
+    <string name="stop_all">Stop all</string>
+
+    <string name="string_false">False</string>
+    <string name="string_true">True</string>
+
+    <string name="support_resume">Support resume</string>
+
+    <string name="task_not_exist">Task doesn\'t exist anymore!</string>
+
+    <string name="three_dot">… </string>
+
+    <string name="time_track_service">Time Track Service</string>
+    <string name="time_track_service_channel" translatable="false">Time Track Service Channel</string>
+
+    <string name="type_the_url">Put the download link here…</string>
+
+    <string name="users">Users</string>
+
+    <string name="warning_divider">warning_divider</string>
+
+    <string name="weather">Weather</string>
+
+    <string name="yes">Yes</string>
 </resources>

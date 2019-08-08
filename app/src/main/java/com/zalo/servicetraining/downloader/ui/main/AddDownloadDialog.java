@@ -50,11 +50,6 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         return new AddDownloadDialog();
     }
 
-    @Override
-    public int getTheme() {
-        return R.style.DialogDimDisabled;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -110,6 +105,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                 addToDownload();
                 break;
             case R.id.close:
+                closeKeyboard();
                 dismiss();
                 break;
             case R.id.paste_and_go_button:

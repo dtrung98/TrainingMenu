@@ -2,22 +2,31 @@ package com.zalo.servicetraining.downloader.service;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 
 
+import androidx.core.content.FileProvider;
+
+import com.zalo.servicetraining.App;
+import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import es.dmoral.toasty.Toasty;
 
 public class DownloaderRemote {
     private static final String TAG = "DownloaderRemote";
@@ -144,6 +153,32 @@ public class DownloaderRemote {
 
     public static void clearTask(int id) {
         if(mService!=null) mService.clearTask(id);
+    }
+    public static void openFinishedTaskInfo(Context context, TaskInfo info) {
+        if(info.getState()== BaseTask.SUCCESS) {
+            try {
+                File filePath = new File(info.getDirectory());
+                File fileToWrite = new File(filePath, info.getFileTitle());
+                final Uri data = FileProvider.getUriForFile(context, "com.zalo.servicetraining.provider", fileToWrite);
+                context.grantUriPermission(context.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                String fileExtension = info.getFileTitle().substring(info.getFileTitle().lastIndexOf("."));
+                Log.d(TAG, "onItemClick: extension " + fileExtension);
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                if (fileExtension.contains("apk")) {
+                    Log.d(TAG, "open as apk");
+                    intent.setDataAndType(data, "application/vnd.android.package-archive");
+                    // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                else
+                    intent.setData(data);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toasty.error(App.getInstance().getApplicationContext(),"Not found any app that could open this file").show();
+            } catch (Exception e) {
+                Toasty.error(App.getInstance().getApplicationContext(),"Sorry, something went wrong").show();
+            }
+        }
     }
 
 
