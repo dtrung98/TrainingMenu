@@ -1,15 +1,15 @@
-package com.zalo.servicetraining.downloader.task.ranges;
+package com.zalo.servicetraining.downloader.task.partial;
 
 import android.os.Build;
 import android.util.Log;
 import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
+import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.database.DownloadDBHelper;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.PartialInfo;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
-import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
 
 import java.io.Closeable;
 import java.io.DataOutput;
@@ -23,26 +23,16 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
+public class FileDownloadTask extends BaseTask<PartialTaskManager> {
     private static final String TAG = "FileDownloadTask";
 
-    public FileDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item, int numberConnection) {
+    public FileDownloadTask(final int id, PartialTaskManager manager, DownloadItem item) {
         super(id, manager, item);
-        if(numberConnection<=0)
-            mMaxConnectionNumber = 1;
-        else
-        mMaxConnectionNumber = numberConnection;
     }
 
-    private FileDownloadTask(int id, SimpleTaskManager taskManager, String directory, String url, long createdTime, String fileTitle, int numberConnection) {
+    private FileDownloadTask(int id, PartialTaskManager taskManager, String directory, String url, long createdTime, String fileTitle) {
         super(id, taskManager, directory, url, createdTime, fileTitle);
-        if(numberConnection<=0)
-            mMaxConnectionNumber = 1;
-        else
-            mMaxConnectionNumber = numberConnection;
     }
-
-    private final int mMaxConnectionNumber;
 
     public ArrayList<PartialDownloadTask> getPartialDownloadTasks() {
         return mPartialDownloadTasks;
@@ -50,8 +40,8 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
 
     private final ArrayList<PartialDownloadTask> mPartialDownloadTasks = new ArrayList<>();
 
-    public static FileDownloadTask restoreInstance(SimpleTaskManager taskManager, TaskInfo info) {
-        FileDownloadTask task = new FileDownloadTask(info.getId(), taskManager,info.getDirectory(),info.getURLString(),info.getCreatedTime(),info.getFileTitle(), info.getPartialInfoList().size());
+    public static FileDownloadTask restoreInstance(PartialTaskManager taskManager, TaskInfo info) {
+        FileDownloadTask task = new FileDownloadTask(info.getId(), taskManager,info.getDirectory(),info.getURLString(),info.getCreatedTime(),info.getFileTitle());
 
         int state = info.getState();
         if(state==BaseTask.RUNNING) state = PAUSED;
@@ -90,6 +80,7 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
             case EXECUTE_MODE_NEW_DOWNLOAD:
             case EXECUTE_MODE_RESTART:
                 setDownloadedInBytes(0);
+                mPartialDownloadTasks.clear();
             case EXECUTE_MODE_RESUME:
                 connectThenDownload();
                 break;
@@ -177,16 +168,17 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
                 mPartialDownloadTasks.add(new PartialDownloadTask(this, (int)DownloadDBHelper.getInstance().generateNewPartialTaskId(0,-1)));
                 Log.d(TAG, "file task id "+getId()+" does not support progress");
             } else {
-                long usualPartSize = fileSize / mMaxConnectionNumber;
+                int numberConnections = getConnectionNumber();
+                long usualPartSize = fileSize / numberConnections;
 
                 long startByte ;
                 long endByte;
 
-                for (int i = 0; i < mMaxConnectionNumber; i++) {
+                for (int i = 0; i < numberConnections; i++) {
                     startByte = usualPartSize*i;
-                    endByte = (i!=mMaxConnectionNumber-1) ? (i+1)*usualPartSize - 1 : fileSize - 1;
+                    endByte = (i!= numberConnections -1) ? (i+1)*usualPartSize - 1 : fileSize - 1;
 
-                    Log.d(TAG, "file task id "+ getId()+" is creating new partial task "+i+" to download from "+ startByte+" to "+ endByte);
+                    Log.d(TAG, "file task id "+ getId()+" is creating new partial task "+i+" to download with "+ startByte+" to "+ endByte);
                     PartialDownloadTask partialTask = new PartialDownloadTask(this,  (int)DownloadDBHelper.getInstance().generateNewPartialTaskId(startByte,endByte),startByte,endByte );
                     mPartialDownloadTasks.add(partialTask);
                 }
@@ -208,6 +200,7 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
         for (PartialDownloadTask task :
                 mPartialDownloadTasks) {
             if(task.getState()!=BaseTask.SUCCESS) {
+                Log.d(TAG, "check success: partial task id "+task.getId() +" is "+BaseTask.getStateName(task.getState()));
                 success = false;
                 break;
             }
@@ -216,8 +209,16 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
         // if success, set success state and notify it
         if(success) {
             setState(BaseTask.SUCCESS);
-        } else if(getState()==RUNNING)
-            setState(BaseTask.FAILURE_TERMINATED);
+        } else switch (getState()) {
+            case BaseTask.CONNECTING:
+            case BaseTask.PENDING:
+            case BaseTask.RUNNING:
+                setState(BaseTask.FAILURE_TERMINATED);
+                break;
+            default:
+                Log.d(TAG, "check success: failed and task state now is "+ BaseTask.getStateName(getState()));
+                break;
+        }
         notifyTaskChanged();
 
         // else do nothing
@@ -287,7 +288,9 @@ public class FileDownloadTask extends BaseTask<SimpleTaskManager> {
         notifyTaskChanged();
     }
 
-    public int getMaxConnectionNumber() {
-        return mMaxConnectionNumber;
+    public int getConnectionNumber() {
+        if(getTaskManager()!=null)
+        return getTaskManager().getConnectionsPerTask();
+        return BaseTaskManager.getRecommendConnectionPerTask();
     }
 }

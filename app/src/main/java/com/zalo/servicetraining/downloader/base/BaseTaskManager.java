@@ -1,18 +1,26 @@
 package com.zalo.servicetraining.downloader.base;
 
+import android.os.Process;
+import android.util.Log;
+
 import com.zalo.servicetraining.downloader.database.DownloadDBHelper;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.model.TaskList;
-import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.task.ranges.FileDownloadTask;
-import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
+import com.zalo.servicetraining.downloader.task.partial.FileDownloadTask;
+import com.zalo.servicetraining.downloader.task.partial.PartialTaskManager;
+import com.zalo.servicetraining.downloader.threading.PriorityThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public abstract class BaseTaskManager<T extends BaseTask> {
+    private static final String TAG = "BaseTaskManager";
+
     /*
      * Number of cores to decide the number of threads
      */
@@ -25,15 +33,31 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     protected ArrayList<T> mTaskList = new ArrayList<>();
 
     public BaseTaskManager() {
+
     }
 
     public void init(CallBack callBack) {
         mCallBack = callBack;
+        mSimultaneousDownloadsNumber = mCallBack.getSimultaneousDownloads();
+        mConnectionsPerTask = mCallBack.getConnectionsPerTask();
+
+        // setting the thread factory
+        ThreadFactory backgroundPriorityThreadFactory = new
+                PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND);
+        if(mExecutor ==null) {
+
+            mExecutor = new ThreadPoolExecutor(
+                    mSimultaneousDownloadsNumber,
+                    mSimultaneousDownloadsNumber*2,
+                    60L,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(),
+                    backgroundPriorityThreadFactory
+            );
+            Log.d(TAG, "initExecutor with corePoolSize = " + mSimultaneousDownloadsNumber);
+        }
     }
 
-    public void updatePreference() {
-
-    }
     private Runnable mRestoreInstanceRunnable = new Runnable() {
         @Override
         public void run() {
@@ -43,11 +67,12 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     private void restoreInstanceInBackground() {
         mTaskList.clear();
         List<TaskInfo> infos =DownloadDBHelper.getInstance().getSavedTaskFromDatabase();
-        if(this instanceof SimpleTaskManager)
+        if(this instanceof PartialTaskManager)
             for (TaskInfo info: infos) {
-                FileDownloadTask task = FileDownloadTask.restoreInstance((SimpleTaskManager) this,info);
-                ((SimpleTaskManager)this).mTaskList.add(task);
+                FileDownloadTask task = FileDownloadTask.restoreInstance((PartialTaskManager) this,info);
+                ((PartialTaskManager)this).mTaskList.add(task);
             }
+
         notifyManagerChanged();
     }
 
@@ -212,10 +237,42 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         }
     }
 
+    public static int getRecommendSimultaneousDownloadsNumber() {
+        return 3;
+    }
+
+    public static int getRecommendConnectionPerTask() {
+        return NUMBER_OF_CORES*2;
+    }
+
+    private int mSimultaneousDownloadsNumber;
+
+    public synchronized int getSimultaneousDownloadsNumber() {
+        return mSimultaneousDownloadsNumber;
+    }
+
+    public synchronized int getConnectionsPerTask() {
+        return mConnectionsPerTask;
+    }
+
+    private int mConnectionsPerTask;
+
+    public synchronized void setSimultaneousDownloadsNumber(int number) {
+        mSimultaneousDownloadsNumber = number;
+        mExecutor.setCorePoolSize(number);
+        mExecutor.setMaximumPoolSize(number*2);
+    }
+
+    public synchronized void setConnectionsPerTask(int number) {
+        mConnectionsPerTask = number;
+    }
+
     public interface CallBack {
         void onClearTask(int id);
         void onUpdateTask(BaseTask task);
         void onUpdateTaskManager(BaseTaskManager tBaseTaskManager);
+        int getConnectionsPerTask();
+        int getSimultaneousDownloads();
     }
 
     private CallBack mCallBack;

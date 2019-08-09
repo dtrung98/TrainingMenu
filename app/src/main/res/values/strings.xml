@@ -37,7 +37,7 @@
 
     <string name="create_new_task">Create new task</string>
 
-    <string name="creation_time">Creation time</string>
+    <string name="creation_time">Created at</string>
 
     <string name="dangerous_divider" translatable="false">dangerous_divider</string>
 
@@ -55,13 +55,13 @@
     <string name="downloads_folder">Downloads Folder</string>
     <string name="downloads_same_time">downloads</string>
 
-    <string name="execution_time">Execution time</string>
+    <string name="execution_time">Executed at</string>
 
     <string name="failure">Failure</string>
 
     <string name="finish_service">Finish Service</string>
 
-    <string name="finishing_time">Finishing time</string>
+    <string name="finishing_time">Finished at</string>
 
     <string name="focus_divider" translatable="false">focus</string>
 
@@ -76,7 +76,7 @@
 
     <string name="link">URL Link</string>
 
-    <string name="menu" translatable="false">@string/app_name</string>
+    <string name="menu" translatable="false">Training Menu</string>
 
     <string name="message">Message</string>
 
@@ -167,4 +167,14 @@
     <string name="weather">Weather</string>
 
     <string name="yes">Yes</string>
+    <string name="application_name" translatable="false">@string/menu</string>
+    <string name="running_duration">Running</string>
+    <string name="connections_number">Connections number</string>
+    <string name="weather_app">Weather App</string>
+    <string name="weather_app_description">A weather app fetching data from internet</string>
+    <string name="user_list">User List</string>
+    <string name="user_list_description">A list that shows numerous user, show a profile on click item</string>
+    <string name="other">Other</string>
+    <string name="pipe_example">Pipe Example</string>
+    <string name="pipe_example_description">Simple program that using pipes.</string>
 </resources>

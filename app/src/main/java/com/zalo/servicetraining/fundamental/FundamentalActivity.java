@@ -21,10 +21,10 @@ public class FundamentalActivity extends AbsMenuActivity {
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
 
-        list.add(new Item().setTitle(R.string.service).setDescription(R.string.service_description).setDestinationActivityClass(ServiceDemoActivity.class));
-        list.add(new Item().setTitle(R.string.content_provider).setDescription(R.string.content_provider_description).setDestinationActivityClass(ContentProviderDemoActivity.class));
-        list.add(new Item().setTitle(R.string.network).setDescription(R.string.network_description).setDestinationActivityClass(NetworkMenuActivity.class));
-        list.add(new Item().setTitle(R.string.multithreading).setDescription(R.string.multithreading_description).setDestinationActivityClass(MultithreadingActivity.class));
+        list.add(Item.with(this).setTitle(R.string.service).setDescription(R.string.service_description).setDestinationActivityClass(ServiceDemoActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.content_provider).setDescription(R.string.content_provider_description).setDestinationActivityClass(ContentProviderDemoActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.network).setDescription(R.string.network_description).setDestinationActivityClass(NetworkMenuActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.multithreading).setDescription(R.string.multithreading_description).setDestinationActivityClass(MultithreadingActivity.class).get());
 
         return list;
     }
@@ -33,5 +33,10 @@ public class FundamentalActivity extends AbsMenuActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected int title() {
+        return R.string.fundamental;
     }
 }

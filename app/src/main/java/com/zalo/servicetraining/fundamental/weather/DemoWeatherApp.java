@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.LocalArea;
 import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
@@ -76,6 +77,11 @@ public class DemoWeatherApp extends AbsListActivity implements LocalAreaAdapter.
     @Override
     public void onLocalAreaItemClick(LocalArea item) {
         Toasty.success(this,"looking weather for "+item.getLocalizedName()).show();
+    }
+
+    @Override
+    protected int title() {
+        return R.string.weather;
     }
 
     private static class LoadWeatherDataTask extends AsyncTask<Void,Void,List<LocalArea>> {

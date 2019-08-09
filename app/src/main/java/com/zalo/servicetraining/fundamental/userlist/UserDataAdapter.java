@@ -46,7 +46,7 @@ public class UserDataAdapter extends RecyclerView.Adapter<UserDataAdapter.ViewHo
         notifyDataSetChanged();
     }
 
-    // inflates the row layout from xml when needed
+    // inflates the row layout with xml when needed
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

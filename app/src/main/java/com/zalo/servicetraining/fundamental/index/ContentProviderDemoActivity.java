@@ -15,9 +15,13 @@ public class ContentProviderDemoActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle(R.string.sqlite_note_app).setDescription(getString(R.string.note_app_description)).setDestinationActivityClass(DemoNoteActivity.class));
-        list.add(new Item().setTitle(R.string.another));
+        list.add(Item.with(this).setTitle(R.string.sqlite_note_app).setDescription(getString(R.string.note_app_description)).setDestinationActivityClass(DemoNoteActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.another).get());
         return list;
     }
 
+    @Override
+    protected int title() {
+        return R.string.content_provider;
+    }
 }

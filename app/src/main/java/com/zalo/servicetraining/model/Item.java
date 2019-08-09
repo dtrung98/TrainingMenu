@@ -1,48 +1,101 @@
 package com.zalo.servicetraining.model;
 
+import android.app.Activity;
+import android.content.Context;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.zalo.servicetraining.App;
+import com.zalo.servicetraining.fundamental.pipe.PipeExampleActivity;
+
+import java.util.List;
 
 public class Item {
-    private String mTitle = "";
-    private String mDescription = "";
-    private Class<? extends AppCompatActivity> mActivityCls;
-    private int mDrawablePadding = 0;
+    private final String mTitle;
+    private final String mDescription;
+    private final Class<? extends AppCompatActivity> mActivityCls;
+    private final int mDrawablePadding;
 
     @DrawableRes
     private Integer mDrawableRes;
 
-    public Item() {
+    public static class Builder {
+        public Context mContext;
+        private String mTitle = "";
+        private String mDescription = "";
+        private Class<? extends AppCompatActivity> mActivityCls;
+
+        public Builder setDrawableRes(Integer drawableRes) {
+            mDrawableRes = drawableRes;
+            return this;
+        }
+
+        private Integer mDrawableRes ;
+        private int mDrawablePadding = 0;
+
+        public Builder setContext(Context context) {
+            mContext = context;
+            return this;
+        }
+
+        public Builder setTitle(String title) {
+            mTitle = title;
+            return this;
+        }
+
+        public Builder setTitle(@StringRes int res) {
+            return setTitle(mContext.getResources().getString(res));
+        }
+
+        public Builder setDescription(String description) {
+            mDescription = description;
+            return this;
+        }
+
+        public Builder setDescription(@StringRes Integer res) {
+            return setDescription(mContext.getResources().getString(res));
+        }
+
+        public Builder setActivityCls(Class<? extends AppCompatActivity> activityCls) {
+            mActivityCls = activityCls;
+            return this;
+        }
+
+        public Builder setDrawablePadding(int drawablePadding) {
+            mDrawablePadding = drawablePadding;
+            return this;
+        }
+
+        private Builder(Context context) {
+            mContext = context;
+        }
+
+        public Builder setDestinationActivityClass(Class<? extends AppCompatActivity> cls) {
+            mActivityCls = cls;
+            return this;
+        }
+
+        public Item get(){
+            mContext = null;
+            return new Item(mTitle,mDescription,mActivityCls,mDrawableRes, mDrawablePadding);
+        }
     }
 
-    public Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls) {
+    public static Builder with(Context context) {
+        return new Builder(context);
+    }
+
+    private Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls, Integer drawableRes, int drawablePadding ) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         mActivityCls = cls;
-    }
-
-    public Item(@StringRes int titleRes, @StringRes int descriptionRes, Class<? extends AppCompatActivity> cls) {
-        setTitle(titleRes).setDescription(descriptionRes).setDestinationActivityClass(cls);
+        mDrawableRes = drawableRes;
+        mDrawablePadding = drawablePadding;
     }
 
     public String getTitle() {
         return mTitle;
-    }
-
-    public Item setTitle(String mTitle) {
-        this.mTitle = mTitle;
-        return this;
-    }
-
-    public Item setTitle(@StringRes int res) {
-        return setTitle(App.getInstance().getApplicationContext().getResources().getString(res));
-    }
-    public Item setDrawable(@DrawableRes int rest) {
-        mDrawableRes = rest;
-        return this;
     }
 
     @DrawableRes
@@ -54,30 +107,11 @@ public class Item {
         return mDescription;
     }
 
-    public Item setDescription(String mDescription) {
-        this.mDescription = mDescription;
-        return this;
-    }
-
-    public Item setDescription(@StringRes int res) {
-        return setDescription(App.getInstance().getApplicationContext().getResources().getString(res));
-    }
-
     public Class<? extends AppCompatActivity> getDestinationActivityClass() {
         return mActivityCls;
     }
 
-    public Item setDestinationActivityClass(Class<? extends  AppCompatActivity> cls) {
-        mActivityCls = cls;
-        return this;
-    }
-
     public int getDrawablePadding() {
         return mDrawablePadding;
-    }
-
-    public Item setDrawablePadding(int mPaddingDrawableInDp) {
-        this.mDrawablePadding = mPaddingDrawableInDp;
-        return this;
     }
 }

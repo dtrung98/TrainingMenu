@@ -5,19 +5,18 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.mainui.MainActivity;
+import com.zalo.servicetraining.mainui.base.AbsLocaleActivity;
 
 import java.util.ArrayList;
 
-public class SettingActivity extends AppCompatActivity {
+public class SettingActivity extends AbsLocaleActivity {
 
     protected Toolbar mToolbar;
 
@@ -27,13 +26,18 @@ public class SettingActivity extends AppCompatActivity {
         setContentView(R.layout.setting);
         bindView();
         setToolbarIcon(R.drawable.ic_arrow_back_24dp);
-        setTitle(getString(R.string.settings));
         setupToolbarAndStatusBar(mToolbar);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.container, new GeneralSettingFragment())
+                .replace(R.id.container, new SettingFragment())
                 .commit();
     }
+
+    @Override
+    protected int title() {
+        return R.string.settings;
+    }
+
     private void bindView() {
         mToolbar = findViewById(R.id.toolbar);
     }

@@ -6,11 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.zalo.servicetraining.App;
-import com.zalo.servicetraining.downloader.base.BaseTask;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.PartialInfo;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
-import com.zalo.servicetraining.downloader.task.ranges.PartialDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +20,12 @@ public class DownloadDBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "downloader_db";
     private static final int DATABASE_VERSION = 1;
     private static DownloadDBHelper sDownloadDBHelper;
+
     public static DownloadDBHelper getInstance() {
         if(sDownloadDBHelper ==null) sDownloadDBHelper = new DownloadDBHelper(App.getInstance().getApplicationContext());
         return sDownloadDBHelper;
     }
+
     public static void destroy() {
         sDownloadDBHelper.close();
         sDownloadDBHelper = null;

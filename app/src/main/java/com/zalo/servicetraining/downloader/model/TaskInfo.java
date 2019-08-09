@@ -5,9 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
-import com.zalo.servicetraining.downloader.service.DownloaderService;
-import com.zalo.servicetraining.downloader.task.ranges.FileDownloadTask;
-import com.zalo.servicetraining.downloader.task.ranges.PartialDownloadTask;
+import com.zalo.servicetraining.downloader.task.partial.FileDownloadTask;
+import com.zalo.servicetraining.downloader.task.partial.PartialDownloadTask;
 
 import java.util.ArrayList;
 import java.util.List;

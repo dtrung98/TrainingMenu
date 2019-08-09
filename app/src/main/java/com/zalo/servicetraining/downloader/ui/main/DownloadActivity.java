@@ -193,4 +193,9 @@ public class DownloadActivity extends BaseActivity {
         mGridLayoutManager = null;
         super.onDestroy();
     }
+
+    @Override
+    protected int title() {
+        return R.string.downloader;
+    }
 }

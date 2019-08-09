@@ -1,6 +1,7 @@
 package com.zalo.servicetraining.fundamental.index;
 
 
+import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.fundamental.pipe.PipeExampleActivity;
 import com.zalo.servicetraining.model.Item;
 import com.zalo.servicetraining.mainui.base.AbsMenuActivity;
@@ -15,9 +16,13 @@ public class MultithreadingActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle("Pipe Example").setDescription("Simple program that using pipes.").setDestinationActivityClass(PipeExampleActivity.class));
-        list.add(new Item().setTitle("Another"));
+        list.add(Item.with(this).setTitle(R.string.pipe_example).setDescription(R.string.pipe_example_description).setDestinationActivityClass(PipeExampleActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.another).get());
         return list;
     }
 
+    @Override
+    protected int title() {
+        return R.string.multithreading;
+    }
 }

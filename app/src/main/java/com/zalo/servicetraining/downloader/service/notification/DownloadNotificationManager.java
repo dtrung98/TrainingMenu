@@ -87,10 +87,16 @@ public class DownloadNotificationManager {
                             builder.setContentText("Downloading" + MIDDLE_DOT+speed);
 
                     builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
+                    Intent intent = new Intent(DownloaderService.ACTION_PAUSE);
+                    PendingIntent pendingIntent = PendingIntent.getService(mService,0,intent,0);
+                    NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_pause_black_24dp,mService.getResources().getString(R.string.pause),pendingIntent);
+                    builder.mActions.clear();
+                    builder.addAction(action);
                     break;
                  case BaseTask.SUCCESS:
                      builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes()));
                      builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
+                     builder.mActions.clear();
                      break;
                 case BaseTask.PAUSED:
                     if(PROGRESS_SUPPORT) {
@@ -134,7 +140,7 @@ public class DownloadNotificationManager {
         postNotificationAndroidO(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING);
         if(STATE!= BaseTask.RUNNING) {
             mIndexBuilders.delete(NOTIFICATION_ID);
-            Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" from IndexBuilders");
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" with IndexBuilders");
         }
     }
 

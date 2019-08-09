@@ -3,10 +3,9 @@ package com.zalo.servicetraining.downloader.model;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
-import com.zalo.servicetraining.downloader.task.ranges.PartialDownloadTask;
+import com.zalo.servicetraining.downloader.task.partial.PartialDownloadTask;
 
 public class PartialInfo{
     public static final String TAG = "PartialInfo";

@@ -34,6 +34,11 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         getParameters();
     }
 
+    @Override
+    protected int title() {
+        return R.string.properties;
+    }
+
     public void getParameters() {
         if(getIntent()!=null) {
 
@@ -83,21 +88,23 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         setTitle(mTaskInfo.getFileTitle());
         bindIcon();
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle(R.string.parent_folder).setDescription(mTaskInfo.getDirectory()));
-        list.add(new Item().setTitle(R.string.path).setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()));
-        list.add(new Item().setTitle(R.string.link).setDescription(mTaskInfo.getURLString()));
-        list.add(new Item().setTitle(R.string.support_resume).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no));
-        list.add(new Item().setTitle(R.string.state).setDescription(BaseTask.getStateName(mTaskInfo.getState())));
-        list.add(new Item().setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()));
-        list.add(new Item().setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())));
-        list.add(new Item().setTitle(R.string.downloaded_size).setDescription(Util.humanReadableByteCount(mTaskInfo.getDownloadedInBytes())));
-        list.add(new Item().setTitle(R.string.progress).setDescription(((int)(mTaskInfo.getProgress()*100))+"%"));
-        list.add(new Item().setTitle(R.string.creation_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getCreatedTime())));
-        list.add(new Item().setTitle(R.string.execution_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFirstExecutedTime())));
-        list.add(new Item().setTitle(R.string.finishing_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFinishedTime())));
-        list.add(new Item().setTitle(R.string.running).setDescription(Util.formatDuration(mTaskInfo.getRunningTime())));
+        list.add(Item.with(this).setTitle(R.string.parent_folder).setDescription(mTaskInfo.getDirectory()).get());
+        list.add(Item.with(this).setTitle(R.string.path).setDescription(mTaskInfo.getDirectory()+'/'+mTaskInfo.getFileTitle()).get());
+        list.add(Item.with(this).setTitle(R.string.link).setDescription(mTaskInfo.getURLString()).get());
+        list.add(Item.with(this).setTitle(R.string.support_resume).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no).get());
+        list.add(Item.with(this).setTitle(R.string.connections_number).setDescription(mTaskInfo.getPartialInfoList().size()+ " "+getResources().getString(R.string.connections)).get());
+        list.add(Item.with(this).setTitle(R.string.state).setDescription(BaseTask.getStateName(mTaskInfo.getState())).get());
+        list.add(Item.with(this).setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()).get());
+        list.add(Item.with(this).setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())).get());
+        list.add(Item.with(this).setTitle(R.string.downloaded_size).setDescription(Util.humanReadableByteCount(mTaskInfo.getDownloadedInBytes())).get());
+        list.add(Item.with(this).setTitle(R.string.progress).setDescription(((int)(mTaskInfo.getProgress()*100))+"%").get());
+        list.add(Item.with(this).setTitle(R.string.creation_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getCreatedTime())).get());
+        list.add(Item.with(this).setTitle(R.string.execution_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFirstExecutedTime())).get());
+        list.add(Item.with(this).setTitle(R.string.finishing_time).setDescription(Util.formatPrettyDateTimeWithSecond(mTaskInfo.getFinishedTime())).get());
+        list.add(Item.with(this).setTitle(R.string.running_duration).setDescription(Util.formatDuration(mTaskInfo.getRunningTime())).get());
         mAdapter.setData(list);
     }
+
     private void bindIcon() {
         switch (mTaskInfo.getState()) {
             case BaseTask.SUCCESS:

@@ -25,6 +25,7 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.model.UserData;
 import com.zalo.servicetraining.mainui.base.AbsListActivity;
 
@@ -136,5 +137,10 @@ public class UserDataListActivity extends AbsListActivity implements UserDataAda
             }
         }
         return builder.toString();
+    }
+
+    @Override
+    protected int title() {
+        return R.string.users;
     }
 }

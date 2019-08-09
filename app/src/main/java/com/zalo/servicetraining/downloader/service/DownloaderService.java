@@ -9,7 +9,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.zalo.servicetraining.App;
@@ -18,7 +17,8 @@ import com.zalo.servicetraining.downloader.base.BaseTaskManager;
 import com.zalo.servicetraining.downloader.model.DownloadItem;
 import com.zalo.servicetraining.downloader.model.TaskInfo;
 import com.zalo.servicetraining.downloader.service.notification.DownloadNotificationManager;
-import com.zalo.servicetraining.downloader.task.simple.SimpleTaskManager;
+import com.zalo.servicetraining.downloader.task.partial.PartialTaskManager;
+import com.zalo.servicetraining.downloader.ui.setting.SettingFragment;
 
 import java.util.ArrayList;
 
@@ -26,6 +26,7 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
     public static final String TAG = "DownloaderService";
 
     public static final String PACKAGE_NAME = "com.zalo.servicetraining.downloader.mService";
+    public static final String ACTION_PAUSE = "pause";
 
     private static final int UPDATE_FROM_TASK = 2;
 
@@ -41,7 +42,7 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
 
     public void initManager() {
         if(mDownloadManager==null) {
-            mDownloadManager = new SimpleTaskManager();
+            mDownloadManager = new PartialTaskManager();
             mDownloadManager.init(this);
             mDownloadManager.restoreInstance();
         }
@@ -58,6 +59,16 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
         intent.setAction(ACTION_TASK_MANAGER_CHANGED);
         Log.d(TAG, "service sends action task manager changed");
         LocalBroadcastManager.getInstance(App.getInstance().getApplicationContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public int getConnectionsPerTask() {
+        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_CONNECTIONS_PER_TASK,String.valueOf(BaseTaskManager.getRecommendConnectionPerTask())));
+    }
+
+    @Override
+    public int getSimultaneousDownloads() {
+        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_SIMULTANEOUS_DOWNLOADS,String.valueOf(BaseTaskManager.getRecommendSimultaneousDownloadsNumber())));
     }
 
     @Override
@@ -182,8 +193,21 @@ public class DownloaderService extends Service implements BaseTaskManager.CallBa
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        switch (key) {
+            case SettingFragment.EXTRA_SIMULTANEOUS_DOWNLOADS:
+                if(mDownloadManager!=null) {
+                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskManager.getRecommendSimultaneousDownloadsNumber())));
+                    mDownloadManager.setSimultaneousDownloadsNumber(number);
+                }
+                break;
+            case SettingFragment.EXTRA_CONNECTIONS_PER_TASK:
+                if(mDownloadManager!=null) {
+                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskManager.getRecommendConnectionPerTask())));
+                    mDownloadManager.setConnectionsPerTask(number);
+                }
+                break;
+        }
     }
 
 

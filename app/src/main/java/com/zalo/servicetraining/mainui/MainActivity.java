@@ -18,8 +18,8 @@ public class MainActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-        list.add(new Item().setTitle(R.string.downloader).setDescription(R.string.downloads_description).setDestinationActivityClass(DownloadActivity.class).setDrawable(R.drawable.download_icon).setDrawablePadding(6));
-        list.add(new Item().setTitle(R.string.basic).setDrawable(R.drawable.redo).setDestinationActivityClass(FundamentalActivity.class));
+        list.add(Item.with(this).setTitle(R.string.downloader).setDescription(R.string.downloads_description).setDestinationActivityClass(DownloadActivity.class).setDrawableRes(R.drawable.download_icon).setDrawablePadding(6).get());
+        list.add(Item.with(this).setTitle(R.string.basic).setDrawableRes(R.drawable.redo).setDestinationActivityClass(FundamentalActivity.class).get());
         return list;
     }
 
@@ -28,5 +28,10 @@ public class MainActivity extends AbsMenuActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected int title() {
+        return R.string.menu;
     }
 }

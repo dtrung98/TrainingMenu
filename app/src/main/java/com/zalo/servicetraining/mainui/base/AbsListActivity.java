@@ -1,12 +1,9 @@
 package com.zalo.servicetraining.mainui.base;
-
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -17,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public abstract class AbsListActivity extends AppCompatActivity {
+public abstract class AbsListActivity extends AbsLocaleActivity {
     private static final String TAG = "AbsListActivity";
 
     @BindView(R.id.recycler_view)
@@ -77,6 +74,7 @@ public abstract class AbsListActivity extends AppCompatActivity {
     @Override
     public void setTitle(CharSequence title) {
         super.setTitle(title);
+        if(mTitle!=null)
         mTitle.setText(title);
     }
 

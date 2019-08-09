@@ -14,13 +14,13 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.zalo.servicetraining.R;
 import com.zalo.servicetraining.downloader.service.ServiceToken;
 import com.zalo.servicetraining.fundamental.servicedemo.service.TimeTrackRemote;
 import com.zalo.servicetraining.fundamental.servicedemo.service.TimeTrackService;
+import com.zalo.servicetraining.mainui.base.AbsLocaleActivity;
 
 import java.lang.ref.WeakReference;
 
@@ -29,7 +29,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import es.dmoral.toasty.Toasty;
 
-public class ServiceDemoActivity extends AppCompatActivity implements ServiceConnection{
+public class ServiceDemoActivity extends AbsLocaleActivity implements ServiceConnection{
     public static final String TAG = "ServiceDemoActivity";
 
     @BindView(R.id.notification_text_view)
@@ -58,6 +58,11 @@ public class ServiceDemoActivity extends AppCompatActivity implements ServiceCon
         if(mStatus==RUNNING)
         mServiceToken = TimeTrackRemote.bindServiceAndStartIfNotRunning(this,this);
 
+    }
+
+    @Override
+    protected int title() {
+        return R.string.service;
     }
 
     @OnClick(R.id.start_button)

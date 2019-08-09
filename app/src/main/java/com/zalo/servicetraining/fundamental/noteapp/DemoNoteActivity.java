@@ -109,4 +109,8 @@ public class DemoNoteActivity extends AbsListActivity implements NoteAdapter.OnI
         NoteOptionDialogFragment.newInstance(item).show(getSupportFragmentManager(), NoteOptionDialogFragment.TAG);
     }
 
+    @Override
+    protected int title() {
+        return R.string.notes;
+    }
 }

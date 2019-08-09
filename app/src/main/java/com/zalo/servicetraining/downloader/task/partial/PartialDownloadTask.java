@@ -1,6 +1,5 @@
-package com.zalo.servicetraining.downloader.task.ranges;
+package com.zalo.servicetraining.downloader.task.partial;
 
-import android.util.Log;
 import android.webkit.URLUtil;
 
 import com.zalo.servicetraining.downloader.base.BaseTask;
@@ -23,14 +22,6 @@ import static com.zalo.servicetraining.downloader.task.simple.SimpleDownloadTask
 
 public class PartialDownloadTask implements Runnable {
 
-
-    private static int sIdCounting =0;
-    private synchronized static int getNextId() {
-        int current = sIdCounting;
-        sIdCounting++;
-
-        return current;
-    }
     public static final String TAG = "PartialDownloadTask";
 
     private final FileDownloadTask mTask;
@@ -111,7 +102,7 @@ public class PartialDownloadTask implements Runnable {
     }
 
     private void download() {
-        //Log.d(TAG, "thread id "+mThread.getId()+" or "+ Thread.currentThread().getId()+" is start downloading from "+ mStartByte+" to "+mEndByte);
+        //Log.d(TAG, "thread id "+mThread.getId()+" or "+ Thread.currentThread().getId()+" is start downloading with "+ mStartByte+" to "+mEndByte);
 
         if(mTask.isStopByUser()||mTask.isTaskFailed()) return;
 
@@ -224,7 +215,7 @@ public class PartialDownloadTask implements Runnable {
 
             if(isPartialDownloadTask()) {
                 urlConnection.setRequestProperty(RANGE_PROPERTY, "bytes=" + getRealPositionInFile(getDownloadedInBytes()) + '-' + mEndByte);
-                //Log.d(TAG, "partial task id "+ getId()+" is request range from "+ getRealPositionInFile(getDownloadedInBytes())+" - "+ mEndByte);
+                //Log.d(TAG, "partial task id "+ getId()+" is request range with "+ getRealPositionInFile(getDownloadedInBytes())+" - "+ mEndByte);
 
                 urlConnection.connect();
                 //Log.d(TAG, "partial task id "+getId()+" connected");
@@ -245,7 +236,7 @@ public class PartialDownloadTask implements Runnable {
                 String[] connectionRanges = rangeFields.substring("bytes=".length()).split("[-/]");
                 long positionDownloadFromByServer = Long.valueOf(connectionRanges[0]);
                 long positionDownloadToByServer = Long.valueOf(connectionRanges[1]);
-                //Log.d(TAG, "partial task id "+getId()+"server reply from "+positionDownloadFromByServer+" to " + positionDownloadToByServer );
+                //Log.d(TAG, "partial task id "+getId()+"server reply with "+positionDownloadFromByServer+" to " + positionDownloadToByServer );
                 if (positionDownloadFromByServer > getRealPositionInFile(getDownloadedInBytes()) || positionDownloadToByServer != mEndByte) {
                     urlConnection.disconnect();
                     setState(FAILURE_TERMINATED, "Could not resume or download partially because server replied wrong values");

@@ -28,7 +28,7 @@
 
     <string name="create_new_task">Tạo mới nhiệm vụ</string>
 
-    <string name="creation_time">Được tạo lúc</string>
+    <string name="creation_time">Được tạo vào lúc</string>
 
     <string name="downloaded_size">Kích thước đã tải</string>
 
@@ -42,13 +42,13 @@
 
     <string name="downloads_description">A file downloader application</string>
 
-    <string name="execution_time">Thực thi lúc</string>
+    <string name="execution_time">Thực thi vào lúc</string>
 
     <string name="failure">Thất bại</string>
 
     <string name="finish_service">Dừng dịch vụ</string>
 
-    <string name="finishing_time">Kết thúc</string>
+    <string name="finishing_time">Kết thúc vào lúc</string>
 
     <string name="fundamental">Cơ bản</string>
 
@@ -152,4 +152,13 @@
     <string name="choose_folders">Chọn thư mục</string>
     <string name="choose_number_connections">Chọn số kết nối đồng thời</string>
     <string name="choose_number_downloads">Chọn số lượng tải đồng thời</string>
+    <string name="running_duration">Thời gian tải</string>
+    <string name="connections_number">Số kết nối được mở</string>
+    <string name="other">Khác</string>
+    <string name="pipe_example">Pipe</string>
+    <string name="pipe_example_description">Ứng dụng demo sử dụng Pipe</string>
+    <string name="user_list">Danh sách người dùng</string>
+    <string name="user_list_description">Hiển thị danh sách một số lượng lớn người dùng</string>
+    <string name="weather_app">Thời tiết</string>
+    <string name="weather_app_description">Ứng dụng thời tiết lấy dữ liệu từ kết nối mạng</string>
 </resources>

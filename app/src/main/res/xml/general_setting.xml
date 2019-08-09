@@ -28,8 +28,8 @@
         <ListPreference
             android:title="@string/simultaneous_downloads"
             android:dialogTitle="@string/choose_number_downloads"
-            android:entries="@array/number_connections"
-            android:entryValues="@array/number_connections"
+            android:entries="@array/simultaneous_downloads"
+            android:entryValues="@array/simultaneous_downloads"
             android:defaultValue="2"
             android:key="simultaneousDownloads"
             tools:summary="2 downloads"
@@ -39,11 +39,10 @@
     <PreferenceCategory android:title="@string/layout"
         app:iconSpaceReserved="false">
         <ListPreference
-            android:defaultValue="EN"
             android:entries="@array/languages_array"
             android:entryValues="@array/languages_array_values"
             android:key="app_language"
-            android:summary="English"
+            tools:summary="English"
             android:title="@string/app_language"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
