@@ -10,7 +10,7 @@
 - ###### Pause | Resume | Restart | Cancel task supported
 - ###### Dark & Pretty Material Design
 - ###### Everything shown in notification: Progress, speed, size, downloaded size
-- ###### Automacally saving tasks to memory, even though app get killed
+- ###### Automatically saving tasks to memory, even though app get killed
 #### Screenshots
 </br>
 <div align="center">
