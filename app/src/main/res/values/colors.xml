@@ -45,4 +45,11 @@
     <color name="GradientRed">#ff1361</color>
     <color name="DribbleBlue">#3C245C</color>
     <color name="dark_666">#666</color>
+
+
+    <color name="LightOrange">#ffaa00</color>
+    <color name="LightGreen">#3dcc3d</color>
+    <color name="LightBlue">#00aaff</color>
+    <color name="LightTealBlue">#2bd9d9</color>
+    <color name="LightYellow">#ffd426</color>
 </resources>

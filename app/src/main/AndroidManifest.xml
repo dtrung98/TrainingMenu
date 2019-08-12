@@ -2,14 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.zalo.servicetraining">
+    package="com.zalo.trainingmenu">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <dist:module dist:instant="true" />
 
     <application
-        android:name=".App"
+        android:name="com.zalo.trainingmenu.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/application_name"
@@ -21,7 +21,7 @@
         <activity
             android:theme="@style/SplashTheme"
             android:label="@string/menu"
-            android:name="com.zalo.servicetraining.mainui.MainActivity">
+            android:name="com.zalo.trainingmenu.mainui.MainActivity">
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,52 +30,52 @@
         </activity>
         <activity
             android:label="@string/service"
-            android:name=".fundamental.servicedemo.ServiceDemoActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity" />
 
         <activity
             android:label="@string/content_provider"
-            android:name=".fundamental.index.ContentProviderDemoActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.index.ContentProviderDemoActivity" />
         <activity
             android:label="@string/notes"
-            android:name=".fundamental.noteapp.DemoNoteActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.noteapp.DemoNoteActivity" />
         <activity
             android:label="@string/notes"
-            android:name=".fundamental.noteapp.NoteDetailActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.noteapp.NoteDetailActivity" />
         <activity
             android:label="@string/network"
-            android:name=".fundamental.index.NetworkMenuActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.index.NetworkMenuActivity" />
         <activity
             android:label="@string/weather"
-            android:name=".fundamental.weather.DemoWeatherApp" />
+            android:name="com.zalo.trainingmenu.fundamental.weather.DemoWeatherApp" />
         <activity
             android:label="@string/users"
-            android:name=".fundamental.userlist.UserDataListActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.userlist.UserDataListActivity" />
         <activity
             android:label="@string/users"
-            android:name=".fundamental.userlist.UserProfileActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.userlist.UserProfileActivity" />
         <activity
             android:label="@string/multithreading"
-            android:name=".fundamental.index.MultithreadingActivity" />
-        <activity android:name=".fundamental.pipe.PipeExampleActivity" />
+            android:name="com.zalo.trainingmenu.fundamental.index.MultithreadingActivity" />
+        <activity android:name="com.zalo.trainingmenu.fundamental.pipe.PipeExampleActivity" />
         <activity
             android:label="@string/downloader"
             android:launchMode="singleTop"
-            android:name=".downloader.ui.main.DownloadActivity" />
-        <activity android:name=".fundamental.FundamentalActivity"
+            android:name="com.zalo.trainingmenu.downloader.ui.main.DownloadActivity" />
+        <activity android:name="com.zalo.trainingmenu.fundamental.FundamentalActivity"
             android:label="@string/fundamental"/>
-        <activity android:name=".downloader.ui.detail.TaskDetailActivity" />
-        <activity android:name=".downloader.ui.setting.SettingActivity"
+        <activity android:name="com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity" />
+        <activity android:name="com.zalo.trainingmenu.downloader.ui.setting.SettingActivity"
             android:theme="@style/PreferenceAppTheme"/>
 
         <service
             android:label="@string/time_track_service"
-            android:name=".fundamental.servicedemo.service.TimeTrackService" />
+            android:name="com.zalo.trainingmenu.fundamental.servicedemo.service.TimeTrackService" />
         <service
             android:label="@string/downloader_service"
-            android:name=".downloader.service.DownloaderService" />
+            android:name="com.zalo.trainingmenu.downloader.service.TaskService" />
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.zalo.servicetraining.provider"
+            android:authorities="com.zalo.trainingmenu.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
