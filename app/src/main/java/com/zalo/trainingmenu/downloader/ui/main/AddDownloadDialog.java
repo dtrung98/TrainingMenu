@@ -29,7 +29,6 @@ import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
 
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -203,7 +202,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
 
     @Override
-    public void show(@NotNull FragmentManager manager, String tag) {
+    public void show(@NonNull FragmentManager manager, String tag) {
         FragmentTransaction fragmentTransaction = manager.beginTransaction();
         fragmentTransaction.add(this, TAG);
         fragmentTransaction.commitAllowingStateLoss();

@@ -505,6 +505,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             mStateTextView.setText(stateText);
         }
         void bindProgressSupport(TaskInfo info) {
+          //  if(true) return;
+            Log.d(TAG, "bind progress support : "+info.isProgressSupport()+" when state is "+BaseTask.getStateName(info.getState()));
             if(info.isProgressSupport()) {
                 mProgressBar.setIndeterminate(false);
             } else {
@@ -603,92 +605,6 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             bindProgressSupport(info);
             bindProgress(info);
             bindState(info);
-
-
-         /*   if(true) return;
-            int progress  = (int)(info.getProgress()*100);
-
-           switch (info.getState()) {
-               case BaseTask.PENDING:
-                   mProgressBar.setVisibility(View.GONE);
-                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatGreen));
-                   mStateTextView.setText(R.string.pending);
-                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatGreen));
-                   mImageView.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
-                   break;
-               case BaseTask.CONNECTING:
-                   mProgressBar.setVisibility(View.VISIBLE);
-                   if(info.isProgressSupport()&&progress>=0 && progress <=100) {
-                       mProgressBar.setIndeterminate(false);
-                       mProgressBar.setProgress(progress);
-                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
-                       mStateTextView.setText(progress+"%"+", "+mStateTextView.getResources().getString(R.string.connecting));
-                   } else {
-                       mProgressBar.setIndeterminate(true);
-                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
-                       mStateTextView.setText(R.string.connecting);
-                   }
-                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
-                   mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
-               break;
-               case BaseTask.RUNNING:
-                   mProgressBar.setVisibility(View.VISIBLE);
-                   if(info.isProgressSupport()&&progress>=0 && progress <=100) {
-                       mProgressBar.setIndeterminate(false);
-                       mProgressBar.setProgress(progress);
-                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
-                       mStateTextView.setText(progress+"%");
-                   } else {
-                       mProgressBar.setIndeterminate(true);
-                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
-                       mStateTextView.setText(R.string.downloading);
-                   }
-                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
-                   mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
-                   break;
-               case BaseTask.PAUSED:
-                   mProgressBar.setVisibility(View.VISIBLE);
-                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatOrange));
-                   if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
-                       mProgressBar.setIndeterminate(false);
-                       mProgressBar.setProgress(progress);
-                       mStateTextView.setText(progress+"%, Paused");
-                   } else {
-                       mProgressBar.setVisibility(View.GONE);
-                       mStateTextView.setText("Paused");
-                   }
-                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatOrange));
-                   mImageView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
-                   break;
-                   case BaseTask.CANCELLED:
-                       mProgressBar.setVisibility(View.VISIBLE);
-                       mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FocusColorTwo));
-                       if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
-                           mProgressBar.setIndeterminate(false);
-                           mProgressBar.setProgress(progress);
-                           mStateTextView.setText(progress+"%, Cancelled");
-                       } else {
-                           mProgressBar.setVisibility(View.GONE);
-                           mStateTextView.setText("Cancelled");
-                       }
-                       mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
-                       mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
-                       break;
-               case BaseTask.FAILURE_TERMINATED:
-                   mProgressBar.setVisibility(View.VISIBLE);
-                   mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
-                   if(info.isProgressSupport()&&progress>=0&&progress <=100)  {
-                       mProgressBar.setIndeterminate(false);
-                       mProgressBar.setProgress(progress);
-                       mStateTextView.setText(progress+"%, Failure");
-                   } else {
-                       mProgressBar.setVisibility(View.GONE);
-                       mStateTextView.setText(R.string.failure);
-                   }
-                   mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
-                   mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
-                   break;
-           }*/
         }
 
         DownloadingItemHolder(View itemView) {

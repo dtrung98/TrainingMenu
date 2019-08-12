@@ -219,6 +219,9 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         for (BaseTask task:mTaskList
              ) {
             if(task.getState()!=BaseTask.RUNNING) task.restartByUser();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {}
         }
     }
 
@@ -279,7 +282,6 @@ public abstract class BaseTaskManager<T extends BaseTask> {
      */
     public void clearAllTasks() {
         synchronized (mTaskList) {
-            int size = mTaskList.size();
             for (BaseTask task :
                     mTaskList) {
                 if(task.getState()==BaseTask.RUNNING) task.cancelByUser();
@@ -287,7 +289,6 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         }
         mTaskList.clear();
         DownloadDBHelper.getInstance().deleteAllTasks();
-
         if(mCallBack!=null) mCallBack.onUpdateTaskManager(this);
     }
 

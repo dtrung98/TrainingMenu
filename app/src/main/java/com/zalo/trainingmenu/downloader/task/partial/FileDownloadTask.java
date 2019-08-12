@@ -73,15 +73,18 @@ public class FileDownloadTask extends BaseTask<PartialTaskManager> {
 
     private void downloadFile() {
         if(isStopByUser()) return;
-        setState(CONNECTING);
-        notifyTaskChanged();
+
 
         switch (getMode()) {
             case EXECUTE_MODE_NEW_DOWNLOAD:
             case EXECUTE_MODE_RESTART:
                 setDownloadedInBytes(0);
+                restoreProgress(0);
                 mPartialDownloadTasks.clear();
             case EXECUTE_MODE_RESUME:
+
+                setState(CONNECTING);
+                notifyTaskChanged();
                 connectThenDownload();
                 break;
         }

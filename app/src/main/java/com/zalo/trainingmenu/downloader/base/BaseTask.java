@@ -34,6 +34,8 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     public static final int CANCELLED = 7;
 
     private final static int TASK_CHANGED = 1;
+    private static final int TASK_RELEASE = 2;
+
 
     public static final int EXECUTE_MODE_NEW_DOWNLOAD = 5;
 
@@ -207,13 +209,19 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private long mLastUpdatedSpeedTime = 0;
     private long mLastUpdatedSpeedDownloaded = 0;
     private boolean mProgressUpdateFlag = false;
-
-    protected synchronized void notifyTaskChanged() {
-        notifyTaskChanged(TASK_CHANGED);
+    public synchronized void lockUpdateFlag() {
+        mProgressUpdateFlag = true;
+    }
+    public synchronized void unlockUpdateFlag() {
+        mProgressUpdateFlag = false;
+    }
+    public synchronized boolean isUpdateFlagLocked() {
+        return mProgressUpdateFlag;
     }
 
 
-    protected synchronized void notifyTaskChanged(int which){
+
+    protected synchronized void notifyTaskChanged(){
 
         if(mNotifyHandler==null) {
             Log.d(TAG, "notify handler is null, let's update task directly");
@@ -221,24 +229,40 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
         }
         else {
             // Nếu chưa có order nào, thì hãy đợi 500s sau, t sẽ gửi
-            if (!mProgressUpdateFlag) {
-                mNotifyHandler.sendEmptyMessageDelayed(which, 1250);
-                mProgressUpdateFlag = true;
-                //Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " orders to update, plz wait for 1250ms");
+            if (!isUpdateFlagLocked()) {
+                mNotifyHandler.sendEmptyMessageDelayed(TASK_CHANGED, 550);
+                lockUpdateFlag();
+                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " orders to update, plz wait for 1250ms");
             } else if (mFirstTime) {
                 mFirstTime = false;
-                mNotifyHandler.sendEmptyMessage(which);
+                mNotifyHandler.sendEmptyMessage(TASK_CHANGED);
+                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+ mId+" run the first time, update now");
             } else {
                 // Nếu đã có order
                 // bỏ qua
-                //Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " is ignored, task will update soon");
+                Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id " + mId + " is ignored, task will update soon");
             }
         }
     }
+    private long mReleaseCommandTime = 0;
+
+    private synchronized void notifyThenRelease(){
+        if(mNotifyHandler!=null)
+        {
+          //  mNotifyHandler.removeCallbacksAndMessages(null);
+            mReleaseCommandTime = System.currentTimeMillis();
+            mNotifyHandler.sendEmptyMessageDelayed(TASK_RELEASE, 1250);
+        }
+    }
+
     private boolean mStopped = true;
-    private void releaseSafely() {
+    private synchronized void releaseSafely() {
         mStopped = true;
-        notifyTaskChanged(TASK_CHANGED);
+        notifyThenRelease();
+    }
+
+    private synchronized boolean shouldRelease() {
+        return mStopped;
     }
 
     private void release() {
@@ -258,6 +282,8 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     private NotifyHandler mNotifyHandler;
 
     private void startNotifier(){
+        release();
+        unlockUpdateFlag();
         mStopped = false;
         mNotifyThread = new HandlerThread("HandlerThread"+getId());
         mNotifyThread.start();
@@ -274,32 +300,32 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
     }
 
     public synchronized boolean isProgressSupport() {
-        return mFileContentLength != -1;
+        return mFileContentLength >0;
     }
 
     private boolean mUserCancelledFlag = false;
 
     private boolean mUserPauseFlag = false;
 
-    protected synchronized final boolean isPausedOrCancelled() {
-        return mUserPauseFlag|| mUserCancelledFlag;
+    private synchronized boolean isPausedOrCancelled() {
+        return !mUserPauseFlag && !mUserCancelledFlag;
     }
 
-    protected final void clearUserFlag() {
+    private void clearUserFlag() {
         mUserCancelledFlag = false;
         mUserPauseFlag = false;
     }
 
-    protected final void pauseByUser() {
-        if(!isPausedOrCancelled()) mUserPauseFlag = true;
+    final void pauseByUser() {
+        if(isPausedOrCancelled()) mUserPauseFlag = true;
         if(getState()==PENDING) {
             setState(PAUSED);
             notifyTaskChanged();
         }
     }
 
-    protected final void cancelByUser() {
-        if(!isPausedOrCancelled()) mUserCancelledFlag = true;
+    final void cancelByUser() {
+        if(isPausedOrCancelled()) mUserCancelledFlag = true;
         if(getState()==PENDING) {
             setState(CANCELLED);
             notifyTaskChanged();
@@ -411,16 +437,18 @@ public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
             if(task==null) return;
             switch (msg.what) {
                 case TASK_CHANGED:
-
-                    task.mProgressUpdateFlag = false;
+                   task.unlockUpdateFlag();
                     Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+task.mId+" is updating with progress "+task.getProgress());
                     // run in HandlerThread
                     task.getTaskManager().notifyTaskChanged(task);
-                    if(task.mStopped) {
-                        Log.d(TAG, "and stop too");
-                        task.release();
-                    }
                     break;
+                case TASK_RELEASE:
+
+                    task.unlockUpdateFlag();
+                    Log.d(TAG, "thread id "+Thread.currentThread().getId()+": task id "+task.mId+" will be released with progress "+task.getProgress()+", delayed "+(System.currentTimeMillis() - task.mReleaseCommandTime));
+                    // run in HandlerThread
+                    task.getTaskManager().notifyTaskChanged(task);
+                       task.release();
             }
         }
     }

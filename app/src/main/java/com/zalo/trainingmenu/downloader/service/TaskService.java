@@ -212,6 +212,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     public void clearAllTasks() {
         if(mDownloadManager!=null) mDownloadManager.clearAllTasks();
+        if(mNotificationManager!=null) mNotificationManager.cancelAll();
     }
 
     public void restartAll() {
