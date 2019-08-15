@@ -205,6 +205,15 @@ public class TaskServiceRemote {
         if(mService!=null) mService.restartAll();
     }
 
+    public static void clearTasks(List<Integer> ids) {
+        if(mService!=null) mService.clearTasks(ids);
+
+    }
+
+    public static void restartTasks(List<Integer> ids) {
+        if(mService!=null) mService.restartTasks(ids);
+    }
+
 
     public static class RemoteServiceBinder implements ServiceConnection {
         private final ServiceConnection mCallback;

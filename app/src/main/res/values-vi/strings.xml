@@ -161,4 +161,7 @@
     <string name="user_list_description">Hiển thị danh sách một số lượng lớn người dùng</string>
     <string name="weather_app">Thời tiết</string>
     <string name="weather_app_description">Ứng dụng thời tiết lấy dữ liệu từ kết nối mạng</string>
+    <string name="clear_selected_tasks">Xóa nhiệm vụ được chọn</string>
+    <string name="copy_url_link">Sao chép liên kết</string>
+    <string name="restart_selected_tasks">Tải lại nhiệm vụ được chọn</string>
 </resources>

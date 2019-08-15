@@ -418,4 +418,13 @@ public class TaskInfo implements Parcelable {
             return new TaskInfo[size];
         }
     };
+
+    public int[] getPercentages() {
+        int size = mPartialInfoList.size();
+        int[] percentages = new int[size];
+        for (int i = 0; i < size; i++) {
+            percentages[i] = (int) (mPartialInfoList.get(i).getProgress()*100);
+        }
+        return percentages;
+    }
 }

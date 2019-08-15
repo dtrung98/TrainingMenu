@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
     <font
-        android:fontStyle="normal"
-        android:fontWeight="500"
-        android:font="@font/hn" />
+        app:fontStyle="normal"
+        app:fontWeight="500"
+        app:font="@font/hn" />
     <font
-        android:fontStyle="italic"
-        android:fontWeight="500"
-        android:font="@font/hn" />
+        app:fontStyle="italic"
+        app:fontWeight="500"
+        app:font="@font/hn" />
 
 </font-family>

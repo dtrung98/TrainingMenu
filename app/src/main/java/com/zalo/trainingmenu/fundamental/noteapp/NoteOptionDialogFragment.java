@@ -17,7 +17,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class NoteOptionDialogFragment extends DialogFragment {
-    public static final String TAG = "NoteOptionDialogFragment";
+    public static final String TAG = "NoteDialogFragment";
     private Note mNote;
 
     public static NoteOptionDialogFragment newInstance(Note note) {

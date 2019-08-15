@@ -287,9 +287,24 @@ public abstract class BaseTaskManager<T extends BaseTask> {
                 if(task.getState()==BaseTask.RUNNING) task.cancelByUser();
             }
         }
+
         mTaskList.clear();
         DownloadDBHelper.getInstance().deleteAllTasks();
         if(mCallBack!=null) mCallBack.onUpdateTaskManager(this);
+    }
+
+    public void clearTasks(List<Integer> ids) {
+        for (Integer id :
+                ids) {
+            clearTask(id);
+        }
+    }
+
+    public void restartTasks(List<Integer> ids) {
+        for (Integer id :
+                ids) {
+            restartTaskByUser(id);
+        }
     }
 
     public interface CallBack {

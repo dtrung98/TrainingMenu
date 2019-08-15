@@ -33,8 +33,6 @@
         android:layout_height="180dp"
         android:scaleType="centerCrop"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp"
         tools:src="@drawable/header"
         app:layout_constraintBottom_toBottomOf="@+id/description"
@@ -43,7 +41,7 @@
         />
     <TextView
         android:id="@+id/title"
-        android:text="Beauty and the Beast"
+        tools:text="Beauty and the Beast"
         android:textColor="@color/FlatWhite"
         android:textSize="26sp"
         android:layout_width="0dp"

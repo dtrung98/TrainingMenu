@@ -3,6 +3,7 @@ package com.zalo.trainingmenu.downloader.ui.main;
 
 import android.content.Intent;
 
+import android.content.res.ColorStateList;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -42,6 +43,12 @@ public class DownloadActivity extends BaseActivity {
         executeWriteStorageAction(intent);
     }
 
+    void plusButtonClick() {
+        if(mAdapter!=null && mAdapter.isInSelectMode()) {
+            mAdapter.goOutSelectMode();
+        } else addNewTask();
+    }
+
     @Override
     public void onPermissionResult(Intent intent, boolean granted) {
         if(intent==null) return;
@@ -71,7 +78,7 @@ public class DownloadActivity extends BaseActivity {
         params.gravity = Gravity.BOTTOM|Gravity.END;
         params.bottomMargin = (int)(oneDP*16);
         params.setMarginEnd(params.bottomMargin);
-        mAddButton.setOnClickListener(view -> addNewTask());
+        mAddButton.setOnClickListener(view -> plusButtonClick());
         mRoot.addView(mAddButton,params);
         // Add menu button
         mMenuButton = new ImageView(this);
@@ -106,7 +113,17 @@ public class DownloadActivity extends BaseActivity {
 
     };
 
+    private int[] mSelectIDs = new int[] {
+            R.string.warning_divider,
+            R.string.restart_selected_tasks,
+            R.string.dangerous_divider,
+            R.string.clear_selected_tasks
+    };
+
     private void showMenu() {
+        if(mAdapter!=null && mAdapter.isInSelectMode())
+            OptionBottomSheet.newInstance(mSelectIDs,mMenuCallBack).showNow(getSupportFragmentManager(),OptionBottomSheet.TAG+"_MENU");
+        else
         OptionBottomSheet.newInstance(mMenuIDs,mMenuCallBack).showNow(getSupportFragmentManager(),OptionBottomSheet.TAG+"_MENU");
     }
 
@@ -127,6 +144,14 @@ public class DownloadActivity extends BaseActivity {
                     break;
                 case R.string.clear_all:
                     TaskServiceRemote.clearAllTasks();
+                    break;
+                case R.string.restart_selected_tasks:
+                    TaskServiceRemote.restartTasks(mAdapter.getSelectedTasks());
+                    mAdapter.goOutSelectMode();
+                    break;
+                case R.string.clear_selected_tasks:
+                    TaskServiceRemote.clearTasks(mAdapter.getSelectedTasks());
+                    mAdapter.goOutSelectMode();
                     break;
             }
             return true;
@@ -151,6 +176,19 @@ public class DownloadActivity extends BaseActivity {
 
     }
 
+    public void switchToSelectMode() {
+        mAddButton.animate().rotation(135);
+        mAddButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.FocusYellowColor)));
+        mMenuButton.setColorFilter(getResources().getColor(R.color.FlatOrange));
+        mMenuButton.setBackgroundResource(R.drawable.circle_background_support_touch_focus);
+    }
+
+    public void switchToNormalMode() {
+        mAddButton.animate().rotation(0);
+        mAddButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.FlatYellow)));
+        mMenuButton.setColorFilter(getResources().getColor(R.color.FlatWhite));
+        mMenuButton.setBackgroundResource(R.drawable.circle_background_support_touch);
+    }
 
     @Override
     protected void refreshData() {

@@ -20,6 +20,7 @@ import com.zalo.trainingmenu.downloader.task.partial.PartialTaskManager;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskService extends Service implements BaseTaskManager.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "TaskService";
@@ -217,6 +218,15 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     public void restartAll() {
         if(mDownloadManager!=null) mDownloadManager.restartAll();
+    }
+
+    public void clearTasks(List<Integer> ids) {
+        if(mDownloadManager!=null) mDownloadManager.clearTasks(ids);
+        if(mNotificationManager!=null) mNotificationManager.cancel(ids);
+    }
+
+    public void restartTasks(List<Integer> ids) {
+        if(mDownloadManager!=null) mDownloadManager.restartTasks(ids);
     }
 
 

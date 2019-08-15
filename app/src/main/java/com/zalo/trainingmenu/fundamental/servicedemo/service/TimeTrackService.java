@@ -145,19 +145,22 @@ public class TimeTrackService extends Service {
     @RequiresApi(26)
     private void createNotificationChannel() {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel channel;
 
-        channel = notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID);
+        if(notificationManager!=null) {
+            NotificationChannel channel;
 
-        if(channel==null) {
-            // create new chanel
-            channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,getString(R.string.time_track_service_channel),NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription(getString(R.string.notification_channel_description));
-            channel.enableLights(true);
-            channel.enableVibration(true);
+            channel = notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID);
+
+            if (channel == null) {
+                // create new chanel
+                channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.time_track_service_channel), NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription(getString(R.string.notification_channel_description));
+                channel.enableLights(true);
+                channel.enableVibration(true);
+            }
+
+            notificationManager.createNotificationChannel(channel);
         }
-
-        notificationManager.createNotificationChannel(channel);
     }
 
     @Override

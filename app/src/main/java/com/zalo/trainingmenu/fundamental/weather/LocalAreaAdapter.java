@@ -1,5 +1,6 @@
 package com.zalo.trainingmenu.fundamental.weather;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,6 +89,7 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
             if(mListener!=null) mListener.onLocalAreaItemClick(mData.get(getAdapterPosition()));
         }
 
+        @SuppressLint("SetTextI18n")
         public void bind(LocalArea item) {
             mTitle.setText(item.getLocalizedName());
 
@@ -97,7 +99,7 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
 
                 String id = item.getID();
                 if(id.isEmpty()) mDescription.setText(item.getLocalizedType());
-                else mDescription.setText(new StringBuilder().append(item.getLocalizedType()).append(" ( ").append(item.getID()).append(" )").toString());
+                else mDescription.setText(item.getLocalizedType() + " ( " + item.getID() + " )");
             }
             else {
                 mDescription.setVisibility(View.INVISIBLE);

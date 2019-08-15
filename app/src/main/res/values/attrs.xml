@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MultipartProgressBar">
+        <attr name="foregroundBarColor" format="color"/>
+        <attr name="indeterminate" format="boolean"/>
+        <attr name="thickness" format="dimension"/>
+        <attr name="backgroundBarColor" format="color"/>
+        <attr name="indeterminateDuration" format="integer"/>
+        <attr name="animateOnChanged" format="boolean"/>
+        <attr name="connections" format="integer"/>
+        <attr name="randomPercentages" format="boolean"/>
+    </declare-styleable>
+</resources>

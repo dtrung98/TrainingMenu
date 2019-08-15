@@ -29,11 +29,11 @@
             android:paddingBottom="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:hint="Title"
+            android:hint="@string/title"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:textStyle="bold"
-            android:textSize="20dp"
+            android:textSize="20sp"
 
             android:textColor="@color/FocusYellowColor"
             android:background="@drawable/line_bottom"/>

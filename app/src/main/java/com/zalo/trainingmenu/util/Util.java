@@ -6,6 +6,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -16,6 +18,8 @@ import com.zalo.trainingmenu.App;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import static android.content.Context.VIBRATOR_SERVICE;
 
 public final class Util {
    /* @SuppressLint("DefaultLocale")
@@ -105,5 +109,16 @@ public final class Util {
         }
         if(!hasSoftKeys(activity.getWindowManager())) return 0;
         return  navigationBarHeight;
+    }
+
+    public static void vibrate() {
+        Vibrator vibrator = (Vibrator) App.getInstance().getSystemService(VIBRATOR_SERVICE);
+        if(vibrator!=null) {
+            if (Build.VERSION.SDK_INT >= 26) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator.vibrate(50);
+            }
+        }
     }
 }

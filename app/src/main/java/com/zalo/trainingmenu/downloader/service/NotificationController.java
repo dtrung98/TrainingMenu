@@ -20,6 +20,8 @@ import com.zalo.trainingmenu.downloader.base.BaseTaskManager;
 import com.zalo.trainingmenu.downloader.ui.main.DownloadActivity;
 import com.zalo.trainingmenu.util.Util;
 
+import java.util.List;
+
 
 public class NotificationController {
     private static final String TAG = "NotificationManager";
@@ -150,7 +152,7 @@ public class NotificationController {
         int PROGRESS = task.getProgressInteger();
         notifyTaskNotificationChanged(task, NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
     }
-    private int mFlagForegroundID = -1;
+
     private void postNotification(Notification notification, int NOTIFICATION_ID) {
         if(mStopped) return;
         mNotificationManager.notify(NOTIFICATION_ID, notification);
@@ -168,14 +170,14 @@ public class NotificationController {
 
         if (mNotifyMode != newNotifyMode && newNotifyMode == NOTIFY_MODE_BACKGROUND) {
             mService.stopForeground(false);
-            Log.d(TAG, "thread "+Thread.currentThread().getId()+", stop foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
+            Log.d(TAG, "thread "+Thread.currentThread().getId()+", stop foreground id "+NOTIFICATION_ID+", isOnGoing false");
         }
 
          if ((mNotifyMode ==NOTIFY_MODE_BACKGROUND && newNotifyMode == NOTIFY_MODE_FOREGROUND)
          //||(newNotifyMode==NOTIFY_MODE_FOREGROUND&&mIndexBuilders.get(mFlagForegroundID)==null)
          ) {
             mService.startForeground(NOTIFICATION_ID, notification);
-            mFlagForegroundID = NOTIFICATION_ID;
+             int flagForegroundID = NOTIFICATION_ID;
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", start foreground id "+NOTIFICATION_ID+", isOnGoing "+ isOnGoing);
         } else {
             mNotificationManager.notify(NOTIFICATION_ID, notification);
@@ -213,5 +215,12 @@ public class NotificationController {
     public void notifyTaskClear(int id) {
         mNotificationManager.cancel(id);
         mIndexBuilders.delete(id);
+    }
+
+    public void cancel(List<Integer> selectedTasks) {
+        for (Integer id:
+             selectedTasks) {
+            mNotificationManager.cancel(id);
+        }
     }
 }

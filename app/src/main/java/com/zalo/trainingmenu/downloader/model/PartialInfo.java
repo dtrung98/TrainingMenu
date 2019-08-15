@@ -141,4 +141,8 @@ public class PartialInfo implements Parcelable {
                 return new PartialInfo[size];
             }
         };
+
+    public float getProgress() {
+        return mDownloadedInBytes/(float)(mEndByte - mStartByte);
     }
+}

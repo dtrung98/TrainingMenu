@@ -26,6 +26,7 @@ import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity;
+import com.zalo.trainingmenu.downloader.ui.widget.MultipartProgressBar;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int BIND_PROGRESS_CHANGED = 1;
     private static final int BIND_STATE_CHANGED = 2;
     private static final int BIND_PROGRESS_SUPPORT = 3;
+    private static final int BIND_SELECT = 4;
 
     private Context mContext;
     private final ArrayList<Object> mData = new ArrayList<>();
@@ -108,6 +110,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    @Deprecated
     boolean onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
         int size = mData.size();
         int posFound = -1;
@@ -158,26 +161,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+
         if(payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads);
-        } else if(holder instanceof DownloadingItemHolder )
-            for (Object object :
-                    payloads) {
-                if(object instanceof Integer) {
-                    switch ((int)object) {
-                        case BIND_PROGRESS_SUPPORT:
-                            ((DownloadingItemHolder)holder).bindProgressSupport((TaskInfo) mData.get(position));
-                            break;
-                        case BIND_PROGRESS_CHANGED:
-                            ((DownloadingItemHolder)holder).bindProgress((TaskInfo) mData.get(position));
-                            break;
-                        case BIND_STATE_CHANGED:
-                            ((DownloadingItemHolder)holder).bindState((TaskInfo) mData.get(position));
-                            break;
+        } else if(holder instanceof TaskInfoItemHolder)
+            ((TaskInfoItemHolder) holder).bind((TaskInfo) mData.get(position), payloads);
 
-                    }
-                }
-            }
     }
 
     void onTaskAdded(TaskInfo info) {
@@ -203,6 +192,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void setData(List<Object> data) {
         mData.clear();
+        mSelectedPos.clear();
+        checkMode();
         if (data !=null) {
             mData.addAll(data);
         }
@@ -231,7 +222,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         switch (viewType) {
-            case TYPE_DOWNLOADING_ITEM: return new DownloadingItemHolder(inflater.inflate(R.layout.item_downloading,parent,false));
+            case TYPE_DOWNLOADING_ITEM: return new DownloadingItemHolder(inflater.inflate(R.layout.item_downloading_multipart,parent,false));
             case TYPE_DOWNLOADED_ITEM: return new DownloadedItemHolder(inflater.inflate(R.layout.item_downloaded,parent,false));
             case TYPE_SECTION:
             default: return new SectionItemHolder(inflater.inflate(R.layout.section_text_view,parent,false));
@@ -241,13 +232,11 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-       if(holder instanceof SectionItemHolder) {
-           ((SectionItemHolder) holder).bind(mData.get(position));
-       } else if(holder instanceof DownloadedItemHolder) {
-           ((DownloadedItemHolder) holder).bind((TaskInfo) mData.get(position));
-       } else if(holder instanceof DownloadingItemHolder) {
-           ((DownloadingItemHolder) holder).bind((TaskInfo) mData.get(position));
-       }
+        if (holder instanceof SectionItemHolder) {
+            ((SectionItemHolder) holder).bind(mData.get(position));
+        } else if (holder instanceof TaskInfoItemHolder) {
+            ((TaskInfoItemHolder) holder).bind((TaskInfo) mData.get(position));
+        }
     }
 
     @Override
@@ -299,6 +288,50 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             R.string.focus_divider,
             R.string.properties
     };
+
+    private List<Integer> mSelectedPos = new ArrayList<>();
+
+    private boolean isSelected(int position) {
+        try {
+            return mSelectedPos.contains(position);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private synchronized void select(int position) {
+        try {
+            mSelectedPos.add(position);
+            checkMode();
+            Log.d(TAG, "select "+position);
+            notifyItemChanged(position,BIND_SELECT);
+        } catch (Exception ignore) {}
+    }
+
+
+    public void goOutSelectMode() {
+        List<Integer> temp = new ArrayList<>(mSelectedPos);
+        mSelectedPos.clear();
+
+        for (Integer pos :
+                temp) {
+            notifyItemChanged(pos);
+        }
+        checkMode();
+    }
+
+    private synchronized void removeSelect(int position) {
+        try {
+            mSelectedPos.remove((Integer)position);
+            Log.d(TAG, "remove select "+position);
+            notifyItemChanged(position,BIND_SELECT);
+        } catch (Exception ignore) {}
+    }
+
+    public boolean isInSelectMode() {
+        return !mSelectedPos.isEmpty();
+    }
+
     private void onMenuButtonClick(int position, Object object) {
         if(object instanceof TaskInfo) {
             final TaskInfo info = (TaskInfo)object;
@@ -338,6 +371,17 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
     private OptionTaskInfoCallBack mOptionTaskInfoCallBack = new OptionTaskInfoCallBack();
+
+    public List<Integer> getSelectedTasks() {
+        List<Integer> ids = new ArrayList<>();
+        for (Integer pos :
+                mSelectedPos) {
+            Object o = mData.get(pos);
+            if(o instanceof TaskInfo)
+            ids.add(((TaskInfo) o).getId());
+        }
+        return ids;
+    }
 
 
     private static class OptionTaskInfoCallBack implements OptionBottomSheet.CallBack {
@@ -392,7 +436,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
             return true;
         }
-    };
+    }
 
     private void onIconClick(int position, Object object) {
         if(object instanceof TaskInfo) {
@@ -423,7 +467,38 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Toasty.info(App.getInstance().getApplicationContext(),"Icon Clicked but this feature's not written yet :)").show();
     }
 
+    private boolean onItemLongClick(int position, Object object) {
+        Util.vibrate();
+        if(!isInSelectMode() || !isSelected(position)) {
+            select(position);
+
+        } else {
+           goOutSelectMode();
+        }
+        return true;
+    }
+
+    private boolean mIsSelectMode = false;
+
+    private void checkMode() {
+        boolean newest = isInSelectMode();
+        if(newest!=mIsSelectMode) {
+            mIsSelectMode = newest;
+            if(mContext instanceof DownloadActivity)
+            if(mIsSelectMode) ((DownloadActivity)mContext).switchToSelectMode();
+            else ((DownloadActivity)mContext).switchToNormalMode();
+        }
+    }
+
     private void onItemClick(int position, Object object) {
+        // Check if adapter is in select mode
+        if(isInSelectMode()) {
+            if(!isSelected(position)) select(position);
+            else removeSelect(position);
+
+            checkMode();
+            return;
+        }
        if(object instanceof TaskInfo && mContext instanceof Activity && ((TaskInfo)object).getState()== BaseTask.SUCCESS) {
            TaskInfo info = (TaskInfo) object;
            TaskServiceRemote.openFinishedTaskInfo(mContext, info);
@@ -486,7 +561,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public class DownloadingItemHolder extends TaskInfoItemHolder {
-        ProgressBar mProgressBar;
+        MultipartProgressBar mProgressBar;
 
         void bindProgress(TaskInfo info) {
             String stateText;
@@ -498,7 +573,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             if(info.isProgressSupport()) {
                 int progress  = (int)(info.getProgress()*100);
-                mProgressBar.setProgress(progress);
+                mProgressBar.setPercentages(info.getPercentages());
+                //mProgressBar.setProgress(progress);
                 stateText = progress +"%"+speed+MIDDLE_DOT+ Util.humanReadableByteCount(info.getDownloadedInBytes())+" of "+ Util.humanReadableByteCount(info.getFileContentLength());
             } else stateText = "Downloading"+speed+MIDDLE_DOT+Util.humanReadableByteCount(info.getDownloadedInBytes());
 
@@ -544,21 +620,23 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
                     if(info.isProgressSupport()&&progress>=0 && progress <=100) {
                         mStateTextView.setText(progress + "%" + " • " + mStateTextView.getResources().getString(R.string.connecting));
-                        mProgressBar.setProgress(progress);
+                        //mProgressBar.setProgress(progress);
+                        mProgressBar.setPercentages(info.getPercentages());
+
                     }
                     else {
                     mStateTextView.setText(R.string.connecting);
                     }
                     break;
                 case BaseTask.RUNNING:
-                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatTealBlue)));
+                    mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.FlatTealBlue));
                     mProgressBar.setVisibility(View.VISIBLE);
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatTealBlue));
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatTealBlue));
                     mImageView.setImageResource(R.drawable.ic_pause_black_24dp);
                     break;
                 case BaseTask.PAUSED:
-                mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatOrange)));
+                mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.FlatOrange));
                 mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatOrange));
                 mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FlatOrange));
                 mImageView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
@@ -571,7 +649,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
                 break;
                 case BaseTask.CANCELLED:
-                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FocusColorTwo)));
+                    mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.FocusColorTwo));
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FocusColorTwo));
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
@@ -584,7 +662,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
                     break;
                 case BaseTask.FAILURE_TERMINATED:
-                    mProgressBar.setProgressTintList(ColorStateList.valueOf(mProgressBar.getResources().getColor(R.color.FlatRed)));
+                    mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.FlatRed));
                     mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
@@ -607,13 +685,35 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             bindState(info);
         }
 
+        @Override
+        public void bind(TaskInfo info, List<Object> payloads) {
+            super.bind(info, payloads);
+            for (Object object :
+                    payloads) {
+                if(object instanceof Integer) {
+                    switch ((int)object) {
+                        case BIND_PROGRESS_SUPPORT:
+                            bindProgressSupport(info);
+                            break;
+                        case BIND_PROGRESS_CHANGED:
+                            bindProgress(info);
+                            break;
+                        case BIND_STATE_CHANGED:
+                            bindState(info);
+                            break;
+
+                    }
+                }
+            }
+        }
+
         DownloadingItemHolder(View itemView) {
             super(itemView);
             mProgressBar = itemView.findViewById(R.id.progress_bar);
         }
     }
 
-    public abstract class TaskInfoItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public abstract class TaskInfoItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         TextView mTitleTextView;
         TextView mStateTextView;
         TextView mDescriptionTextView;
@@ -628,11 +728,35 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             mImageView.setOnClickListener(this);
             itemView.findViewById(R.id.menu_button).setOnClickListener(this);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         public void bind(TaskInfo info) {
                 mTitleTextView.setText(info.getFileTitle());
                 mDescriptionTextView.setText(info.getURLString());
+                bindSelect();
+        }
+
+        public void bind(TaskInfo info, List<Object> payloads) {
+            for (Object object :
+                    payloads) {
+                if (object instanceof Integer) {
+                    switch ((int) object) {
+                        case BIND_SELECT:
+                            bindSelect();
+                            break;
+                    }
+                }
+            }
+        }
+
+        private void bindSelect() {
+            Log.d(TAG, "receive bind select command: selected "+isSelected(getAdapterPosition()));
+            if(isSelected(getAdapterPosition())) {
+                itemView.setBackgroundResource(R.drawable.background_item_user_data_with_border);
+            } else {
+                itemView.setBackgroundResource(R.drawable.background_item_user_data);
+            }
         }
 
 
@@ -646,6 +770,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 case R.id.image_view: onIconClick(getAdapterPosition(),mData.get(getAdapterPosition()));
                 break;
             }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            Log.d(TAG, "detect long click item "+getAdapterPosition());
+            return onItemLongClick(getAdapterPosition(),mData.get(getAdapterPosition()));
         }
     }
 }

@@ -106,7 +106,7 @@ public class FileDownloadTask extends BaseTask<PartialTaskManager> {
                 if (!sizeString.isEmpty())
                 try {
                     size = Long.parseLong(sizeString);
-                } catch (NumberFormatException ignored) {};
+                } catch (NumberFormatException ignored) {}
             }
 
         } catch (IOException ignored) {} finally {

@@ -46,7 +46,6 @@ public abstract class AbsLocaleActivity extends AppCompatActivity {
         return context.createConfigurationContext(configuration);
     }
 
-    @SuppressWarnings("deprecation")
     private Context updateResourcesLocaleLegacy(Context context, Locale locale) {
         Resources resources = context.getResources();
         Configuration configuration = resources.getConfiguration();

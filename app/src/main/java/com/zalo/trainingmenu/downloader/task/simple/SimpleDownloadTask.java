@@ -126,7 +126,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
                 if (!sizeString.isEmpty())
                 try {
                     size = Long.parseLong(sizeString);
-                } catch (NumberFormatException ignored) {};
+                } catch (NumberFormatException ignored) {}
             }
 
         } catch (IOException ignored) {} finally {

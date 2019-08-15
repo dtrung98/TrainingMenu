@@ -29,7 +29,7 @@ public class UserData {
             this.mAvatarPath = avatarPath;
         }
 
-        public UserData(int id, String username, String avatarPath) {;
+        public UserData(int id, String username, String avatarPath) {
             this.mId = id;
             this.mUsername = username;
             this.mAvatarPath = avatarPath;

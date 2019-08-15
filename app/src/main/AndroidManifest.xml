@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.zalo.trainingmenu">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <dist:module dist:instant="true" />
@@ -17,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
         <activity
             android:theme="@style/SplashTheme"
             android:label="@string/menu"

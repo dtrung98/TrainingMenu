@@ -178,4 +178,8 @@
     <string name="pipe_example">Pipe Example</string>
     <string name="pipe_example_description">Simple program that using pipes.</string>
     <string name="copy_url_link">Copy Url Link</string>
+    <string name="restart_selected_tasks">Restart all selected items</string>
+    <string name="clear_selected_tasks">Clear all selected items</string>
+    <string name="title">Title</string>
+    <string name="write_something_here">Write something here...</string>
 </resources>
