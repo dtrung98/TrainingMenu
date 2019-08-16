@@ -169,36 +169,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
     private void addTask(String url) {
         DownloadItem item = new DownloadItem(url);
-        File parentFolder = new File(item.getDirectoryPath());
-
-        String fileName = item.getFileTitle();
-
-
-        if( new File(parentFolder,fileName).exists()) {
-            Pattern p = Pattern.compile("(.*?)?(\\..*)?");
-            Matcher m = p.matcher(fileName);
-            if(m.matches()) {
-                String base = m.group(1);
-                String extension = m.group(2);
-                int i = 1;
-                do {
-                    fileName = base + " ("+i+")"+extension;
-                    i++;
-                } while (new File(parentFolder,fileName).exists());
-            } else {
-                String base = fileName;
-                int i = 1;
-                do {
-                    fileName = base +" ("+i+")";
-                } while (new File(parentFolder,fileName).exists());
-            }
-        }
-
-
-        item.setFileTitle(fileName);
-
         TaskServiceRemote.appendTask(item);
-
     }
 
     @Override

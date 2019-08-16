@@ -307,6 +307,23 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         }
     }
 
+    public void tryToResume(int id) {
+        List<T> tasks = getAllTask();
+        BaseTask task = null;
+
+        for (T t:
+                tasks) {
+            if(t.getId()==id) {
+                task = t;
+            }
+        }
+
+        if(task!=null) {
+            task.setState(BaseTask.PAUSED);
+            task.resumeByUser();
+        }
+    }
+
     public interface CallBack {
         void onClearTask(int id);
         void onUpdateTask(BaseTask task);

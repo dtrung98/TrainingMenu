@@ -5,23 +5,35 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
+import android.webkit.URLUtil;
+
 
 import com.zalo.trainingmenu.App;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.content.Context.VIBRATOR_SERVICE;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public final class Util {
+    private static final String TAG = "Util";
+
    /* @SuppressLint("DefaultLocale")
     public static String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
@@ -120,5 +132,59 @@ public final class Util {
                 vibrator.vibrate(50);
             }
         }
+    }
+
+    public static String generatePath() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            File file = App.getInstance().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            return file == null ? "" : file.toString();
+        } else  return getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+    }
+
+    public static String generateTitle(String url, String directoryPath) {
+
+        String autoTitle = URLUtil.guessFileName(url, null, null);
+        if(autoTitle==null || autoTitle.isEmpty())
+            autoTitle = "Unknown.std";
+
+        return makeSureFileNameDoesNotExist(directoryPath ,autoTitle);
+    }
+
+    public static String generateTitle(String url, String directoryPath, String contentDisposition, String mimeType) {
+        Log.d(TAG, "try to generate title with mimetype "+mimeType);
+        String autoTitle;
+        String extensionInUrl = MimeTypeMap.getFileExtensionFromUrl(url);
+
+        if(extensionInUrl.isEmpty())
+        autoTitle = URLUtil.guessFileName(url, contentDisposition, mimeType);
+        else autoTitle = URLUtil.guessFileName(url,contentDisposition,extensionInUrl);
+        if(autoTitle==null || autoTitle.isEmpty())
+            autoTitle = "Untitled.bin";
+
+        return makeSureFileNameDoesNotExist(directoryPath ,autoTitle);
+    }
+
+    public static String makeSureFileNameDoesNotExist(String parentFolder, String title) {
+        Log.d(TAG, "update name for "+title);
+        if( new File(parentFolder,title).exists()) {
+            Pattern p = Pattern.compile("(.*?)?(\\..*)?");
+            Matcher m = p.matcher(title);
+            if(m.matches()) {
+                String base = m.group(1);
+                String extension = m.group(2);
+                int i = 1;
+                do {
+                    title = base + " ("+i+")"+extension;
+                    i++;
+                } while (new File(parentFolder,title).exists());
+            } else {
+                String base = title;
+                int i = 1;
+                do {
+                    title = base +" ("+i+")";
+                } while (new File(parentFolder,title).exists());
+            }
+        }
+        return title;
     }
 }

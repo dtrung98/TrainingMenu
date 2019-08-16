@@ -37,10 +37,11 @@ import es.dmoral.toasty.Toasty;
 public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "DownloadAdapter";
 
-    private static final int BIND_PROGRESS_CHANGED = 1;
-    private static final int BIND_STATE_CHANGED = 2;
-    private static final int BIND_PROGRESS_SUPPORT = 3;
-    private static final int BIND_SELECT = 4;
+    private static final int BIND_INFO = 1;
+    private static final int BIND_PROGRESS_CHANGED = 2;
+    private static final int BIND_STATE_CHANGED = 3;
+    private static final int BIND_PROGRESS_SUPPORT = 4;
+    private static final int BIND_SELECT = 5;
 
     private Context mContext;
     private final ArrayList<Object> mData = new ArrayList<>();
@@ -90,12 +91,16 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mData.set(posFound, newInfo);
                 }
 
+
                 if(oldInfo.isProgressSupport()!=newInfo.isProgressSupport()) {
                     notifyItemChanged(posFound,BIND_PROGRESS_SUPPORT);
                 }
 
                 if(oldInfo.getProgress()!=newInfo.getProgress()) {
                     notifyItemChanged(posFound,BIND_PROGRESS_CHANGED);
+                }
+                else if(!oldInfo.getFileTitle().equals(newInfo.getFileTitle()) || !oldInfo.getDirectory().equals(newInfo.getDirectory())) {
+                    notifyItemChanged(posFound, BIND_INFO);
                 }
 
                 if(oldInfo.getState()!=newInfo.getState()) {
@@ -274,6 +279,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     };
 
     private int[] mStoppedOptionIDs = new int[] {
+            R.string.try_to_resume,
             R.string.restart,
             R.string.warning_divider,
             R.string.clear,
@@ -419,6 +425,9 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         break;
                     case R.string.restart:
                         TaskServiceRemote.restartTaskWithTaskId(mActiveTaskInfo.getId());
+                        break;
+                    case R.string.try_to_resume:
+                        TaskServiceRemote.tryToResume(mActiveTaskInfo.getId());
                         break;
                   /*  case R.string.copy_url_link:
                         if(Util.setClipboard(mContext,mActiveTaskInfo.getFileTitle(),mActiveTaskInfo.getURLString()))
@@ -692,6 +701,9 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     payloads) {
                 if(object instanceof Integer) {
                     switch ((int)object) {
+                        case BIND_INFO:
+                            bindInfo(info);
+                            break;
                         case BIND_PROGRESS_SUPPORT:
                             bindProgressSupport(info);
                             break;
@@ -732,8 +744,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         public void bind(TaskInfo info) {
-                mTitleTextView.setText(info.getFileTitle());
-                mDescriptionTextView.setText(info.getURLString());
+                bindInfo(info);
                 bindSelect();
         }
 
@@ -748,6 +759,11 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
                 }
             }
+        }
+
+        final void bindInfo(TaskInfo info) {
+            mTitleTextView.setText(info.getFileTitle());
+            mDescriptionTextView.setText(info.getURLString());
         }
 
         private void bindSelect() {

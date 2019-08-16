@@ -229,6 +229,10 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
         if(mDownloadManager!=null) mDownloadManager.restartTasks(ids);
     }
 
+    public void tryToResume(int id) {
+        if(mDownloadManager!=null) mDownloadManager.tryToResume(id);
+    }
+
 
     public class Binder extends android.os.Binder {
         @NonNull

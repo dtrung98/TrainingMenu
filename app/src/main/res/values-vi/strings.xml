@@ -164,4 +164,7 @@
     <string name="clear_selected_tasks">Xóa nhiệm vụ được chọn</string>
     <string name="copy_url_link">Sao chép liên kết</string>
     <string name="restart_selected_tasks">Tải lại nhiệm vụ được chọn</string>
+    <string name="title">Tiêu đề</string>
+    <string name="try_to_resume">Thử khôi phục</string>
+    <string name="write_something_here">Viết ghi chú ở đây</string>
 </resources>

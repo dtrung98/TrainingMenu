@@ -181,5 +181,6 @@
     <string name="restart_selected_tasks">Restart all selected items</string>
     <string name="clear_selected_tasks">Clear all selected items</string>
     <string name="title">Title</string>
-    <string name="write_something_here">Write something here...</string>
+    <string name="write_something_here">Write something here…</string>
+    <string name="try_to_resume">Try to resume</string>
 </resources>

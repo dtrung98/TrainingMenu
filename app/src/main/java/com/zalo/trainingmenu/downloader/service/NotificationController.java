@@ -88,11 +88,11 @@ public class NotificationController {
                             builder.setContentText("Downloading" + MIDDLE_DOT+speed);
 
                     builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
-                    Intent intent = new Intent(TaskService.ACTION_PAUSE);
+                  /*  Intent intent = new Intent(TaskService.ACTION_PAUSE);
                     PendingIntent pendingIntent = PendingIntent.getService(mService,0,intent,0);
                     NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_pause_black_24dp,mService.getResources().getString(R.string.pause),pendingIntent);
                     builder.mActions.clear();
-                    builder.addAction(action);
+                    builder.addAction(action);*/
                     break;
                  case BaseTask.SUCCESS:
                      builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes()));

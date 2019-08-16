@@ -171,7 +171,7 @@ public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
 
                 urlConnection.connect();
                 if(urlConnection.getResponseCode()/100 !=2) {
-                    setState(FAILURE_TERMINATED,"Response code is invalid");
+                    setState(FAILURE_TERMINATED,"Response code is invalid ("+urlConnection.getResponseCode()+")");
                     notifyTaskChanged();
                     return;
                 }

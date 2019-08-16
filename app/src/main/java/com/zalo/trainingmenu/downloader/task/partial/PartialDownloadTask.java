@@ -18,6 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import static com.zalo.trainingmenu.downloader.base.BaseTask.FAILURE_TERMINATED;
 import static com.zalo.trainingmenu.downloader.base.BaseTask.RUNNING;
+import static com.zalo.trainingmenu.downloader.base.BaseTask.SUCCESS;
 import static com.zalo.trainingmenu.downloader.task.simple.SimpleDownloadTask.RANGE_PROPERTY;
 
 public class PartialDownloadTask implements Runnable {
@@ -160,6 +161,12 @@ public class PartialDownloadTask implements Runnable {
                     setState(FAILURE_TERMINATED, "File had been modified");
                     notifyTaskChanged();
                     return;
+                } else if(mEndByte==getRealPositionInFile(downloaded)-1) {
+                    // This task had been finished already
+                    closeFileWriter(fileWriter);
+                    setState(SUCCESS);
+                    notifyTaskChanged();
+                    return;
                 }
 
                 try {
@@ -214,13 +221,14 @@ public class PartialDownloadTask implements Runnable {
 
 
             if(isPartialDownloadTask()) {
-                urlConnection.setRequestProperty(RANGE_PROPERTY, "bytes=" + getRealPositionInFile(getDownloadedInBytes()) + '-' + mEndByte);
+                String requestRange =  "bytes=" + getRealPositionInFile(getDownloadedInBytes()) + '-' + mEndByte;
+                urlConnection.setRequestProperty(RANGE_PROPERTY,requestRange);
                 //Log.d(TAG, "partial task id "+ getId()+" is request range with "+ getRealPositionInFile(getDownloadedInBytes())+" - "+ mEndByte);
 
                 urlConnection.connect();
                 //Log.d(TAG, "partial task id "+getId()+" connected");
                 if (urlConnection.getResponseCode() / 100 != 2) {
-                    setState(FAILURE_TERMINATED, "Response code is invalid");
+                    setState(FAILURE_TERMINATED, "Response code from server is invalid ("+urlConnection.getResponseCode()+"). The thread which downloads range "+getStartByte()+" - "+getEndByte() +" is can not request for range "+getRealPositionInFile(getDownloadedInBytes())+" - "+mEndByte);
                     notifyTaskChanged();
                     return;
                 } //else //Log.d(TAG, "partial task id "+ getId()+" receives response code "+urlConnection.getResponseCode());

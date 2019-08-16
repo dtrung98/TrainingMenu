@@ -1,17 +1,25 @@
 package com.zalo.trainingmenu.downloader.ui.widget;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 
 import com.zalo.trainingmenu.R;
 
 import java.util.Random;
 
 public class MultipartProgressBar extends View {
+    private static final String TAG = "MultipartProgressBar";
+
     public MultipartProgressBar(Context context) {
         super(context);
         init(context,null);
@@ -36,6 +44,16 @@ public class MultipartProgressBar extends View {
     private int mThickness;
 
     private void init(Context context, AttributeSet attrs) {
+
+        mIVAnimator.setRepeatMode(ValueAnimator.RESTART);
+        mIVAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mIVAnimator.setStartDelay(100);
+        mIVAnimator.setInterpolator(new DecelerateInterpolator());
+        mIVAnimator.addUpdateListener(valueAnimator -> {
+            mCurrentIVValue = (float) valueAnimator.getAnimatedValue();
+            update();
+        });
+
         if(attrs!=null && context!=null) {
             TypedArray t = context.obtainStyledAttributes(attrs, R.styleable.MultipartProgressBar);
 
@@ -51,16 +69,17 @@ public class MultipartProgressBar extends View {
             setBackgroundBarColor(t.getColor(R.styleable.MultipartProgressBar_backgroundBarColor,context.getResources().getColor(R.color.FlatWhite)));
 
 
-            mIsIndeterminate = t.getBoolean(R.styleable.MultipartProgressBar_indeterminate,false);
             mThickness = (int) t.getDimension(R.styleable.MultipartProgressBar_thickness,context.getResources().getDimension(R.dimen.dp_6));
-            mIndeterminateDuration = t.getInteger(R.styleable.MultipartProgressBar_indeterminateDuration,context.getResources().getInteger(android.R.integer.config_mediumAnimTime));
-            mIsAnimateOnChanged = t.getBoolean(R.styleable.MultipartProgressBar_animateOnChanged,true);
 
 
             int number = t.getInteger(R.styleable.MultipartProgressBar_connections,6);
             mPercentages = new int[number];
             if(t.getBoolean(R.styleable.MultipartProgressBar_randomPercentages,false))
             randomPercentages();
+
+            setIndeterminateDuration(t.getInteger(R.styleable.MultipartProgressBar_indeterminateDuration,context.getResources().getInteger(android.R.integer.config_mediumAnimTime)));
+            setIndeterminate(t.getBoolean(R.styleable.MultipartProgressBar_indeterminate,false));
+            mIsAnimateOnChanged = t.getBoolean(R.styleable.MultipartProgressBar_animateOnChanged,true);
 
             t.recycle();
         }
@@ -78,7 +97,7 @@ public class MultipartProgressBar extends View {
         update();
     }
 
-    public void setPercentage(int index, int value) {
+    public void updatePercentage(int index, int value) {
         if(index<mPercentages.length) {
             mPercentages[index] = value;
             update();
@@ -104,6 +123,7 @@ public class MultipartProgressBar extends View {
 
     public void setIndeterminateDuration(long indeterminateDuration) {
         mIndeterminateDuration = indeterminateDuration;
+        mIVAnimator.setDuration(mIndeterminateDuration);
     }
 
     private long mIndeterminateDuration;
@@ -143,9 +163,15 @@ public class MultipartProgressBar extends View {
 
 
     public void setIndeterminate(boolean value) {
-        mIsIndeterminate = true;
+        Log.d(TAG, "set indeterminate to "+value+" from "+mIsIndeterminate);
+        mIsIndeterminate = value;
+        if(mIsIndeterminate && !mIVAnimator.isRunning()) {
+            mIVAnimator.start();
+        } else if(!mIsIndeterminate && mIVAnimator.isRunning()) mIVAnimator.cancel();
         update();
     }
+    float mCurrentIVValue = 0;
+    ValueAnimator mIVAnimator = ValueAnimator.ofFloat(0,1);
 
     private void update() {
         invalidate();
@@ -184,7 +210,21 @@ public class MultipartProgressBar extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawBackgroundBar(canvas);
+        if(isIndeterminate())
+            drawIndeterminate(canvas);
+        else
         drawForegroundBar(canvas);
+    }
+
+    private void drawIndeterminate(Canvas canvas) {
+        Log.d(TAG, "draw indeterminate");
+
+        float indeterminateWidth = mProgressBarWidth * 112/240f;
+        float indeterminateLeft = (mProgressBarLeft  - indeterminateWidth) + (mProgressBarWidth + indeterminateWidth)*mCurrentIVValue;
+        float indeterminateRight = indeterminateLeft +indeterminateWidth;
+        if(indeterminateLeft<mProgressBarLeft) indeterminateLeft = mProgressBarLeft;
+        if(indeterminateRight> mProgressBarRight) indeterminateRight = mProgressBarRight;
+        canvas.drawRect(indeterminateLeft, mProgressBarTop,indeterminateRight,mProgressBarBottom,mForegroundBarPaint);
     }
 
     private void drawBackgroundBar(Canvas canvas) {
@@ -192,6 +232,8 @@ public class MultipartProgressBar extends View {
     }
 
     private void drawForegroundBar(Canvas canvas) {
+        Log.d(TAG, "draw foreground");
+
         int number = mPercentages.length;
         float chunkWidth = (float) mProgressBarWidth/number;
         for (int i = 0; i < number; i++) {

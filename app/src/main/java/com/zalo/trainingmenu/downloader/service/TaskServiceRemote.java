@@ -175,7 +175,7 @@ public class TaskServiceRemote {
             try {
                 File filePath = new File(info.getDirectory());
                 File fileToWrite = new File(filePath, info.getFileTitle());
-                final Uri data = FileProvider.getUriForFile(context, "com.zalo.servicetraining.provider", fileToWrite);
+                final Uri data = FileProvider.getUriForFile(context, "com.zalo.trainingmenu.provider", fileToWrite);
                 context.grantUriPermission(context.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 String fileExtension = info.getFileTitle().substring(info.getFileTitle().lastIndexOf("."));
                 Log.d(TAG, "onItemClick: extension " + fileExtension);
@@ -193,6 +193,7 @@ public class TaskServiceRemote {
                 Toasty.error(App.getInstance().getApplicationContext(),"Not found any app that could open this file").show();
             } catch (Exception e) {
                 Toasty.error(App.getInstance().getApplicationContext(),"Sorry, something went wrong").show();
+                Log.d(TAG, "exception when trying to open file: "+e.getMessage());
             }
         }
     }
@@ -207,11 +208,14 @@ public class TaskServiceRemote {
 
     public static void clearTasks(List<Integer> ids) {
         if(mService!=null) mService.clearTasks(ids);
-
     }
 
     public static void restartTasks(List<Integer> ids) {
         if(mService!=null) mService.restartTasks(ids);
+    }
+
+    public static void tryToResume(int id) {
+        if(mService!=null) mService.tryToResume(id);
     }
 
 
