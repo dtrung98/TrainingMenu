@@ -10,18 +10,24 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
+import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.downloader.ui.main.AddDownloadDialog;
 import com.zalo.trainingmenu.mainui.MainActivity;
 import com.zalo.trainingmenu.mainui.base.AbsLocaleActivity;
 
 import java.util.ArrayList;
 
+import es.dmoral.toasty.Toasty;
+
 public class SettingActivity extends AbsLocaleActivity {
+    public static final String ACTION_CHOOSE_DOWNLOAD_FOLDER = "choose_download_folder";
 
     protected Toolbar mToolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting);
         bindView();
@@ -98,5 +104,20 @@ public class SettingActivity extends AbsLocaleActivity {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPermissionResult(Intent intent, boolean granted) {
+        if(intent==null) return;
+        String action = intent.getAction();
+        if(action!=null&&!action.isEmpty())
+            switch (action) {
+                case ACTION_CHOOSE_DOWNLOAD_FOLDER:
+                    if(granted) {
+                        FolderChooserDialog.newInstance().show(getSupportFragmentManager(),FolderChooserDialog.TAG);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't choose folder without storage permissions!").show();
+                    break;
+            }
     }
 }

@@ -12,10 +12,11 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zalo.trainingmenu.downloader.helper.LocaleHelper;
+import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
 
 import java.util.Locale;
 
-public abstract class AbsLocaleActivity extends AppCompatActivity {
+public abstract class AbsLocaleActivity extends PermissionActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

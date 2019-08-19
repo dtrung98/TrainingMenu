@@ -29,8 +29,8 @@ import java.util.WeakHashMap;
 
 import es.dmoral.toasty.Toasty;
 
-public class TaskServiceRemote {
-    private static final String TAG = "TaskServiceRemote";
+public class RemoteForTaskService {
+    private static final String TAG = "RemoteForTaskService";
 
     private static TaskService mService;
     private static final WeakHashMap<Context, RemoteServiceBinder> mConnectionMap = new WeakHashMap<>();

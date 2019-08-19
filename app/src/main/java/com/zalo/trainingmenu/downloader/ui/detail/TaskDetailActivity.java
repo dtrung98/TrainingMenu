@@ -10,7 +10,7 @@ import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
+import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.model.Item;
 import com.zalo.trainingmenu.mainui.base.MenuAdapter;
@@ -70,7 +70,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
     @Override
     protected void refreshData() {
         if(isServiceConnected()) {
-            mTaskInfo = TaskServiceRemote.getTaskInfoWithTaskId(mTaskId);
+            mTaskInfo = RemoteForTaskService.getTaskInfoWithTaskId(mTaskId);
         }
         if(mTaskInfo!=null) {
             bind();

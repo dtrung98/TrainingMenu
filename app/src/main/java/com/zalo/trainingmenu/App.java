@@ -2,8 +2,10 @@ package com.zalo.trainingmenu;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import com.zalo.trainingmenu.downloader.helper.LocaleHelper;
 
@@ -27,4 +29,8 @@ public class App extends Application {
     }
 
     private void init() {}
+
+    public static SharedPreferences getDefaultSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext());
+    }
 }

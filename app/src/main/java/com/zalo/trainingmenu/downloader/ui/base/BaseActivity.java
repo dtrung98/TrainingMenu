@@ -14,13 +14,14 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
+import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.service.TaskService;
+import com.zalo.trainingmenu.mainui.base.AbsListActivity;
 import com.zalo.trainingmenu.model.ServiceToken;
 
 import java.lang.ref.WeakReference;
 
-public abstract class BaseActivity extends PermissionActivity  implements ServiceConnection {
+public abstract class BaseActivity extends AbsListActivity implements ServiceConnection {
     private static final String TAG = "BaseActivity";
 
     private ServiceToken mServiceToken;
@@ -63,13 +64,13 @@ public abstract class BaseActivity extends PermissionActivity  implements Servic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mServiceToken = TaskServiceRemote.bindServiceAndStartIfNotRunning(this,this);
+        mServiceToken = RemoteForTaskService.bindServiceAndStartIfNotRunning(this,this);
     }
 
     @Override
     protected void onDestroy() {
         unregister();
-        TaskServiceRemote.unBind(mServiceToken);
+        RemoteForTaskService.unBind(mServiceToken);
         mServiceToken = null;
         super.onDestroy();
     }

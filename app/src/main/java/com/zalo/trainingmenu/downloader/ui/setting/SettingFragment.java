@@ -1,5 +1,6 @@
 package com.zalo.trainingmenu.downloader.ui.setting;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -14,20 +15,32 @@ import androidx.preference.PreferenceGroup;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.helper.LocaleHelper;
+import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.util.Util;
 
-public class SettingFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+import java.io.File;
+
+import static com.zalo.trainingmenu.downloader.ui.setting.SettingActivity.ACTION_CHOOSE_DOWNLOAD_FOLDER;
+
+public class SettingFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener, FolderChooserDialog.FolderCallback {
+    private static final String TAG = "SettingFragment";
+
     public static final String EXTRA_CONNECTIONS_PER_TASK = "connectionsPerTask";
     public static final String EXTRA_SIMULTANEOUS_DOWNLOADS = "simultaneousDownloads";
     public static final String EXTRA_APP_LANGUAGE = "app_language";
+    public static final String DOWNLOADS_FOLDER = "downloadsFolder";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.general_setting, rootKey);
+
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         initSummary(getPreferenceScreen());
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -58,13 +71,13 @@ public class SettingFragment extends PreferenceFragmentCompat implements SharedP
 
     private void updateSummary(@Nullable Preference preference) {
         if (preference == null) return;
-
-        if (preference instanceof ListPreference && EXTRA_CONNECTIONS_PER_TASK.equals(preference.getKey())) {
+        if(preference instanceof FolderChooserPreference && DOWNLOADS_FOLDER.equals(preference.getKey())) {
+          preference.setSummary(Util.getCurrentDownloadDirectoryPath());
+        } else if (preference instanceof ListPreference && EXTRA_CONNECTIONS_PER_TASK.equals(preference.getKey())) {
             preference.setSummary(((ListPreference) preference).getValue() + " " + getString(R.string.connections));
         } else if (preference instanceof ListPreference && EXTRA_SIMULTANEOUS_DOWNLOADS.equals(preference.getKey())) {
             preference.setSummary(((ListPreference) preference).getValue() + " " + getString(R.string.downloads_same_time));
         } else if (preference instanceof ListPreference && EXTRA_APP_LANGUAGE.equals(preference.getKey())) {
-
 
             CharSequence entry = ((ListPreference) preference).getEntry();
             String value = ((ListPreference) preference).getValue();
@@ -83,5 +96,24 @@ public class SettingFragment extends PreferenceFragmentCompat implements SharedP
             }
             preference.setSummary(entry);
         }
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        if(preference instanceof FolderChooserPreference) {
+            if(getActivity() instanceof PermissionActivity) {
+                Intent intent = new Intent(ACTION_CHOOSE_DOWNLOAD_FOLDER);
+                ((PermissionActivity) getActivity()).executeWriteStorageAction(intent);
+            }
+        }
+        else
+        super.onDisplayPreferenceDialog(preference);
+    }
+
+    @Override
+    public void onFolderSelection(@NonNull File folder) {
+        SharedPreferences.Editor editor = App.getDefaultSharedPreferences().edit();
+        editor.putString("downloadsFolder", folder.getAbsolutePath());
+        editor.apply();
     }
 }

@@ -228,7 +228,7 @@ public class PartialDownloadTask implements Runnable {
                 urlConnection.connect();
                 //Log.d(TAG, "partial task id "+getId()+" connected");
                 if (urlConnection.getResponseCode() / 100 != 2) {
-                    setState(FAILURE_TERMINATED, "Response code from server is invalid ("+urlConnection.getResponseCode()+"). The thread which downloads range "+getStartByte()+" - "+getEndByte() +" is can not request for range "+getRealPositionInFile(getDownloadedInBytes())+" - "+mEndByte);
+                    setState(FAILURE_TERMINATED, "Response code from server is invalid ("+urlConnection.getResponseCode()+"). Task that downloads byte ranges "+getStartByte()+" - "+getEndByte() +" can not request server for ranges "+getRealPositionInFile(getDownloadedInBytes())+" - "+mEndByte);
                     notifyTaskChanged();
                     return;
                 } //else //Log.d(TAG, "partial task id "+ getId()+" receives response code "+urlConnection.getResponseCode());

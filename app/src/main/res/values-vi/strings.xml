@@ -167,4 +167,5 @@
     <string name="title">Tiêu đề</string>
     <string name="try_to_resume">Thử khôi phục</string>
     <string name="write_something_here">Viết ghi chú ở đây</string>
+    <string name="choose_folder">Chọn thư mục</string>
 </resources>

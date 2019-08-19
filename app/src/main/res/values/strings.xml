@@ -183,4 +183,7 @@
     <string name="title">Title</string>
     <string name="write_something_here">Write something here…</string>
     <string name="try_to_resume">Try to resume</string>
+    <string name="choose_folder">Choose folder</string>
+    <string name="choose_this_folder">Choose this folder</string>
+    <string name="folder_chooser">Folder Chooser</string>
 </resources>

@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
+import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingActivity;
+import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
 
@@ -28,9 +30,12 @@ import es.dmoral.toasty.Toasty;
 
 
 public class DownloadActivity extends BaseActivity {
+    public static final String ACTION_TRY_TO_RESUME = "try_to_resume";
     private static final String TAG = "DownloadActivity";
     public static final String ACTION_ADD_NEW_DOWNLOAD = "add_new_download";
     public static final String ACTION_RESUME_DOWNLOAD = "resume_download";
+    public static final String ACTION_RESTART_DOWNLOAD = "restart_download";
+    public static final String ACTION_OPEN_FILE = "open_file";
 
 
     FloatingActionButton mAddButton;
@@ -55,13 +60,41 @@ public class DownloadActivity extends BaseActivity {
         String action = intent.getAction();
         if(action!=null&&!action.isEmpty())
         switch (action) {
+
             case ACTION_ADD_NEW_DOWNLOAD:
                 if(granted) {
                     AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Can't create new download task because you denied permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't create new download task because you denied permissions!").show();
                 break;
+
             case ACTION_RESUME_DOWNLOAD:
+                if(granted) {
+                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                    if(id!=-1) RemoteForTaskService.resumeTaskWithTaskId(id);
+                }
+                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't resume download task without storage permissions!").show();
+                break;
+            case ACTION_RESTART_DOWNLOAD:
+                if(granted) {
+                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                    if(id!=-1) RemoteForTaskService.restartTaskWithTaskId(id);
+                }
+                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't restart task without storage permissions!").show();
+                break;
+            case ACTION_TRY_TO_RESUME:
+                if(granted) {
+                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                    if(id!=-1) RemoteForTaskService.tryToResume(id);
+                }
+                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't resume download task without storage permissions!").show();
+                break;
+            case ACTION_OPEN_FILE:
+                if(granted) {
+                    TaskInfo info = intent.getParcelableExtra(BaseTask.EXTRA_TASK_INFO);
+                    if(info!=null) RemoteForTaskService.openFinishedTaskInfo(this,info);
+                }
+                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't open without storage permissions!").show();
                 break;
         }
     }
@@ -135,22 +168,23 @@ public class DownloadActivity extends BaseActivity {
                     addNewTask();
                     break;
                 case R.string.go_to_download_folder:
+                        Util.openDirectoryIntent(DownloadActivity.this, Util.getCurrentDownloadDirectoryPath());
                     break;
                 case R.string.settings:
                     DownloadActivity.this.startActivity(new Intent(DownloadActivity.this, SettingActivity.class));
                     break;
                 case R.string.restart_all:
-                    TaskServiceRemote.restartAll();
+                    RemoteForTaskService.restartAll();
                     break;
                 case R.string.clear_all:
-                    TaskServiceRemote.clearAllTasks();
+                    RemoteForTaskService.clearAllTasks();
                     break;
                 case R.string.restart_selected_tasks:
-                    TaskServiceRemote.restartTasks(mAdapter.getSelectedTasks());
+                    RemoteForTaskService.restartTasks(mAdapter.getSelectedTasks());
                     mAdapter.goOutSelectMode();
                     break;
                 case R.string.clear_selected_tasks:
-                    TaskServiceRemote.clearTasks(mAdapter.getSelectedTasks());
+                    RemoteForTaskService.clearTasks(mAdapter.getSelectedTasks());
                     mAdapter.goOutSelectMode();
                     break;
             }
@@ -193,7 +227,7 @@ public class DownloadActivity extends BaseActivity {
     @Override
     protected void refreshData() {
         ArrayList<Object> list = new ArrayList<>();
-        List<TaskInfo> task_list = TaskServiceRemote.getSessionTaskList();
+        List<TaskInfo> task_list = RemoteForTaskService.getSessionTaskList();
         list.add(getString(R.string.downloading));
 
         if(task_list!=null&&!task_list.isEmpty()) {
@@ -220,7 +254,7 @@ public class DownloadActivity extends BaseActivity {
     protected void onTaskUpdated(int id, int state, float progress, boolean progress_support, long downloaded, long fileContentLength, float speed) {
        if(true) return;
         if(!mAdapter.onTaskUpdated(id,state, progress, progress_support,downloaded, fileContentLength, speed))
-          mAdapter.onTaskAdded(TaskServiceRemote.getTaskInfoWithTaskId(id));
+          mAdapter.onTaskAdded(RemoteForTaskService.getTaskInfoWithTaskId(id));
     }*/
 
     @Override

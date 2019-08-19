@@ -2,9 +2,11 @@ package com.zalo.trainingmenu.util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -19,6 +21,8 @@ import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
 
+import androidx.preference.PreferenceManager;
+
 import com.zalo.trainingmenu.App;
 
 import java.io.File;
@@ -27,6 +31,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import es.dmoral.toasty.Toasty;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -134,11 +140,20 @@ public final class Util {
         }
     }
 
-    public static String generatePath() {
+    public static File getDefaultDirectory() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            File file = App.getInstance().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            return file == null ? "" : file.toString();
-        } else  return getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+            return App.getInstance().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        } else
+            return getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+    }
+
+    public static String getDefaultDirectoryPath() {
+        File file = getDefaultDirectory();
+        return (file==null) ? "":file.getAbsolutePath();
+    }
+
+    public static String getCurrentDownloadDirectoryPath() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString("downloadsFolder",getDefaultDirectoryPath());
     }
 
     public static String generateTitle(String url, String directoryPath) {
@@ -187,4 +202,23 @@ public final class Util {
         }
         return title;
     }
-}
+
+    public static void openDirectoryIntent(Context context, String path)
+    {
+        Uri selectedUri = Uri.parse(path);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(selectedUri, "resource/folder");
+        if(intent.resolveActivityInfo(context.getPackageManager(),0) == null) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setDataAndType(selectedUri,"file/*");
+        }
+
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toasty.error(App.getInstance().getApplicationContext(), "No apps found to open this folder").show();
+        } catch (Exception e) {
+            Toasty.error(App.getInstance().getApplicationContext(), "Sorry, something went wrong!").show();
+        }
+        }
+    }

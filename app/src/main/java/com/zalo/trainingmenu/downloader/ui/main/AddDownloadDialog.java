@@ -27,12 +27,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
-import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
+import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 
-
-import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import es.dmoral.toasty.Toasty;
 
@@ -45,7 +41,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
 
-    static AddDownloadDialog newInstance() {
+    public static AddDownloadDialog newInstance() {
         return new AddDownloadDialog();
     }
 
@@ -55,6 +51,10 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         return inflater.inflate(R.layout.add_download_layout,container,false);
     }
 
+    @Override
+    public int getTheme() {
+        return R.style.DialogDimDisabled;
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -169,7 +169,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     }
     private void addTask(String url) {
         DownloadItem item = new DownloadItem(url);
-        TaskServiceRemote.appendTask(item);
+        RemoteForTaskService.appendTask(item);
     }
 
     @Override

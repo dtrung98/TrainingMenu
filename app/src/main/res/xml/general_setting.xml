@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    <androidx.preference.PreferenceCategory
+    <PreferenceCategory
         android:title="@string/downloader"
         app:iconSpaceReserved="false">
-        <androidx.preference.ListPreference
+        <com.zalo.trainingmenu.downloader.ui.setting.FolderChooserPreference
             android:title="@string/downloads_folder"
-            android:dialogTitle="@string/choose_folders"
-            android:entries="@array/number_connections"
-            android:entryValues="@array/number_connections"
-            android:defaultValue="2"
             android:key="downloadsFolder"
-            android:summary="/storage/emulated/0/Downloads"
+            tools:summary="/storage/emulated/0/Downloads"
             app:iconSpaceReserved="false"
             />
-        <androidx.preference.ListPreference
+        <ListPreference
             android:title="@string/connections_per_task"
             android:dialogTitle="@string/choose_number_connections"
             android:entries="@array/number_connections"
@@ -25,7 +21,7 @@
             app:iconSpaceReserved="false"
             tools:summary="5 connections"
             />
-        <androidx.preference.ListPreference
+        <ListPreference
             android:title="@string/simultaneous_downloads"
             android:dialogTitle="@string/choose_number_downloads"
             android:entries="@array/simultaneous_downloads"
@@ -35,15 +31,32 @@
             tools:summary="2 downloads"
             app:iconSpaceReserved="false"
             />
-    </androidx.preference.PreferenceCategory>
-    <androidx.preference.PreferenceCategory android:title="@string/layout"
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/layout"
         app:iconSpaceReserved="false">
-        <androidx.preference.ListPreference
+        <ListPreference
             android:entries="@array/languages_array"
             android:entryValues="@array/languages_array_values"
             android:key="app_language"
             tools:summary="English"
             android:title="@string/app_language"
             app:iconSpaceReserved="false"/>
-    </androidx.preference.PreferenceCategory>
-</androidx.preference.PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Notifications"
+        app:iconSpaceReserved="false">
+    <SwitchPreference
+        android:title="Combine downloading tasks notifications"
+        android:defaultValue="false"
+        android:key="combineDownloadingTasks"
+        app:iconSpaceReserved="false"
+        app:summary="Every downloading tasks show in one notification. \nTap to enable"
+        />
+    <SwitchPreference
+        android:title="Combine downloaded task notifications"
+        android:defaultValue="true"
+        android:key="combineDownloadedTasks"
+        app:iconSpaceReserved="false"
+        app:summary="Each downloaded tasks shows in one notification. \nTap to disable."
+        />
+    </PreferenceCategory>
+</PreferenceScreen>

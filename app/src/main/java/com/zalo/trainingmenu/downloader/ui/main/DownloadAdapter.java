@@ -4,14 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,7 +21,7 @@ import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.downloader.service.TaskServiceRemote;
+import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.trainingmenu.downloader.ui.widget.MultipartProgressBar;
@@ -406,28 +404,37 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         @Override
         public boolean onOptionClicked(int optionID) {
-            if(mActiveTaskInfo!=null&&mContext!=null) {
+            if(mActiveTaskInfo!=null&&mContext instanceof DownloadActivity) {
+                Intent intent;
                 switch (optionID) {
                     case R.string.open:
-                        TaskServiceRemote.openFinishedTaskInfo(mContext, mActiveTaskInfo);
+                        intent = new Intent(DownloadActivity.ACTION_OPEN_FILE);
+                        intent.putExtra(BaseTask.EXTRA_TASK_INFO,mActiveTaskInfo);
+                        ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                         break;
                     case R.string.pause:
-                        TaskServiceRemote.pauseTaskWithTaskId(mActiveTaskInfo.getId());
+                        RemoteForTaskService.pauseTaskWithTaskId(mActiveTaskInfo.getId());
                         break;
                     case R.string.resume:
-                        TaskServiceRemote.resumeTaskWithTaskId(mActiveTaskInfo.getId());
+                        intent = new Intent(DownloadActivity.ACTION_RESUME_DOWNLOAD);
+                        intent.putExtra(BaseTask.EXTRA_TASK_ID,mActiveTaskInfo.getId());
+                        ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                         break;
                     case R.string.cancel:
-                        TaskServiceRemote.cancelTaskWithTaskId(mActiveTaskInfo.getId());
+                        RemoteForTaskService.cancelTaskWithTaskId(mActiveTaskInfo.getId());
                         break;
                     case R.string.clear:
-                        TaskServiceRemote.clearTask(mActiveTaskInfo.getId());
+                        RemoteForTaskService.clearTask(mActiveTaskInfo.getId());
                         break;
                     case R.string.restart:
-                        TaskServiceRemote.restartTaskWithTaskId(mActiveTaskInfo.getId());
+                        intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
+                        intent.putExtra(BaseTask.EXTRA_TASK_ID,mActiveTaskInfo.getId());
+                        ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                         break;
                     case R.string.try_to_resume:
-                        TaskServiceRemote.tryToResume(mActiveTaskInfo.getId());
+                        intent = new Intent(DownloadActivity.ACTION_TRY_TO_RESUME);
+                        intent.putExtra(BaseTask.EXTRA_TASK_ID,mActiveTaskInfo.getId());
+                        ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                         break;
                   /*  case R.string.copy_url_link:
                         if(Util.setClipboard(mContext,mActiveTaskInfo.getFileTitle(),mActiveTaskInfo.getURLString()))
@@ -435,7 +442,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         else Toasty.error(App.getInstance().getApplicationContext(),"Something went wrong, can not copy this field").show();
                         break;*/
                     case R.string.properties:
-                        Intent intent = new Intent(mContext, TaskDetailActivity.class);
+                        intent = new Intent(mContext, TaskDetailActivity.class);
                         intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
                         intent.putExtra(BaseTask.EXTRA_TASK_ID, mActiveTaskInfo.getId());
                         mContext.startActivity(intent);
@@ -448,24 +455,29 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void onIconClick(int position, Object object) {
-        if(object instanceof TaskInfo) {
+        if(object instanceof TaskInfo && mContext instanceof DownloadActivity) {
             TaskInfo info = ((TaskInfo)object);
+            Intent intent;
             switch (info.getState()) {
                 case BaseTask.PENDING:
                     Toasty.info(App.getInstance().getApplicationContext(),"Task is pending, please wait");
                     break;
                 case BaseTask.PAUSED:
-                    TaskServiceRemote.resumeTaskWithTaskId(info.getId());
+                    intent = new Intent(DownloadActivity.ACTION_RESUME_DOWNLOAD);
+                    intent.putExtra(BaseTask.EXTRA_TASK_ID,info.getId());
+                    ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                     break;
                 case BaseTask.CONNECTING:
                 case BaseTask.RUNNING:
-                    TaskServiceRemote.pauseTaskWithTaskId(info.getId());
+                    RemoteForTaskService.pauseTaskWithTaskId(info.getId());
                     break;
                 case BaseTask.FAILURE_TERMINATED:
-                    TaskServiceRemote.restartTaskWithTaskId(info.getId());
+                    intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
+                    intent.putExtra(BaseTask.EXTRA_TASK_ID,info.getId());
+                    ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                     break;
                 case BaseTask.SUCCESS:
-                    Intent intent = new Intent(mContext, TaskDetailActivity.class);
+                    intent = new Intent(mContext, TaskDetailActivity.class);
                     intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
                     intent.putExtra(BaseTask.EXTRA_TASK_ID,info.getId());
                     mContext.startActivity(intent);
@@ -510,7 +522,9 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
        if(object instanceof TaskInfo && mContext instanceof Activity && ((TaskInfo)object).getState()== BaseTask.SUCCESS) {
            TaskInfo info = (TaskInfo) object;
-           TaskServiceRemote.openFinishedTaskInfo(mContext, info);
+           Intent intent = new Intent(DownloadActivity.ACTION_OPEN_FILE);
+           intent.putExtra(BaseTask.EXTRA_TASK_INFO,info);
+           ((DownloadActivity) mContext).executeWriteStorageAction(intent);
 
        } else if(object instanceof TaskInfo) {
            Intent intent = new Intent(mContext, TaskDetailActivity.class);
@@ -560,10 +574,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super.onClick(view);
             switch (view.getId()) {
                 case R.id.clear:
-                    TaskServiceRemote.clearTask(((TaskInfo)mData.get(getAdapterPosition())).getId());
+                    RemoteForTaskService.clearTask(((TaskInfo)mData.get(getAdapterPosition())).getId());
                     break;
                 case R.id.restart:
-                    TaskServiceRemote.restartTaskWithTaskId(((TaskInfo)mData.get(getAdapterPosition())).getId());
+                    Intent intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
+                    intent.putExtra(BaseTask.EXTRA_TASK_ID,((TaskInfo)mData.get(getAdapterPosition())).getId());
+                    ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                     break;
             }
         }
