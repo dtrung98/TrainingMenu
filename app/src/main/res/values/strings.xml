@@ -185,5 +185,9 @@
     <string name="try_to_resume">Try to resume</string>
     <string name="choose_folder">Choose folder</string>
     <string name="choose_this_folder">Choose this folder</string>
-    <string name="folder_chooser">Folder Chooser</string>
+    <string name="folder_chooser" translatable="false">Folder Chooser</string>
+    <string name="access_external_storage">Access External Storage</string>
+    <string name="permission_description">Downloader requires storage permission to run this feature. Just accept the dialog that appears in next screen.</string>
+    <string name="ok_got_it">Ok, got it</string>
+    <string name="note_description">* This message will not display anymore when you pressed Ok button</string>
 </resources>

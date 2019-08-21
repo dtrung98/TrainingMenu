@@ -19,10 +19,10 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class SimpleDownloadTask extends BaseTask<SimpleTaskManager> {
+public class SimpleDownloadTask extends BaseTask<SimpleTaskController> {
     private static final String TAG = "SimpleDownloadTask";
 
-    public SimpleDownloadTask(final int id, SimpleTaskManager manager, DownloadItem item) {
+    public SimpleDownloadTask(final int id, SimpleTaskController manager, DownloadItem item) {
         super(id, manager, item);
     }
 

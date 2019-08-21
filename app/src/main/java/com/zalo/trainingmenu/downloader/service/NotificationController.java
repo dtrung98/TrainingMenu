@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
-import com.zalo.trainingmenu.downloader.base.BaseTaskManager;
+import com.zalo.trainingmenu.downloader.base.BaseTaskController;
 import com.zalo.trainingmenu.downloader.ui.main.DownloadActivity;
 import com.zalo.trainingmenu.util.Util;
 
@@ -53,12 +53,12 @@ public class NotificationController {
      //   notifyTaskNotificationChanged(1,BaseTask.RUNNING,0.5f,false);
     }
 
-    private BaseTaskManager getDownloadManager() {
+    private BaseTaskController getDownloadManager() {
         return mService.getDownloadManager();
     }
 
     private boolean shouldForeground() {
-        BaseTaskManager downloadManager = getDownloadManager();
+        BaseTaskController downloadManager = getDownloadManager();
         return downloadManager.isSomeTaskRunning();
     }
     public synchronized void notifyTaskNotificationChanged(BaseTask task, final int NOTIFICATION_ID, final int STATE, final int INT_PROGRESS, final boolean PROGRESS_SUPPORT) {

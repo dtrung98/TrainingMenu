@@ -1,14 +1,14 @@
 package com.zalo.trainingmenu.downloader.task.simple;
 
-import com.zalo.trainingmenu.downloader.base.BaseTaskManager;
+import com.zalo.trainingmenu.downloader.base.BaseTaskController;
 import com.zalo.trainingmenu.downloader.database.DownloadDBHelper;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 
 
-public class SimpleTaskManager extends BaseTaskManager<SimpleDownloadTask> {
-    private static final String TAG = "SimpleTaskManager";
+public class SimpleTaskController extends BaseTaskController<SimpleDownloadTask> {
+    private static final String TAG = "SimpleTaskController";
 
-    public SimpleTaskManager() {
+    public SimpleTaskController() {
         super();
     }
 

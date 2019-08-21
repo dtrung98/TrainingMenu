@@ -168,4 +168,9 @@
     <string name="try_to_resume">Thử khôi phục</string>
     <string name="write_something_here">Viết ghi chú ở đây</string>
     <string name="choose_folder">Chọn thư mục</string>
+    <string name="choose_this_folder">Chọn thư mục này</string>
+    <string name="access_external_storage">Truy cập bộ nhớ</string>
+    <string name="permission_description">Trình tải xuống cần quyền truy cập bộ nhớ để chạy tính năng này. Vui lòng nhấn cho phép lúc một cửa sổ hiện ra ở màn hình kế tiếp.</string>
+    <string name="ok_got_it">Ừ, tôi hiểu</string>
+    <string name="note_description">* Tin nhắn này sẽ không xuất hiện lại sau khi bạn nhấn chấp nhận</string>
 </resources>

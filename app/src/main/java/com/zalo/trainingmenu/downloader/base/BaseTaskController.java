@@ -8,7 +8,7 @@ import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.model.TaskList;
 import com.zalo.trainingmenu.downloader.task.partial.FileDownloadTask;
-import com.zalo.trainingmenu.downloader.task.partial.PartialTaskManager;
+import com.zalo.trainingmenu.downloader.task.partial.PartialTaskController;
 import com.zalo.trainingmenu.downloader.threading.PriorityThreadFactory;
 
 import java.util.ArrayList;
@@ -18,21 +18,21 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseTaskManager<T extends BaseTask> {
-    private static final String TAG = "BaseTaskManager";
+public abstract class BaseTaskController<T extends BaseTask> {
+    private static final String TAG = "BaseTaskController";
 
     /*
      * Number of cores to decide the number of threads
      */
-    public static final int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
+    private static final int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
 
-    public ThreadPoolExecutor mExecutor;
+    private ThreadPoolExecutor mExecutor;
 
     private final static int WHAT_TASK_CHANGED = 1;
 
     protected final ArrayList<T> mTaskList = new ArrayList<>();
 
-    public BaseTaskManager() {
+    public BaseTaskController() {
 
     }
 
@@ -67,10 +67,10 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     private void restoreInstanceInBackground() {
         mTaskList.clear();
         List<TaskInfo> infos =DownloadDBHelper.getInstance().getSavedTaskFromDatabase();
-        if(this instanceof PartialTaskManager)
+        if(this instanceof PartialTaskController)
             for (TaskInfo info: infos) {
-                FileDownloadTask task = FileDownloadTask.restoreInstance((PartialTaskManager) this,info);
-                ((PartialTaskManager)this).mTaskList.add(task);
+                FileDownloadTask task = FileDownloadTask.restoreInstance((PartialTaskController) this,info);
+                ((PartialTaskController)this).mTaskList.add(task);
             }
 
         notifyManagerChanged();
@@ -85,7 +85,7 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         notifyTaskChanged(task);
     }
 
-    public void executeExistedTask(BaseTask task) {
+    void executeExistedTask(BaseTask task) {
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
         notifyTaskChanged(task);
@@ -99,12 +99,12 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         mTaskList.clear();
     }
 
-    public void notifyManagerChanged(){
+    void notifyManagerChanged(){
         if(mCallBack!=null)
             mCallBack.onUpdateTaskManager(this);
     }
 
-    public void notifyTaskChanged(BaseTask task) {
+    void notifyTaskChanged(BaseTask task) {
         if(mCallBack!=null) {
             mCallBack.onUpdateTask(task);
         }
@@ -112,7 +112,7 @@ public abstract class BaseTaskManager<T extends BaseTask> {
         DownloadDBHelper.getInstance().saveTask(info);
     }
 
-    public ArrayList<T> getAllTask() {
+    ArrayList<T> getAllTask() {
         return mTaskList;
     }
 
@@ -327,7 +327,7 @@ public abstract class BaseTaskManager<T extends BaseTask> {
     public interface CallBack {
         void onClearTask(int id);
         void onUpdateTask(BaseTask task);
-        void onUpdateTaskManager(BaseTaskManager baseTaskManager);
+        void onUpdateTaskManager(BaseTaskController baseTaskController);
         int getConnectionsPerTask();
         int getSimultaneousDownloads();
     }

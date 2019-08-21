@@ -1,14 +1,14 @@
 package com.zalo.trainingmenu.downloader.task.partial;
 
-import com.zalo.trainingmenu.downloader.base.BaseTaskManager;
+import com.zalo.trainingmenu.downloader.base.BaseTaskController;
 import com.zalo.trainingmenu.downloader.database.DownloadDBHelper;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 
 
-public class PartialTaskManager extends BaseTaskManager<FileDownloadTask> {
-    private static final String TAG = "PartialTaskManager";
+public class PartialTaskController extends BaseTaskController<FileDownloadTask> {
+    private static final String TAG = "PartialTaskController";
 
-    public PartialTaskManager() {
+    public PartialTaskController() {
         super();
     }
 

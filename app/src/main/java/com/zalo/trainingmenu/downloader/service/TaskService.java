@@ -13,16 +13,16 @@ import androidx.preference.PreferenceManager;
 
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
-import com.zalo.trainingmenu.downloader.base.BaseTaskManager;
+import com.zalo.trainingmenu.downloader.base.BaseTaskController;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.downloader.task.partial.PartialTaskManager;
+import com.zalo.trainingmenu.downloader.task.partial.PartialTaskController;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskService extends Service implements BaseTaskManager.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
+public class TaskService extends Service implements BaseTaskController.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "TaskService";
 
     public static final String PACKAGE_NAME = "com.zalo.trainingmenu.downloader.mService";
@@ -37,12 +37,12 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
     public static final String ACTION_TASK_CLEAR = "action_task_clear";
     public static final String ACTION_TASK_MANAGER_CHANGED = "action_task_manager_changed";
 
-    private BaseTaskManager mDownloadManager;
-    private NotificationController mNotificationManager;
+    private BaseTaskController mDownloadManager;
+    private NotificationController mNotificationController;
 
     public void initManager() {
         if(mDownloadManager==null) {
-            mDownloadManager = new PartialTaskManager();
+            mDownloadManager = new PartialTaskController();
             mDownloadManager.init(this);
             mDownloadManager.restoreInstance();
         }
@@ -54,7 +54,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
     }
 
     @Override
-    public void onUpdateTaskManager(BaseTaskManager manager) {
+    public void onUpdateTaskManager(BaseTaskController manager) {
         Intent intent = new Intent();
         intent.setAction(ACTION_TASK_MANAGER_CHANGED);
         Log.d(TAG, "service sends action task manager changed");
@@ -63,21 +63,22 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     @Override
     public int getConnectionsPerTask() {
-        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_CONNECTIONS_PER_TASK,String.valueOf(BaseTaskManager.getRecommendConnectionPerTask())));
+        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_CONNECTIONS_PER_TASK,String.valueOf(BaseTaskController.getRecommendConnectionPerTask())));
     }
 
     @Override
     public int getSimultaneousDownloads() {
-        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_SIMULTANEOUS_DOWNLOADS,String.valueOf(BaseTaskManager.getRecommendSimultaneousDownloadsNumber())));
+        return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).getString(SettingFragment.EXTRA_SIMULTANEOUS_DOWNLOADS,String.valueOf(BaseTaskController.getRecommendSimultaneousDownloadsNumber())));
     }
 
     @Override
     public void onUpdateTask(BaseTask task) {
-       mNotificationManager.notifyTaskNotificationChanged(task);
+        long start = System.currentTimeMillis();
+       mNotificationController.notifyTaskNotificationChanged(task);
        Intent intent = new Intent();
        intent.setAction(ACTION_TASK_CHANGED);
        intent.putExtra(BaseTask.EXTRA_TASK_INFO,TaskInfo.newInstance(task));
-        Log.d(TAG, "service sends action task id"+task.getId()+" changed");
+        Log.d(TAG, "thread "+Thread.currentThread().getId()+" service sends action task id"+task.getId()+" changed, costs "+(System.currentTimeMillis() - start));
      /*   intent.putExtra(BaseTask.EXTRA_TASK_ID,task.getId());
         intent.putExtra(BaseTask.EXTRA_STATE,task.getState());
         intent.putExtra(BaseTask.EXTRA_PROGRESS,task.getProgress());
@@ -90,7 +91,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     @Override
     public void onClearTask(int id) {
-        mNotificationManager.notifyTaskClear(id);
+        mNotificationController.notifyTaskClear(id);
         Intent intent = new Intent();
         intent.setAction(ACTION_TASK_CLEAR);
         intent.putExtra(BaseTask.EXTRA_TASK_ID, id);
@@ -99,7 +100,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
                 .sendBroadcast(intent);
     }
 
-    public BaseTaskManager getDownloadManager() {
+    public BaseTaskController getDownloadManager() {
         return mDownloadManager;
     }
 
@@ -119,9 +120,9 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
     }
 
     private void initNotification() {
-        if(mNotificationManager ==null) {
-            mNotificationManager = new NotificationController();
-            mNotificationManager.init(this);
+        if(mNotificationController ==null) {
+            mNotificationController = new NotificationController();
+            mNotificationController.init(this);
         }
     }
 
@@ -134,9 +135,9 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        mNotificationManager.cancelAll();
+        mNotificationController.cancelAll();
         mDownloadManager.destroy();
-        mNotificationManager = null;
+        mNotificationController = null;
         mDownloadManager = null;
         PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
@@ -151,7 +152,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
         return super.onStartCommand(intent, flags, startId);
     }
     public void stopIfModeBackground() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O &&mNotificationManager!=null && mNotificationManager.getNotifyMode()== NotificationController.NOTIFY_MODE_BACKGROUND)
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && mNotificationController !=null && mNotificationController.getNotifyMode()== NotificationController.NOTIFY_MODE_BACKGROUND)
             stopSelf();
     }
 
@@ -198,13 +199,13 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
         switch (key) {
             case SettingFragment.EXTRA_SIMULTANEOUS_DOWNLOADS:
                 if(mDownloadManager!=null) {
-                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskManager.getRecommendSimultaneousDownloadsNumber())));
+                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskController.getRecommendSimultaneousDownloadsNumber())));
                     mDownloadManager.setSimultaneousDownloadsNumber(number);
                 }
                 break;
             case SettingFragment.EXTRA_CONNECTIONS_PER_TASK:
                 if(mDownloadManager!=null) {
-                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskManager.getRecommendConnectionPerTask())));
+                    int number = Integer.parseInt(sharedPreferences.getString(key,String.valueOf(BaseTaskController.getRecommendConnectionPerTask())));
                     mDownloadManager.setConnectionsPerTask(number);
                 }
                 break;
@@ -213,7 +214,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     public void clearAllTasks() {
         if(mDownloadManager!=null) mDownloadManager.clearAllTasks();
-        if(mNotificationManager!=null) mNotificationManager.cancelAll();
+        if(mNotificationController !=null) mNotificationController.cancelAll();
     }
 
     public void restartAll() {
@@ -222,7 +223,7 @@ public class TaskService extends Service implements BaseTaskManager.CallBack, Sh
 
     public void clearTasks(List<Integer> ids) {
         if(mDownloadManager!=null) mDownloadManager.clearTasks(ids);
-        if(mNotificationManager!=null) mNotificationManager.cancel(ids);
+        if(mNotificationController !=null) mNotificationController.cancel(ids);
     }
 
     public void restartTasks(List<Integer> ids) {

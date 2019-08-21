@@ -10,7 +10,7 @@ import com.zalo.trainingmenu.downloader.model.DownloadItem;
 
 import java.lang.ref.WeakReference;
 
-public abstract class BaseTask<T extends BaseTaskManager> implements Runnable {
+public abstract class BaseTask<T extends BaseTaskController> implements Runnable {
     public static final String EXTRA_PROGRESS_SUPPORT = "progress_support";
     public static final String EXTRA_TASK_INFO = "task_info";
     private static final String TAG = "BaseTask";
