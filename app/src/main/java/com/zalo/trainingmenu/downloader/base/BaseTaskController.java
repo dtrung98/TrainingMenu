@@ -211,16 +211,21 @@ public abstract class BaseTaskController<T extends BaseTask> {
         }
 
         if(task!=null) {
+            if(task.getState()==BaseTask.SUCCESS) {
+                DownloadDBHelper.getInstance().deleteTask(TaskInfo.newInstance(task));
+                if(mCallBack!=null) mCallBack.onClearTask(id);
+                addNewTask(new DownloadItem(task.getURLString(),task.getFileTitle(),task.getDirectory()));
+            } else
             task.restartByUser();
         }
     }
 
     public void restartAll() {
-        for (BaseTask task:mTaskList
-             ) {
+        for (BaseTask task :
+                mTaskList) {
             if(task.getState()!=BaseTask.RUNNING) task.restartByUser();
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException ignored) {}
         }
     }

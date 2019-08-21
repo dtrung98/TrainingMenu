@@ -24,8 +24,7 @@ import java.util.List;
 
 public class TaskService extends Service implements BaseTaskController.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "TaskService";
-
-    public static final String PACKAGE_NAME = "com.zalo.trainingmenu.downloader.mService";
+    public static final String PACKAGE_NAME = "com.zalo.trainingmenu.downloader";
     public static final String ACTION_PAUSE = "pause";
 
     private static final int UPDATE_FROM_TASK = 2;

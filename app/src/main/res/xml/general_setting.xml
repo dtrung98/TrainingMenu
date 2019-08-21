@@ -49,7 +49,7 @@
         android:defaultValue="false"
         android:key="combineDownloadingTasks"
         app:iconSpaceReserved="false"
-        app:summary="Limit number of notifications created if multiple tasks're running. \nTap to enable"
+        app:summary="Limit the number of notifications created."
         />
     </PreferenceCategory>
 </PreferenceScreen>

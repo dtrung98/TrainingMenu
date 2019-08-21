@@ -24,6 +24,8 @@ import java.util.List;
 
 
 public class NotificationController {
+    private static final String DOWNLOADING_GROUP = TaskService.PACKAGE_NAME +".DOWNLOADING";
+    private static final String DOWNLOADED_GROUP = TaskService.PACKAGE_NAME +".DOWNLOADED";
     private static final String TAG = "NotificationManager";
     private static final String NOTIFICATION_CHANNEL_ID = "downloader_service_notification";
 
@@ -130,15 +132,44 @@ public class NotificationController {
             builder.setProgress(100, INT_PROGRESS, false);
             else if(STATE == BaseTask.RUNNING)
                 builder.setProgress(100,0,true);
+
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 100, "+INT_PROGRESS+", false");
+         /*   Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloadActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
+
+            NotificationCompat.Builder groupBuilder =
+                    new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle("Tasks are downloading")
+                            .setSmallIcon(R.drawable.background_folder_icon)
+                            .setContentText("Downloading...")
+                            .setGroupSummary(true)
+                            .setOnlyAlertOnce(false)
+                            .setGroup(DOWNLOADING_GROUP)
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText("Downloading..."))
+                            .setContentIntent(pendingIntent);
+            mNotificationManager.notify(1,groupBuilder.build());*/
         }
         else {
-            builder.setOnlyAlertOnce(false);
             builder.setProgress(0,0,false);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", set progress: 0, 0, false");
+      /*      Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloadActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
+
+            NotificationCompat.Builder groupBuilder =
+                    new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle("Downloaded")
+                            .setSmallIcon(R.drawable.tick)
+                            .setContentText("Some tasks downloaded")
+                            .setGroupSummary(true)
+                            .setOnlyAlertOnce(false)
+                            .setGroup(DOWNLOADED_GROUP)
+                            .setStyle(new NotificationCompat.BigTextStyle().bigText("Some tasks downloaded"))
+                            .setContentIntent(pendingIntent);
+            mNotificationManager.notify(1,groupBuilder.build());
+            builder.setGroup(DOWNLOADED_GROUP);*/
         }
 
-        postNotificationAndroidO(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING);
+        postNotificationAndroidO(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING, STATE == BaseTask.SUCCESS);
         if(STATE!= BaseTask.RUNNING) {
             mIndexBuilders.delete(NOTIFICATION_ID);
             Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" with IndexBuilders");
@@ -153,12 +184,7 @@ public class NotificationController {
         notifyTaskNotificationChanged(task, NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
     }
 
-    private void postNotification(Notification notification, int NOTIFICATION_ID) {
-        if(mStopped) return;
-        mNotificationManager.notify(NOTIFICATION_ID, notification);
-    }
-
-    private void postNotificationAndroidO(Notification notification, int NOTIFICATION_ID, boolean isOnGoing) {
+    private void postNotificationAndroidO(Notification notification, int NOTIFICATION_ID, boolean isOnGoing, boolean isSuccess) {
         if(mStopped) return;
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
@@ -166,7 +192,6 @@ public class NotificationController {
         } else {
             newNotifyMode = NOTIFY_MODE_BACKGROUND;
         }
-       // if(!isOnGoing) mNotificationManager.cancel(NOTIFICATION_ID);
 
         if (mNotifyMode != newNotifyMode && newNotifyMode == NOTIFY_MODE_BACKGROUND) {
             mService.stopForeground(false);

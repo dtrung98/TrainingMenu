@@ -48,7 +48,7 @@ public abstract class PermissionActivity extends AppCompatActivity implements Pe
     public void requestPermission() {
         if (!checkSelfPermission()) {
 
-            if (!mPermissionShown && ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (!mPermissionShown || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 PermissionRequestDialog.newInstance().setRequestResultCallback(this).show(getSupportFragmentManager(),PermissionRequestDialog.TAG);
             } else {
                 onRequestResult(true);

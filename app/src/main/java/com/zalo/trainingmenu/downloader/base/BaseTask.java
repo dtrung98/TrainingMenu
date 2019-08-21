@@ -6,7 +6,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.zalo.trainingmenu.downloader.database.DownloadDBHelper;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
+import com.zalo.trainingmenu.downloader.model.TaskInfo;
 
 import java.lang.ref.WeakReference;
 
@@ -426,15 +428,6 @@ public abstract class BaseTask<T extends BaseTaskController> implements Runnable
     }
 
     public synchronized void restartByUser() {
-        if(getState()==SUCCESS) {
-            int position = getTaskManager().getAllTask().indexOf(this);
-            if(position!=getTaskManager().getAllTask().size()-1) {
-                getTaskManager().mTaskList.remove(position);
-                getTaskManager().notifyManagerChanged();
-                getTaskManager().mTaskList.add( this);
-            }
-        }
-
         setMode(EXECUTE_MODE_RESTART);
         setDownloadedInBytes(0);
         setState(PENDING);

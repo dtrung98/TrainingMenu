@@ -79,6 +79,7 @@ public class DownloadDBHelper extends SQLiteOpenHelper {
         db.close();
         return id;
     }
+
     public synchronized long generateNewPartialTaskId(long startByte, long endByte) {
         SQLiteDatabase db = getWritableDatabase();
         PartialInfo info = new PartialInfo(startByte, endByte, 1);
