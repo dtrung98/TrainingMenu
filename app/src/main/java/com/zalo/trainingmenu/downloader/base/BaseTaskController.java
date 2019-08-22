@@ -99,7 +99,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
         mTaskList.clear();
     }
 
-    void notifyManagerChanged(){
+    private void notifyManagerChanged(){
         if(mCallBack!=null)
             mCallBack.onUpdateTaskManager(this);
     }
@@ -202,17 +202,19 @@ public abstract class BaseTaskController<T extends BaseTask> {
     public void restartTaskByUser(int id) {
         List<T> tasks = getAllTask();
         BaseTask task = null;
-
-        for (T t:
-                tasks) {
-            if(t.getId()==id) {
+        int pos = -1;
+        for (int i = 0; i < tasks.size(); i++) {
+            T t = tasks.get(i);
+            if (t.getId() == id) {
                 task = t;
+                pos=i;
             }
         }
 
         if(task!=null) {
             if(task.getState()==BaseTask.SUCCESS) {
                 DownloadDBHelper.getInstance().deleteTask(TaskInfo.newInstance(task));
+                mTaskList.remove(pos);
                 if(mCallBack!=null) mCallBack.onClearTask(id);
                 addNewTask(new DownloadItem(task.getURLString(),task.getFileTitle(),task.getDirectory()));
             } else
@@ -224,9 +226,6 @@ public abstract class BaseTaskController<T extends BaseTask> {
         for (BaseTask task :
                 mTaskList) {
             if(task.getState()!=BaseTask.RUNNING) task.restartByUser();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignored) {}
         }
     }
 

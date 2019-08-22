@@ -15,11 +15,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingActivity;
+import com.zalo.trainingmenu.model.CountSectionItem;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
@@ -32,7 +34,8 @@ import es.dmoral.toasty.Toasty;
 public class DownloadActivity extends BaseActivity {
     public static final String ACTION_TRY_TO_RESUME = "try_to_resume";
     private static final String TAG = "DownloadActivity";
-    public static final String ACTION_ADD_NEW_DOWNLOAD = "add_new_download";
+    public static final String ACTION_NEW_DOWNLOAD_DIALOG = "new_download_dialog";
+    public static final String ACTION_APPEND_TASK ="append_task";
     public static final String ACTION_RESUME_DOWNLOAD = "resume_download";
     public static final String ACTION_RESTART_DOWNLOAD = "restart_download";
     public static final String ACTION_OPEN_FILE = "open_file";
@@ -44,7 +47,7 @@ public class DownloadActivity extends BaseActivity {
     GridLayoutManager mGridLayoutManager;
 
     void addNewTask() {
-        Intent intent = new Intent(ACTION_ADD_NEW_DOWNLOAD);
+        Intent intent = new Intent(ACTION_NEW_DOWNLOAD_DIALOG);
         executeWriteStorageAction(intent);
     }
 
@@ -61,40 +64,44 @@ public class DownloadActivity extends BaseActivity {
         if(action!=null&&!action.isEmpty())
         switch (action) {
 
-            case ACTION_ADD_NEW_DOWNLOAD:
+            case ACTION_NEW_DOWNLOAD_DIALOG:
                 if(granted) {
                     AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't create new download task because you denied permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_new_download_dialog).show();
                 break;
-
+            case ACTION_APPEND_TASK:
+                if(granted) {
+                    DownloadItem item = intent.getParcelableExtra(BaseTask.EXTRA_DOWNLOAD_ITEM);
+                    if(item!=null) RemoteForTaskService.appendTask(item);
+                } else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_append_task).show();
             case ACTION_RESUME_DOWNLOAD:
                 if(granted) {
                     int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
                     if(id!=-1) RemoteForTaskService.resumeTaskWithTaskId(id);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't resume download task without storage permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_resume_download).show();
                 break;
             case ACTION_RESTART_DOWNLOAD:
                 if(granted) {
                     int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
                     if(id!=-1) RemoteForTaskService.restartTaskWithTaskId(id);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't restart task without storage permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_restart).show();
                 break;
             case ACTION_TRY_TO_RESUME:
                 if(granted) {
                     int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
                     if(id!=-1) RemoteForTaskService.tryToResume(id);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't resume download task without storage permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_try_to_resume).show();
                 break;
             case ACTION_OPEN_FILE:
                 if(granted) {
                     TaskInfo info = intent.getParcelableExtra(BaseTask.EXTRA_TASK_INFO);
                     if(info!=null) RemoteForTaskService.openFinishedTaskInfo(this,info);
                 }
-                else Toasty.error(App.getInstance().getApplicationContext(),"Couldn't open without storage permissions!").show();
+                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_open_file).show();
                 break;
         }
     }
@@ -227,25 +234,34 @@ public class DownloadActivity extends BaseActivity {
     @Override
     protected void refreshData() {
         ArrayList<Object> list = new ArrayList<>();
-        List<TaskInfo> task_list = RemoteForTaskService.getSessionTaskList();
-        list.add(getString(R.string.downloading));
+        List<TaskInfo> taskList = RemoteForTaskService.getSessionTaskList();
+        int downloadingSize = 0;
+        int downloadedSize = 0;
 
-        if(task_list!=null&&!task_list.isEmpty()) {
+        if(taskList!=null&&!taskList.isEmpty()) {
 
-
-            for (TaskInfo info :
-                    task_list) {
-                if (info.getSectionState() == TaskInfo.SECTION_DOWNLOADING)
-                    list.add(info);
-            }
-            list.add(getString(R.string.downloaded));
 
             for (TaskInfo info :
-                    task_list) {
-                if (info.getSectionState() != TaskInfo.SECTION_DOWNLOADING)
+                    taskList) {
+                if (info.getSectionState() == TaskInfo.SECTION_DOWNLOADING) {
                     list.add(info);
+                    downloadingSize++;
+                }
             }
-        } else list.add(getString(R.string.downloaded));
+
+            for (TaskInfo info :
+                    taskList) {
+                if (info.getSectionState() != TaskInfo.SECTION_DOWNLOADING) {
+                    list.add(info);
+                    downloadedSize++;
+                }
+            }
+
+        } else {
+
+        }
+        list.add(0,new CountSectionItem(getResources().getString(R.string.downloading),downloadingSize));
+        list.add(downloadingSize+1,new CountSectionItem(getResources().getString(R.string.downloaded),downloadedSize));
         mAdapter.setData(list);
         getSwipeRefreshLayout().setRefreshing(false);
     }

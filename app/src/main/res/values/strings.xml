@@ -191,4 +191,11 @@
     <string name="ok_got_it">Ok, got it</string>
     <string name="note_description">* This message will not display anymore when you pressed Ok button</string>
     <string name="download_completed">Download completed</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="error_permissions_new_download_dialog">Couldn\'t create new download task because you denied permissions!</string>
+    <string name="error_permissions_append_task">Couldn\'t add new task because application doesn\'t have storage permissions!</string>
+    <string name="error_permissions_resume_download">Couldn\'t resume download task without storage permissions!</string>
+    <string name="error_permissions_restart">Couldn\'t restart task without storage permissions!</string>
+    <string name="error_permissions_try_to_resume">Couldn\'t resume download task without storage permissions!</string>
+    <string name="error_permissions_open_file">Couldn\'t open without storage permissions!</string>
 </resources>

@@ -20,6 +20,7 @@ public abstract class BaseTask<T extends BaseTaskController> implements Runnable
     public static final String RANGE_PROPERTY = "Range";
     public static final String CONTENT_LENGTH = "content-length";
 
+    public static final String EXTRA_DOWNLOAD_ITEM = "download_item";
     public static final String EXTRA_TASK_ID = "notification_id";
     public static final String EXTRA_STATE = "state";
     public static final String EXTRA_PROGRESS ="progress";

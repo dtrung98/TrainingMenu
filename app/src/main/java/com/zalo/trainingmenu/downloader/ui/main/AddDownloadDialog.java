@@ -3,6 +3,7 @@ package com.zalo.trainingmenu.downloader.ui.main;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,8 +27,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
-import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 
 
 import es.dmoral.toasty.Toasty;
@@ -134,7 +135,7 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
         if(editable!=null) {
             String text = editable.toString();
             if(!text.isEmpty()&& URLUtil.isValidUrl(text)) {
-                addTask(mUrlEditText.getText().toString());
+                append(mUrlEditText.getText().toString());
                 dismiss();
                 Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
             } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
@@ -160,16 +161,20 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
                 }
                 if(pasteData!=null&&URLUtil.isValidUrl(pasteData.toString())) {
                     closeKeyboard();
-                    addTask(pasteData.toString());
+                    append(pasteData.toString());
                     dismiss();
                     Toasty.info(App.getInstance().getApplicationContext(),R.string.add_new_download).show();
                 } else Toasty.error(App.getInstance().getApplicationContext(),R.string.invalid_url).show();
             }
 
     }
-    private void addTask(String url) {
+    private void append(String url) {
         DownloadItem item = new DownloadItem(url);
-        RemoteForTaskService.appendTask(item);
+        if(getActivity() instanceof DownloadActivity) {
+            Intent intent = new Intent(DownloadActivity.ACTION_APPEND_TASK);
+            intent.putExtra(BaseTask.EXTRA_DOWNLOAD_ITEM,item);
+            ((DownloadActivity) getActivity()).executeWriteStorageAction(intent);
+        }
     }
 
     @Override

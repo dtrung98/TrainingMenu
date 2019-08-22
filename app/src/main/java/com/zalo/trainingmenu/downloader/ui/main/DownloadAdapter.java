@@ -20,11 +20,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.trainingmenu.downloader.ui.widget.MultipartProgressBar;
+import com.zalo.trainingmenu.model.CountSectionItem;
+import com.zalo.trainingmenu.model.Item;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
@@ -176,15 +179,40 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Log.d(TAG, "onTaskAdded");
         mData.add(1,info);
         notifyItemInserted(1);
+        Object section = mData.get(0);
+        if(section instanceof CountSectionItem) {
+            ((CountSectionItem) section).setCount(((CountSectionItem) section).getCount()+1);
+            notifyItemChanged(0);
+        }
     }
 
     void onTaskCleared(int id) {
+        int posFound = -1;
         for (int i = 0; i < mData.size(); i++) {
             Object object = mData.get(i);
             if(object instanceof TaskInfo && ((TaskInfo)object).getId()==id) {
-                mData.remove(i);
-                notifyItemRemoved(i);
+               posFound = i;
                 break;
+            }
+        }
+
+        if(posFound!=-1) {
+            mData.remove(posFound);
+            notifyItemRemoved(posFound);
+            Object downloadingSection = mData.get(0);
+            if(downloadingSection instanceof CountSectionItem) {
+                int downloadingSize= ((CountSectionItem) downloadingSection).getCount();
+                if(posFound<=downloadingSize) {
+                    ((CountSectionItem) downloadingSection).downCount();
+                    notifyItemChanged(0);
+                }
+                else if(posFound>downloadingSize+1) {
+                    Object downloadedSection = mData.get(downloadingSize+1);
+                    if(downloadedSection instanceof CountSectionItem) {
+                        ((CountSectionItem) downloadedSection).downCount();
+                        notifyItemChanged(downloadingSize+1);
+                    }
+                }
             }
         }
     }
@@ -252,6 +280,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private int[] mPendingOptionIDs = new int[] {
             R.string.cancel,
+            R.string.duplicate,
             R.string.warning_divider,
             R.string.clear,
             R.string.focus_divider,
@@ -260,6 +289,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private int[] mRunningOptionIDs = new int[] {
             R.string.pause,
+            R.string.duplicate,
             R.string.warning_divider,
             R.string.cancel,
             R.string.focus_divider,
@@ -269,6 +299,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private int[] mPausedOptionIDs = new int[] {
             R.string.resume,
             R.string.restart,
+            R.string.duplicate,
             R.string.warning_divider,
             R.string.clear,
             R.string.focus_divider,
@@ -279,6 +310,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private int[] mStoppedOptionIDs = new int[] {
             R.string.try_to_resume,
             R.string.restart,
+            R.string.duplicate,
             R.string.warning_divider,
             R.string.clear,
             R.string.focus_divider,
@@ -287,6 +319,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private int[] mFinishedOptionIDs = new int[] {
             R.string.open,
             R.string.restart,
+            R.string.duplicate,
             R.string.warning_divider,
             R.string.clear,
             R.string.focus_divider,
@@ -357,7 +390,6 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case BaseTask.FAILURE_TERMINATED:
                 optionIDs = mStoppedOptionIDs;
                 break;
-
             case BaseTask.PAUSED:
                 optionIDs = mPausedOptionIDs;
                 break;
@@ -429,6 +461,11 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     case R.string.restart:
                         intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
                         intent.putExtra(BaseTask.EXTRA_TASK_ID,mActiveTaskInfo.getId());
+                        ((DownloadActivity) mContext).executeWriteStorageAction(intent);
+                        break;
+                    case R.string.duplicate:
+                        intent = new Intent(DownloadActivity.ACTION_APPEND_TASK);
+                        intent.putExtra(BaseTask.EXTRA_DOWNLOAD_ITEM,new DownloadItem(mActiveTaskInfo.getURLString()));
                         ((DownloadActivity) mContext).executeWriteStorageAction(intent);
                         break;
                     case R.string.try_to_resume:
@@ -535,17 +572,21 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public class SectionItemHolder extends RecyclerView.ViewHolder {
-        TextView mTextView;
+        TextView mTitle;
+        TextView mCount;
 
         SectionItemHolder(View itemView) {
             super(itemView);
-            mTextView = (TextView)itemView;
-
+            mTitle = itemView.findViewById(R.id.title);
+            mCount = itemView.findViewById(R.id.number);
         }
         public void bind(Object object) {
-            if(object instanceof String) {
-                mTextView.setText((String)object);
-            } else mTextView.setText(R.string.invalid_section);
+            if(object instanceof CountSectionItem) {
+                mTitle.setText(((CountSectionItem) object).getTitle());
+                mCount.setText(String.valueOf(((CountSectionItem) object).getCount()));
+            } else if(object instanceof String) {
+                mTitle.setText((String)object);
+            } else mTitle.setText(R.string.invalid_section);
         }
     }
 
