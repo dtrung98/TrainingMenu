@@ -16,19 +16,19 @@
             android:dialogTitle="@string/choose_number_connections"
             android:entries="@array/number_connections"
             android:entryValues="@array/number_connections"
-            android:defaultValue="5"
+            android:defaultValue="6"
             android:key="connectionsPerTask"
             app:iconSpaceReserved="false"
-            tools:summary="5 connections"
+            tools:summary="6 connections"
             />
         <ListPreference
             android:title="@string/simultaneous_downloads"
             android:dialogTitle="@string/choose_number_downloads"
             android:entries="@array/simultaneous_downloads"
             android:entryValues="@array/simultaneous_downloads"
-            android:defaultValue="2"
+            android:defaultValue="3"
             android:key="simultaneousDownloads"
-            tools:summary="2 downloads"
+            tools:summary="3 downloads"
             app:iconSpaceReserved="false"
             />
     </PreferenceCategory>

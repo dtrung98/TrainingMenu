@@ -132,7 +132,7 @@ public class OptionBottomSheet extends BottomSheetDialogFragment implements View
             if(optionType==R.string.warning_divider)
                 view.setTextColor(context.getResources().getColor(R.color.FlatOrange));
             else if(optionType==R.string.dangerous_divider)
-                view.setTextColor(context.getResources().getColor(R.color.FlatRed));
+                view.setTextColor(context.getResources().getColor(R.color.Tomato));
             else if(optionType==R.string.focus_divider)
                 view.setTextColor(context.getResources().getColor(R.color.FlatTealBlue));
             else

@@ -73,10 +73,10 @@
         android:layout_marginBottom="8dp"
     />
     <TextView
-        android:id="@+id/restart"
+        android:id="@+id/quick_button_one"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/restart"
+        android:text="@string/properties"
         android:textColor="@color/FlatTealBlue"
         android:textSize="14sp"
         android:maxLines="1"
@@ -94,7 +94,7 @@
         android:background="@drawable/ripple_effect_small_round"
         />
     <TextView
-        android:id="@+id/clear"
+        android:id="@+id/quick_button_two"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/clear"
@@ -104,9 +104,9 @@
         android:textStyle="bold"
         android:ellipsize="end"
         android:layout_marginStart="16dp"
-        app:layout_constraintStart_toEndOf="@id/restart"
-        app:layout_constraintTop_toTopOf="@id/restart"
-        app:layout_constraintBottom_toBottomOf="@id/restart"
+        app:layout_constraintStart_toEndOf="@id/quick_button_one"
+        app:layout_constraintTop_toTopOf="@id/quick_button_one"
+        app:layout_constraintBottom_toBottomOf="@id/quick_button_one"
         android:background="@drawable/ripple_effect_small_round"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"

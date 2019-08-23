@@ -62,8 +62,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
 
     // Leak Canary
-    // debugImplementation because LeakCanary should only run in debug builds.
-    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
+    //debugImplementation because LeakCanary should only run in debug builds.
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
 
     // Glide V4
     implementation 'com.github.bumptech.glide:glide:4.9.0'

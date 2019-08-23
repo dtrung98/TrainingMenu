@@ -606,21 +606,22 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         DownloadedItemHolder(View itemView) {
             super(itemView);
-            itemView.findViewById(R.id.clear).setOnClickListener(this);
-            itemView.findViewById(R.id.restart).setOnClickListener(this);
+            itemView.findViewById(R.id.quick_button_one).setOnClickListener(this);
+            itemView.findViewById(R.id.quick_button_two).setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             super.onClick(view);
             switch (view.getId()) {
-                case R.id.clear:
-                    RemoteForTaskService.clearTask(((TaskInfo)mData.get(getAdapterPosition())).getId());
+                case R.id.quick_button_one:
+                    Intent intent = new Intent(mContext, TaskDetailActivity.class);
+                    intent.setAction(TaskDetailActivity.VIEW_TASK_DETAIL);
+                    intent.putExtra(BaseTask.EXTRA_TASK_ID, ((TaskInfo)mData.get(getAdapterPosition())).getId());
+                    mContext.startActivity(intent);
                     break;
-                case R.id.restart:
-                    Intent intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
-                    intent.putExtra(BaseTask.EXTRA_TASK_ID,((TaskInfo)mData.get(getAdapterPosition())).getId());
-                    ((DownloadActivity) mContext).executeWriteStorageAction(intent);
+                case R.id.quick_button_two:
+                    RemoteForTaskService.clearTask(((TaskInfo)mData.get(getAdapterPosition())).getId());
                     break;
             }
         }

@@ -219,7 +219,7 @@ public class DownloadActivity extends BaseActivity {
 
     public void switchToSelectMode() {
         mAddButton.animate().rotation(135);
-        mAddButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.FocusYellowColor)));
+        mAddButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.Tomato)));
         mMenuButton.setColorFilter(getResources().getColor(R.color.FlatOrange));
         mMenuButton.setBackgroundResource(R.drawable.circle_background_support_touch_focus);
     }
