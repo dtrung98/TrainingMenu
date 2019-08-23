@@ -93,6 +93,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         list.add(Item.with(this).setTitle(R.string.link).setDescription(mTaskInfo.getURLString()).get());
         list.add(Item.with(this).setTitle(R.string.support_resume).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no).get());
         list.add(Item.with(this).setTitle(R.string.connections_number).setDescription(mTaskInfo.getPartialInfoList().size()+ " "+getResources().getString(R.string.connections)).get());
+        list.add(Item.with(this).setTitle(R.string.index).setDescription(String.valueOf(mTaskInfo.getId())).get());
         list.add(Item.with(this).setTitle(R.string.state).setDescription(BaseTask.getStateName(mTaskInfo.getState())).get());
         list.add(Item.with(this).setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? "Empty": mTaskInfo.getMessage()).get());
         list.add(Item.with(this).setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())).get());

@@ -181,4 +181,6 @@
     <string name="error_permissions_restart">Không thể tải lại khi không có quyền đọc ghi bộ nhớ!</string>
     <string name="error_permissions_resume_download">Không thể khôi phục nhiệm vụ khi không có quyền truy cập bộ nhớ</string>
     <string name="error_permissions_try_to_resume">Không thể khôi phục nhiệm vụ khi không có quyền truy cập bộ nhớ</string>
+    <string name="tap_to_see_detail">chạm để xem chi tiết</string>
+    <string name="index">Chỉ mục</string>
 </resources>

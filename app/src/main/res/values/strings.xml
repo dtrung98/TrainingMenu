@@ -198,4 +198,6 @@
     <string name="error_permissions_restart">Couldn\'t restart task without storage permissions!</string>
     <string name="error_permissions_try_to_resume">Couldn\'t resume download task without storage permissions!</string>
     <string name="error_permissions_open_file">Couldn\'t open without storage permissions!</string>
+    <string name="tap_to_see_detail">tap to see detail</string>
+    <string name="index">Identification</string>
 </resources>

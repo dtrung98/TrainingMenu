@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -208,6 +210,13 @@ public class OptionBottomSheet extends BottomSheetDialogFragment implements View
         else {
             //TODO: setBackground below Android L
         }
+    }
+
+    @Override
+    public void show(@NonNull FragmentManager manager, String tag) {
+        FragmentTransaction fragmentTransaction = manager.beginTransaction();
+        fragmentTransaction.add(this, TAG);
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     @Override

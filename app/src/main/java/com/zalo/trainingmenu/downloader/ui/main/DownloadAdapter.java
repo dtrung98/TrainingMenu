@@ -729,8 +729,8 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
                     break;
                 case BaseTask.FAILURE_TERMINATED:
-                    mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.FlatRed));
-                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.FlatRed));
+                    mProgressBar.setForegroundBarColor(mProgressBar.getResources().getColor(R.color.Tomato));
+                    mStateTextView.setTextColor(mStateTextView.getResources().getColor(R.color.Tomato));
                     mImageView.setColorFilter(mImageView.getResources().getColor(R.color.FocusColorTwo));
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
                     if(info.isProgressSupport()&&progress>=0 && progress <=100) {
@@ -738,7 +738,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         mStateTextView.setText(progress+"%"+" • "+mStateTextView.getResources().getString(R.string.failure)+", tap to see detail");
                     } else {
                         mProgressBar.setVisibility(View.GONE);
-                        mStateTextView.setText(mStateTextView.getResources().getString(R.string.failure)+", tap to see detail");
+                        mStateTextView.setText(mStateTextView.getResources().getString(R.string.failure)+", "+mContext.getString(R.string.tap_to_see_detail));
                     }
                     break;
             }
