@@ -1,14 +1,14 @@
 package com.zalo.trainingmenu.downloader.base;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.zalo.trainingmenu.downloader.database.DownloadDBHelper;
+import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
-import com.zalo.trainingmenu.downloader.model.TaskInfo;
 
 import java.lang.ref.WeakReference;
 
@@ -158,7 +158,7 @@ public abstract class BaseTask<T extends BaseTaskController> implements Runnable
         return mTaskManager;
     }
 
-    public static String getStateName(int state) {
+    protected static String getStateName(int state) {
         switch (state) {
             case PENDING: return "Pending";
             case RUNNING: return "Running";
@@ -168,6 +168,20 @@ public abstract class BaseTask<T extends BaseTaskController> implements Runnable
             case CANCELLED: return "Cancelled";
             case CONNECTING: return "Connecting";
             default: return null;
+        }
+    }
+
+    public static String getStateName(Context context, int state) {
+        if(context==null) return getStateName(state);
+        switch (state) {
+            case PENDING: return context.getResources().getString(R.string.pending);
+            case RUNNING: return context.getResources().getString(R.string.running);
+            case FAILURE_TERMINATED: return context.getResources().getString(R.string.failed);
+            case SUCCESS: return context.getResources().getString(R.string.success);
+            case PAUSED: return context.getResources().getString(R.string.paused);
+            case CANCELLED: return context.getResources().getString(R.string.cancelled);
+            case CONNECTING: return context.getResources().getString(R.string.connecting);
+            default: return "";
         }
     }
 

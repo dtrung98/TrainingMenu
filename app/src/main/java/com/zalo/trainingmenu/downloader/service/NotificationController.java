@@ -64,7 +64,7 @@ public class NotificationController {
         return downloadManager.isSomeTaskRunning();
     }
     public synchronized void notifyTaskNotificationChanged(BaseTask task, final int NOTIFICATION_ID, final int STATE, final int INT_PROGRESS, final boolean PROGRESS_SUPPORT) {
-        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ BaseTask.getStateName(STATE)+", progress "+ INT_PROGRESS);
+        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ BaseTask.getStateName(null,STATE)+", progress "+ INT_PROGRESS);
 
         NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
         if(builder==null) {
@@ -97,9 +97,8 @@ public class NotificationController {
                     builder.addAction(action);*/
                     break;
                  case BaseTask.SUCCESS:
-                     builder.setContentText("Download completed"+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes()));
+                     builder.setContentText(mService.getResources().getString(R.string.download_completed)+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes()));
                      builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
-                     builder.mActions.clear();
                      break;
                 case BaseTask.PAUSED:
                     if(PROGRESS_SUPPORT) {
@@ -111,12 +110,12 @@ public class NotificationController {
                     builder.setColor(mService.getResources().getColor(R.color.FlatOrange));
                     break;
                 case BaseTask.FAILURE_TERMINATED:
-                    builder.setContentText("Failed to download file. "+task.getMessage()+", tap for more info");
+                    builder.setContentText(mService.getResources().getString(R.string.failed_notification_message)+task.getMessage()+", tap for more info");
                     builder.setColor(mService.getResources().getColor(R.color.FlatRed));
 
                     break;
                  default:
-                     builder.setContentText(BaseTask.getStateName(STATE));
+                     builder.setContentText(BaseTask.getStateName(mService,STATE));
                      builder.setColor(mService.getResources().getColor(R.color.FlatTealBlue));
             }
 

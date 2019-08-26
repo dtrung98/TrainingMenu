@@ -57,7 +57,7 @@
 
     <string name="execution_time">Executed at</string>
 
-    <string name="failure">Failure</string>
+    <string name="failed">Failed</string>
 
     <string name="finish_service">Finish Service</string>
 
@@ -200,4 +200,7 @@
     <string name="error_permissions_open_file">Couldn\'t open without storage permissions!</string>
     <string name="tap_to_see_detail">tap to see detail</string>
     <string name="index">Identification</string>
+    <string name="success">Success</string>
+    <string name="failed_notification_message">Failed to download file. %1$s. Tap for more info.</string>
+    <string name="empty">Empty</string>
 </resources>

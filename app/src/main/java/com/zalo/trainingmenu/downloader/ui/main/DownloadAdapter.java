@@ -27,7 +27,6 @@ import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.trainingmenu.downloader.ui.widget.MultipartProgressBar;
 import com.zalo.trainingmenu.model.CountSectionItem;
-import com.zalo.trainingmenu.model.Item;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
@@ -508,6 +507,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 case BaseTask.RUNNING:
                     RemoteForTaskService.pauseTaskWithTaskId(info.getId());
                     break;
+                case BaseTask.CANCELLED:
                 case BaseTask.FAILURE_TERMINATED:
                     intent = new Intent(DownloadActivity.ACTION_RESTART_DOWNLOAD);
                     intent.putExtra(BaseTask.EXTRA_TASK_ID,info.getId());
@@ -649,7 +649,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         void bindProgressSupport(TaskInfo info) {
           //  if(true) return;
-            Log.d(TAG, "bind progress support : "+info.isProgressSupport()+" when state is "+BaseTask.getStateName(info.getState()));
+            Log.d(TAG, "bind progress support : "+info.isProgressSupport()+" when state is "+BaseTask.getStateName(null, info.getState()));
             if(info.isProgressSupport()) {
                 mProgressBar.setIndeterminate(false);
             } else {
@@ -735,10 +735,10 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     mImageView.setImageResource(R.drawable.ic_refresh_black_24dp);
                     if(info.isProgressSupport()&&progress>=0 && progress <=100) {
                         mProgressBar.setVisibility(View.VISIBLE);
-                        mStateTextView.setText(progress+"%"+" • "+mStateTextView.getResources().getString(R.string.failure)+", tap to see detail");
+                        mStateTextView.setText(progress+"%"+" • "+mStateTextView.getResources().getString(R.string.failed)+", tap to see detail");
                     } else {
                         mProgressBar.setVisibility(View.GONE);
-                        mStateTextView.setText(mStateTextView.getResources().getString(R.string.failure)+", "+mContext.getString(R.string.tap_to_see_detail));
+                        mStateTextView.setText(mStateTextView.getResources().getString(R.string.failed)+", "+mContext.getString(R.string.tap_to_see_detail));
                     }
                     break;
             }

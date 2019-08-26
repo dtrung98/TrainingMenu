@@ -44,7 +44,7 @@
 
     <string name="execution_time">Thực thi vào lúc</string>
 
-    <string name="failure">Thất bại</string>
+    <string name="failed">Thất bại</string>
 
     <string name="finish_service">Dừng dịch vụ</string>
 
@@ -183,4 +183,6 @@
     <string name="error_permissions_try_to_resume">Không thể khôi phục nhiệm vụ khi không có quyền truy cập bộ nhớ</string>
     <string name="tap_to_see_detail">chạm để xem chi tiết</string>
     <string name="index">Chỉ mục</string>
+    <string name="success">Thành công</string>
+    <string name="failed_notification_message">Tải về thất bại. %1$s.</string>
 </resources>
