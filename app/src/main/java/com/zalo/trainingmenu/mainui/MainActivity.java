@@ -25,6 +25,12 @@ public class MainActivity extends AbsMenuActivity {
 
 
     @Override
+    protected void onInitRecyclerView() {
+        setBackButtonVisibility(false);
+        super.onInitRecyclerView();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);

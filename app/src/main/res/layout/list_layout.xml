@@ -68,6 +68,5 @@
         android:background="@drawable/circle_background_support_touch"
         android:tint="#FAF3DD"
         android:alpha="0.8"
-        android:visibility="gone"
         android:padding="12dp"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

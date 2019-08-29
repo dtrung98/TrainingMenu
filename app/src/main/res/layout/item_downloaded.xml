@@ -60,7 +60,7 @@
         />
     <TextView
         android:id="@+id/state_text_view"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="24Mb | 08:45 Monday 22 Feb 2019"
         android:textColor="#5AC8FA"
@@ -69,6 +69,7 @@
         android:ellipsize="end"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintEnd_toEndOf="@id/title"
         app:layout_constraintTop_toBottomOf="@id/description"
         android:layout_marginBottom="8dp"
     />

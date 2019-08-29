@@ -6,8 +6,13 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 
@@ -107,26 +112,60 @@ public class DownloadActivity extends BaseActivity {
     }
 
     private void addButtons() {
-        CoordinatorLayout mRoot = findViewById(R.id.root);
+        ViewGroup mRoot = findViewById(R.id.root);
 
         // Add new-task button
         mAddButton = new FloatingActionButton(this);
+        mAddButton.setId(View.generateViewId());
         mAddButton.setImageResource(R.drawable.ic_add_black_24dp);
         float oneDP = getResources().getDimension(R.dimen.oneDp);
         mAddButton.setCustomSize((int) (60*oneDP));
-        CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams((int)(60*oneDP),(int)(60*oneDP));
-        params.gravity = Gravity.BOTTOM|Gravity.END;
-        params.bottomMargin = (int)(oneDP*16);
-        params.setMarginEnd(params.bottomMargin);
+
+        ViewGroup.MarginLayoutParams params = null;
+        ConstraintSet addSet = null;
+
+        if(mRoot instanceof CoordinatorLayout) {
+            params = new CoordinatorLayout.LayoutParams((int)(60*oneDP),(int)(60*oneDP));
+            ((CoordinatorLayout.LayoutParams) params).gravity = Gravity.BOTTOM | Gravity.END;
+
+        } else if (mRoot instanceof ConstraintLayout) {
+            params = new ConstraintLayout.LayoutParams((int)(60*oneDP),(int)(60*oneDP));
+            addSet = new ConstraintSet();
+            addSet.clone((ConstraintLayout) mRoot);
+            addSet.connect(mAddButton.getId(),ConstraintSet.BOTTOM,ConstraintSet.PARENT_ID,ConstraintSet.BOTTOM);
+            addSet.connect(mAddButton.getId(),ConstraintSet.END,ConstraintSet.PARENT_ID,ConstraintSet.END);
+
+        }
+
+        if(params!=null) {
+            params.bottomMargin = (int) (oneDP * 16);
+            params.setMarginEnd(params.bottomMargin);
+        }
+
         mAddButton.setOnClickListener(view -> plusButtonClick());
         mRoot.addView(mAddButton,params);
+        if(addSet!=null) addSet.applyTo((ConstraintLayout) mRoot);
         // Add menu button
         mMenuButton = new ImageView(this);
+        mMenuButton.setId(View.generateViewId());
         mMenuButton.setImageResource(R.drawable.ic_menu_24dp);
-        CoordinatorLayout.LayoutParams menuParams = new CoordinatorLayout.LayoutParams((int)(50*oneDP),(int)(50*oneDP));
-        menuParams.gravity = Gravity.TOP | Gravity.END;
-        menuParams.topMargin = (int)(16*oneDP);
-        menuParams.setMarginEnd(menuParams.topMargin);
+        ViewGroup.MarginLayoutParams menuParams = null;
+        ConstraintSet menuSet = null;
+
+        if(mRoot instanceof CoordinatorLayout) {
+            menuParams = new CoordinatorLayout.LayoutParams((int)(50*oneDP),(int)(50*oneDP));
+            ((CoordinatorLayout.LayoutParams) menuParams).gravity = Gravity.TOP | Gravity.END;
+        } else if(mRoot instanceof ConstraintLayout) {
+            menuParams = new ConstraintLayout.LayoutParams((int)(50*oneDP),(int)(50*oneDP));
+            menuSet = new ConstraintSet();
+            menuSet.clone((ConstraintLayout) mRoot);
+            menuSet.connect(mMenuButton.getId(),ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP);
+            menuSet.connect(mMenuButton.getId(),ConstraintSet.END,ConstraintSet.PARENT_ID,ConstraintSet.END);
+        }
+        if(menuParams!=null) {
+            menuParams.topMargin = (int) (16 * oneDP);
+            menuParams.setMarginEnd(menuParams.topMargin);
+        }
 
         TypedValue outValue = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
@@ -136,7 +175,8 @@ public class DownloadActivity extends BaseActivity {
         mMenuButton.setPadding(dpTwelve,dpTwelve,dpTwelve,dpTwelve);
         mMenuButton.setOnClickListener(view -> showMenu());
         mRoot.addView(mMenuButton,menuParams);
-
+        if(menuSet !=null)
+            menuSet.applyTo((ConstraintLayout) mRoot);
     }
 
     private int[] mMenuIDs = new int[] {
@@ -199,9 +239,17 @@ public class DownloadActivity extends BaseActivity {
         }
     };
 
+    private ImageView mIconImageView;
+
 
     @Override
     protected void onInitRecyclerView() {
+        mIconImageView = findViewById(R.id.icon);
+        if(mIconImageView!=null) {
+            mIconImageView.setVisibility(View.VISIBLE);
+            mIconImageView.setImageResource(R.drawable.download_icon);
+            mIconImageView.setBackground(null);
+        }
         addButtons();
         mAdapter = new DownloadAdapter(this);
         getRecyclerView().setAdapter(mAdapter);

@@ -10,6 +10,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.zalo.trainingmenu.R;
 
+import java.util.zip.GZIPOutputStream;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -48,8 +50,18 @@ public abstract class AbsListActivity extends AbsLocaleActivity {
         refreshData();
     }
 
+    private View getBackButton() {
+        return mBackButton;
+    }
+
+    protected void setBackButtonVisibility(boolean show) {
+        if(mBackButton!=null) {
+            if (show) mBackButton.setVisibility(View.VISIBLE);
+            else mBackButton.setVisibility(View.GONE);
+        }
+    }
+
     private void init() {
-        mBackButton.setVisibility(View.VISIBLE);
         mTitle.setText(getTitle());
         onInitRecyclerView();
         mSwipeRefresh.setOnRefreshListener(this::refreshData);
