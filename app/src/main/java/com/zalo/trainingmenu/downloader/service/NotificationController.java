@@ -1,9 +1,11 @@
 package com.zalo.trainingmenu.downloader.service;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -34,6 +36,36 @@ public class NotificationController {
 
     public static final int NOTIFY_MODE_BACKGROUND = 0;
     public static final int NOTIFY_MODE_FOREGROUND = 1;
+
+    private NotificationCompat.Action getAction(final String actionStr, final int id) {
+        switch (actionStr) {
+            case TaskService.ACTION_CONTROL_PAUSE:
+                return new NotificationCompat.Action(R.drawable.ic_pause_black_24dp,mService.getResources().getString(R.string.pause),retrieveAction(actionStr,1,id));
+
+            case TaskService.ACTION_CONTROL_RESTART:
+                return new  NotificationCompat.Action(R.drawable.ic_refresh_black_24dp,mService.getResources().getString(R.string.restart),retrieveAction(actionStr,2,id));
+
+            case TaskService.ACTION_CONTROL_CANCEL:
+                return new NotificationCompat.Action(R.drawable.ic_delete_black_24dp,mService.getResources().getString(R.string.cancel),retrieveAction(actionStr,3,id));
+
+            case TaskService.ACTION_CONTROL_OPEN:
+                return new NotificationCompat.Action(R.drawable.ic_play_arrow_black_24dp,mService.getResources().getString(R.string.open),retrieveAction(actionStr,4,id));
+
+            case TaskService.ACTION_CONTROL_RESUME:
+                return new NotificationCompat.Action(R.drawable.ic_play_arrow_black_24dp,mService.getResources().getString(R.string.resume),retrieveAction(actionStr,5,id));
+
+            case TaskService.ACTION_CONTROL_TRY_TO_RESUME:
+                return new NotificationCompat.Action(R.drawable.ic_play_arrow_black_24dp,mService.getResources().getString(R.string.try_to_resume),retrieveAction(actionStr,6,id));
+
+            case TaskService.ACTION_CONTROL_DUPLICATE:
+                return new NotificationCompat.Action(R.drawable.ic_arrow_downward_black_24dp,mService.getResources().getString(R.string.duplicate),retrieveAction(actionStr,7,id));
+
+            case TaskService.ACTION_CONTROL_CLEAR:
+            default:
+                return new NotificationCompat.Action(R.drawable.ic_delete_black_24dp,mService.getResources().getString(R.string.clear),retrieveAction(actionStr,8,id));
+        }
+    }
+
 
     public int getNotifyMode() {
         return mNotifyMode;
@@ -71,7 +103,6 @@ public class NotificationController {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel();
         }
-     //   notifyTaskNotificationChanged(1,BaseTask.RUNNING,0.5f,false);
     }
 
     private BaseTaskController getDownloadManager() {
@@ -83,75 +114,99 @@ public class NotificationController {
         return downloadManager.isSomeTaskRunning();
     }
 
-    public synchronized void notifyTaskNotificationChanged(BaseTask task, final int NOTIFICATION_ID, final int STATE, final int INT_PROGRESS, final boolean PROGRESS_SUPPORT) {
-        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ BaseTask.getStateName(null,STATE)+", progress "+ INT_PROGRESS);
+    private NotificationCompat.Builder newBuilder(BaseTask task, final int NOTIFICATION_ID) {
+        Log.d(TAG, "thread " + Thread.currentThread().getId() + ", null builder for id " + NOTIFICATION_ID);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
+        Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloadActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
+        builder.setContentIntent(pendingIntent).setContentTitle(task.getFileTitle());
+        return builder;
+    }
 
-        NotificationCompat.Builder builder = mIndexBuilders.get(NOTIFICATION_ID);
+    @SuppressLint("RestrictedApi")
+    private void bindAction(NotificationCompat.Builder builder, final int id, final int STATE) {
+        builder.mActions.clear();
+        switch (STATE) {
+            case BaseTask.RUNNING:
+               builder.addAction(getAction(TaskService.ACTION_CONTROL_PAUSE,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CANCEL,id));
+                break;
+            case BaseTask.SUCCESS:
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_OPEN,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
 
-        if(builder==null) {
-            Log.d(TAG, "thread " + Thread.currentThread().getId() + ", null builder for id " + NOTIFICATION_ID);
-            builder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
-            Intent intent = new Intent(App.getInstance().getApplicationContext(), DownloadActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance().getApplicationContext(), 0, intent, 0);
-            builder.setContentIntent(pendingIntent).setContentTitle(task.getFileTitle());
+                break;
+            case BaseTask.PAUSED:
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_RESUME,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
+                break;
+            case BaseTask.CANCELLED:
+            case BaseTask.FAILURE_TERMINATED:
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_TRY_TO_RESUME,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_RESTART,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
+                break;
+            case BaseTask.CONNECTING:
+            case BaseTask.PENDING:
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CANCEL,id));
+                break;
         }
 
-        Intent intent = new Intent(mService,TaskService.ServiceActionReceiver.class);
-        intent.setAction(TaskService.ACTION_CONTROL_PAUSE);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mService,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_pause_black_24dp,mService.getResources().getString(R.string.pause),pendingIntent);
-        builder.mActions.clear();
-        builder.addAction(action);
 
-            switch (STATE) {
-                case BaseTask.RUNNING:
-                    String speed;
-                        speed =Util.humanReadableByteCount((long) task.getSpeedInBytes())+"/s";
-                        if(PROGRESS_SUPPORT)
-                            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(INT_PROGRESS+"%"+MIDDLE_DOT+speed));
-                        else
-                        builder.setStyle(new NotificationCompat.BigTextStyle().bigText("Downloading" + MIDDLE_DOT+speed));
 
-                 builder.setColor(mService.getResources().getColor(R.color.LightTealBlue));
-                 builder.setSmallIcon(getNextDownloadingIcon());
+    }
 
-                    break;
-                 case BaseTask.SUCCESS:
-                     builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.download_completed)+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes())));
-                     builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
-                     builder.setSmallIcon(R.drawable.downloaded);
-                     break;
-                case BaseTask.PAUSED:
-                    if(PROGRESS_SUPPORT) {
-                        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(INT_PROGRESS +"%" +MIDDLE_DOT+mService.getResources().getString(R.string.paused)));
-                    } else {
-                        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.paused)));
-                    }
+    private void bindNotificationContent(NotificationCompat.Builder builder, final int NOTIFICATION_ID, final int STATE, final int INT_PROGRESS, final boolean PROGRESS_SUPPORT, BaseTask task) {
 
-                    builder.setColor(mService.getResources().getColor(R.color.FlatOrange))
-                    .setSmallIcon(R.drawable.download_pause);
-                    break;
-                case BaseTask.FAILURE_TERMINATED:
-                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.failed_notification_message,task.getMessage())));
-                    builder.setColor(mService.getResources().getColor(R.color.FlatRed))
-                    .setSmallIcon(R.drawable.download_failed);
-                    break;
-                 default:
-                     builder.setStyle(new NotificationCompat.BigTextStyle().bigText(BaseTask.getStateName(mService,STATE)));
-                     builder.setColor(mService.getResources().getColor(R.color.FlatTealBlue))
-                     .setSmallIcon(R.drawable.downloading_white);
-            }
+        switch (STATE) {
+            case BaseTask.RUNNING:
+                String speed;
+                speed =Util.humanReadableByteCount((long) task.getSpeedInBytes())+"/s";
+                if(PROGRESS_SUPPORT)
+                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(INT_PROGRESS+"%"+MIDDLE_DOT+speed));
+                else
+                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText("Downloading" + MIDDLE_DOT+speed));
+
+                builder.setColor(mService.getResources().getColor(R.color.LightTealBlue));
+                builder.setSmallIcon(getNextDownloadingIcon());
+
+                break;
+            case BaseTask.SUCCESS:
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.download_completed)+MIDDLE_DOT+Util.humanReadableByteCount(task.getDownloadedInBytes())));
+                builder.setColor(mService.getResources().getColor(R.color.FlatGreen));
+                builder.setSmallIcon(R.drawable.downloaded);
+                break;
+            case BaseTask.PAUSED:
+                if(PROGRESS_SUPPORT) {
+                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(INT_PROGRESS +"%" +MIDDLE_DOT+mService.getResources().getString(R.string.paused)));
+                } else {
+                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.paused)));
+                }
+
+                builder.setColor(mService.getResources().getColor(R.color.FlatOrange))
+                        .setSmallIcon(R.drawable.download_pause);
+                break;
+            case BaseTask.FAILURE_TERMINATED:
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(mService.getResources().getString(R.string.failed_notification_message,task.getMessage())));
+                builder.setColor(mService.getResources().getColor(R.color.FlatRed))
+                        .setSmallIcon(R.drawable.download_failed);
+                break;
+            default:
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(BaseTask.getStateName(mService,STATE)));
+                builder.setColor(mService.getResources().getColor(R.color.FlatTealBlue))
+                        .setSmallIcon(R.drawable.downloading_white);
+        }
 
         if(PROGRESS_SUPPORT)
             builder.setSubText(Util.humanReadableByteCount(task.getDownloadedInBytes())+" of "+ Util.humanReadableByteCount(task.getFileContentLength()));
         else builder.setSubText(Util.humanReadableByteCount(task.getDownloadedInBytes()));
 
-            builder.setOnlyAlertOnce(true).setAutoCancel(true).setOngoing(STATE == BaseTask.RUNNING);
-            mIndexBuilders.put(NOTIFICATION_ID,builder);
+        builder.setOnlyAlertOnce(true).setAutoCancel(true).setOngoing(STATE == BaseTask.RUNNING);
+        mIndexBuilders.put(NOTIFICATION_ID,builder);
 
         if(STATE!= BaseTask.SUCCESS) {
             if(PROGRESS_SUPPORT)
-            builder.setProgress(100, INT_PROGRESS, false);
+                builder.setProgress(100, INT_PROGRESS, false);
             else if(STATE == BaseTask.RUNNING)
                 builder.setProgress(100,0,true);
 
@@ -190,23 +245,27 @@ public class NotificationController {
             mNotificationManager.notify(1,groupBuilder.build());
             builder.setGroup(DOWNLOADED_GROUP);*/
         }
-
-        postNotificationAndroidO(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING, STATE == BaseTask.SUCCESS);
-        if(STATE!= BaseTask.RUNNING) {
-            mIndexBuilders.delete(NOTIFICATION_ID);
-            Log.d(TAG, "thread "+Thread.currentThread().getId()+", delete key id "+ NOTIFICATION_ID+" with IndexBuilders");
-        }
     }
 
-    public void notifyTaskNotificationChanged(BaseTask task) {
 
-        int NOTIFICATION_ID = task.getId();
-        int STATE = task.getState();
-        int PROGRESS = task.getProgressInteger();
-        notifyTaskNotificationChanged(task, NOTIFICATION_ID,STATE, PROGRESS, task.isProgressSupport());
+    public synchronized void notifyTaskNotificationChanged(BaseTask task) {
+        final int NOTIFICATION_ID = task.getId();
+        final int STATE = task.getState();
+        final int INT_PROGRESS = task.getProgressInteger();
+        final boolean PROGRESS_SUPPORT = task.isProgressSupport();
+
+        Log.d(TAG, "thread "+Thread.currentThread().getId()+", start updating id "+NOTIFICATION_ID+", state "+ BaseTask.getStateName(null,STATE)+", progress "+ INT_PROGRESS);
+
+        NotificationCompat.Builder builder = getBuilder(task,NOTIFICATION_ID);
+        bindAction(builder,NOTIFICATION_ID,STATE);
+        bindNotificationContent(builder,NOTIFICATION_ID,STATE,INT_PROGRESS,PROGRESS_SUPPORT,task);
+        postNotification(builder.build(), NOTIFICATION_ID, STATE== BaseTask.RUNNING, STATE == BaseTask.SUCCESS);
+
+        if(STATE!= BaseTask.RUNNING)
+            releaseBuilder(NOTIFICATION_ID);
     }
 
-    private void postNotificationAndroidO(Notification notification, int NOTIFICATION_ID, boolean isOnGoing, boolean isSuccess) {
+    private void postNotification(Notification notification, int NOTIFICATION_ID, boolean isOnGoing, boolean isSuccess) {
         if(mStopped) return;
         int newNotifyMode;
         if (isOnGoing||shouldForeground()) {
@@ -270,5 +329,24 @@ public class NotificationController {
              selectedTasks) {
             mNotificationManager.cancel(id);
         }
+    }
+
+    private NotificationCompat.Builder getBuilder(BaseTask task, final int id) {
+        NotificationCompat.Builder builder = mIndexBuilders.get(id);
+
+        if(builder==null) builder = newBuilder(task,id);
+        return builder;
+    }
+
+    private void releaseBuilder(final int id) {
+        mIndexBuilders.delete(id);
+    }
+
+    private PendingIntent retrieveAction(final String action,int code, final int id) {
+        final ComponentName serviceName = new ComponentName(mService, TaskService.class);
+        Intent intent = new Intent(action);
+        intent.putExtra(BaseTask.EXTRA_TASK_ID,id);
+        intent.setComponent(serviceName);
+        return PendingIntent.getService(mService, code, intent, 0);
     }
 }

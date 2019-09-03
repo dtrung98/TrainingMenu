@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
@@ -35,7 +36,10 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
     public static final String ACTION_CONTROL_CANCEL = PACKAGE_NAME +".cancel";
     public static final String ACTION_CONTROL_OPEN = PACKAGE_NAME +".open";
     public static final String ACTION_CONTROL_CLEAR = PACKAGE_NAME +".clear";
+    public static final String ACTION_CONTROL_RESUME = PACKAGE_NAME + ".resume";
+    public static final String ACTION_CONTROL_TRY_TO_RESUME = PACKAGE_NAME +".try_to_resume";
     public static final String ACTION_CONTROL_DUPLICATE = PACKAGE_NAME +".duplicate";
+    public static final int ACTION_CONTROLS_SIZE = 8;
 
     public static int DOWNLOAD_MODE_SIMPLE = 0;
     public static int DOWNLOAD_MODE_PARTIAL = 1;
@@ -47,12 +51,8 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
     private BaseTaskController mDownloadManager;
     private NotificationController mNotificationController;
 
-    private void initReceiver() {
-    }
-
-    private void releaseReceiver() {
-
-    }
+    private ActionForServiceReceiver mReceiver;
+    private boolean mReceiverRegistered = false;
 
     public void initManager() {
         if(mDownloadManager==null) {
@@ -143,6 +143,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         if(mWakeLock!=null) mWakeLock.setReferenceCounted(false);
 
         PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).registerOnSharedPreferenceChangeListener(this);
+        initReceiver();
         initManager();
         initNotification();
     }
@@ -174,6 +175,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         Log.d(TAG, "onDestroy");
         mNotificationController.cancelAll();
         mDownloadManager.destroy();
+        releaseReceiver();
         mNotificationController = null;
         mDownloadManager = null;
         PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).unregisterOnSharedPreferenceChangeListener(this);
@@ -186,9 +188,43 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         if(intent==null) Log.d(TAG, "onStartCommand: null intent");
         else if(intent.getAction()==null)
         Log.d(TAG, "onStartCommand : receive intent with no action");
-        else Log.d(TAG, "onStartCommand: receive intent with action :["+intent.getAction()+"]");
-        return Service.START_NOT_STICKY ;
+        else Log.d(TAG, "onStartCommand: receive intent with action is ["+intent.getAction()+"]");
+        controlService(intent);
+        return START_NOT_STICKY;
     }
+
+    private void controlService(Intent intent) {
+        if(intent!=null) {
+            String action = intent.getAction();
+            final int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+            Log.d(TAG, "controlService: "+action+", id = "+id);
+            if(action!=null && id !=-1) {
+                switch (action) {
+                    case ACTION_CONTROL_PAUSE:
+                        pauseTaskWithTaskId(id);
+                        break;
+                    case ACTION_CONTROL_CANCEL:
+                        cancelTaskWithTaskId(id);
+                        break;
+                    case ACTION_CONTROL_OPEN:
+                        RemoteForTaskService.openFinishedTaskInfo(this,getTaskInfoWithId(id));
+                        break;
+                    case ACTION_CONTROL_CLEAR:
+                        clearTask(id);
+                        break;
+                    case ACTION_CONTROL_RESUME:
+                        resumeTaskWithTaskId(id);
+                        break;
+                    case ACTION_CONTROL_RESTART:
+                        restartTaskWithTaskId(id);
+                        break;
+                    case ACTION_CONTROL_DUPLICATE:
+                        break;
+                }
+            }
+        }
+    }
+
     public void stopIfModeBackground() {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && mNotificationController !=null && mNotificationController.getNotifyMode()== NotificationController.NOTIFY_MODE_BACKGROUND)
             stopSelf();
@@ -272,15 +308,53 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         if(mDownloadManager!=null) mDownloadManager.tryToResume(id);
     }
 
-    public final class ServiceActionReceiver extends BroadcastReceiver {
-        private static final String TAG = "ServiceActionReceiver";
+    private void initReceiver() {
+        if (!mReceiverRegistered) {
+            mReceiver = new ActionForServiceReceiver(this);
+
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_CONTROL_PAUSE);
+            filter.addAction(ACTION_CONTROL_OPEN);
+            filter.addAction(ACTION_CONTROL_RESTART);
+            filter.addAction(ACTION_CONTROL_CANCEL);
+            filter.addAction(ACTION_CONTROL_CLEAR);
+            filter.addAction(ACTION_CONTROL_DUPLICATE);
+
+            try {
+                LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+            } catch (Exception ignored) {
+            }
+
+            mReceiverRegistered = true;
+        }
+    }
+
+    private void releaseReceiver() {
+        if (mReceiverRegistered) {
+            try {
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+            } catch (Exception ignored) {
+            }
+            mReceiver = null;
+            mReceiverRegistered = false;
+        }
+    }
+
+    public static final class ActionForServiceReceiver extends BroadcastReceiver {
+        private static final String TAG = "ServiceReceiver";
+        private final WeakReference<TaskService> mWeakReference;
+
+        public ActionForServiceReceiver(TaskService service) {
+            mWeakReference = new WeakReference<>(service);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             Log.d(TAG, "onReceive: "+action);
+            TaskService service = mWeakReference.get();
 
-            if(action != null && !action.isEmpty() ) {
+            if(service!=null && action != null && !action.isEmpty() ) {
                 switch (action) {
                     case ACTION_CONTROL_PAUSE:
                         break;
@@ -298,7 +372,6 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
             }
         }
     }
-
 
     public class Binder extends android.os.Binder {
         @NonNull
