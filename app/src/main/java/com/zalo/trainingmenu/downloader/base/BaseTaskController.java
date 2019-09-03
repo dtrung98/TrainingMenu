@@ -245,10 +245,11 @@ public abstract class BaseTaskController<T extends BaseTask> {
         T task = findTaskById(id);
 
         if(task!=null&&task.getState()!=BaseTask.RUNNING) {
+            Log.d(TAG, "clearTask");
             if(mCallBack!=null) mCallBack.onClearTask(task.getId());
             mTaskList.remove(task);
             DownloadDBHelper.getInstance().deleteTask(TaskInfo.newInstance(task));
-        }
+        } else Log.d(TAG, "not exist task like that");
     }
 
     public static int getRecommendSimultaneousDownloadsNumber() {

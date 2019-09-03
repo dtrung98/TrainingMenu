@@ -36,6 +36,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
     public static final String ACTION_CONTROL_CANCEL = PACKAGE_NAME +".cancel";
     public static final String ACTION_CONTROL_OPEN = PACKAGE_NAME +".open";
     public static final String ACTION_CONTROL_CLEAR = PACKAGE_NAME +".clear";
+    public static final String ACTION_CONTROL_CLEAR_NOTIFICATION = PACKAGE_NAME +".clear_notification";
     public static final String ACTION_CONTROL_RESUME = PACKAGE_NAME + ".resume";
     public static final String ACTION_CONTROL_TRY_TO_RESUME = PACKAGE_NAME +".try_to_resume";
     public static final String ACTION_CONTROL_DUPLICATE = PACKAGE_NAME +".duplicate";
@@ -185,10 +186,6 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent==null) Log.d(TAG, "onStartCommand: null intent");
-        else if(intent.getAction()==null)
-        Log.d(TAG, "onStartCommand : receive intent with no action");
-        else Log.d(TAG, "onStartCommand: receive intent with action is ["+intent.getAction()+"]");
         controlService(intent);
         return START_NOT_STICKY;
     }
@@ -207,10 +204,16 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
                         cancelTaskWithTaskId(id);
                         break;
                     case ACTION_CONTROL_OPEN:
-                        RemoteForTaskService.openFinishedTaskInfo(this,getTaskInfoWithId(id));
+                        TaskInfo info = getTaskInfoWithId(id);
+                        if(info!=null)
+                        RemoteForTaskService.openFinishedTaskInfo(this,info);
                         break;
                     case ACTION_CONTROL_CLEAR:
+                        Log.d(TAG, "clear action");
                         clearTask(id);
+                        break;
+                    case ACTION_CONTROL_CLEAR_NOTIFICATION:
+                        if(mNotificationController!=null) mNotificationController.notifyTaskClear(id);
                         break;
                     case ACTION_CONTROL_RESUME:
                         resumeTaskWithTaskId(id);
@@ -266,6 +269,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     public void clearTask(int id) {
         if(mDownloadManager!=null) mDownloadManager.clearTask(id);
+        else Log.d(TAG, "download manager is null");
     }
 
     @Override

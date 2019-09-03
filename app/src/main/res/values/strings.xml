@@ -203,4 +203,5 @@
     <string name="success">Success</string>
     <string name="failed_notification_message">Failed to download file. %1$s. Tap for more info.</string>
     <string name="empty">Empty</string>
+    <string name="delete">Delete</string>
 </resources>

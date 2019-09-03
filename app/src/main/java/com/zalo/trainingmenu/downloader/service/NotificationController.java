@@ -61,7 +61,9 @@ public class NotificationController {
                 return new NotificationCompat.Action(R.drawable.ic_arrow_downward_black_24dp,mService.getResources().getString(R.string.duplicate),retrieveAction(actionStr,7,id));
 
             case TaskService.ACTION_CONTROL_CLEAR:
-            default:
+                return new NotificationCompat.Action(R.drawable.ic_delete_black_24dp,mService.getResources().getString(R.string.delete),retrieveAction(actionStr,8,id));
+            case TaskService.ACTION_CONTROL_CLEAR_NOTIFICATION:
+                default:
                 return new NotificationCompat.Action(R.drawable.ic_delete_black_24dp,mService.getResources().getString(R.string.clear),retrieveAction(actionStr,8,id));
         }
     }
@@ -133,18 +135,18 @@ public class NotificationController {
                 break;
             case BaseTask.SUCCESS:
                 builder.addAction(getAction(TaskService.ACTION_CONTROL_OPEN,id));
-                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR_NOTIFICATION,id));
 
                 break;
             case BaseTask.PAUSED:
                 builder.addAction(getAction(TaskService.ACTION_CONTROL_RESUME,id));
-                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR_NOTIFICATION,id));
                 break;
             case BaseTask.CANCELLED:
             case BaseTask.FAILURE_TERMINATED:
                 builder.addAction(getAction(TaskService.ACTION_CONTROL_TRY_TO_RESUME,id));
                 builder.addAction(getAction(TaskService.ACTION_CONTROL_RESTART,id));
-                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR,id));
+                builder.addAction(getAction(TaskService.ACTION_CONTROL_CLEAR_NOTIFICATION,id));
                 break;
             case BaseTask.CONNECTING:
             case BaseTask.PENDING:
@@ -347,6 +349,6 @@ public class NotificationController {
         Intent intent = new Intent(action);
         intent.putExtra(BaseTask.EXTRA_TASK_ID,id);
         intent.setComponent(serviceName);
-        return PendingIntent.getService(mService, code, intent, 0);
+        return PendingIntent.getService(mService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
