@@ -1,10 +1,14 @@
 package com.zalo.trainingmenu.downloader.service;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -19,15 +23,19 @@ import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.task.partial.PartialTaskController;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingFragment;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaskService extends Service implements BaseTaskController.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "TaskService";
     public static final String PACKAGE_NAME = "com.zalo.trainingmenu.downloader";
-    public static final String ACTION_PAUSE = "pause";
-
-    private static final int UPDATE_FROM_TASK = 2;
+    public static final String ACTION_CONTROL_PAUSE = PACKAGE_NAME +".pause";
+    public static final String ACTION_CONTROL_RESTART = PACKAGE_NAME +".restart";
+    public static final String ACTION_CONTROL_CANCEL = PACKAGE_NAME +".cancel";
+    public static final String ACTION_CONTROL_OPEN = PACKAGE_NAME +".open";
+    public static final String ACTION_CONTROL_CLEAR = PACKAGE_NAME +".clear";
+    public static final String ACTION_CONTROL_DUPLICATE = PACKAGE_NAME +".duplicate";
 
     public static int DOWNLOAD_MODE_SIMPLE = 0;
     public static int DOWNLOAD_MODE_PARTIAL = 1;
@@ -38,6 +46,13 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     private BaseTaskController mDownloadManager;
     private NotificationController mNotificationController;
+
+    private void initReceiver() {
+    }
+
+    private void releaseReceiver() {
+
+    }
 
     public void initManager() {
         if(mDownloadManager==null) {
@@ -108,15 +123,38 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         Log.d(TAG, "onBind");
         return mBinder;
     }
+    private PowerManager.WakeLock mWakeLock;
+
+    @SuppressLint("WakelockTimeout")
+    public void acquire() {
+        if(mWakeLock!=null) mWakeLock.acquire();
+    }
 
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
+
+        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        if(powerManager!=null)
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+
+        if(mWakeLock!=null) mWakeLock.setReferenceCounted(false);
+
         PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).registerOnSharedPreferenceChangeListener(this);
         initManager();
         initNotification();
     }
+
+    public void releaseWakeLock() {
+        if (mWakeLock!=null&&mWakeLock.isHeld()) {
+            try {
+                mWakeLock.release();
+            } catch (Exception ignored) {}
+        }
+    }
+
 
     private void initNotification() {
         if(mNotificationController ==null) {
@@ -139,6 +177,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         mNotificationController = null;
         mDownloadManager = null;
         PreferenceManager.getDefaultSharedPreferences(App.getInstance().getApplicationContext()).unregisterOnSharedPreferenceChangeListener(this);
+        releaseWakeLock();
         super.onDestroy();
     }
 
@@ -148,7 +187,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         else if(intent.getAction()==null)
         Log.d(TAG, "onStartCommand : receive intent with no action");
         else Log.d(TAG, "onStartCommand: receive intent with action :["+intent.getAction()+"]");
-        return super.onStartCommand(intent, flags, startId);
+        return Service.START_NOT_STICKY ;
     }
     public void stopIfModeBackground() {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && mNotificationController !=null && mNotificationController.getNotifyMode()== NotificationController.NOTIFY_MODE_BACKGROUND)
@@ -231,6 +270,33 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     public void tryToResume(int id) {
         if(mDownloadManager!=null) mDownloadManager.tryToResume(id);
+    }
+
+    public final class ServiceActionReceiver extends BroadcastReceiver {
+        private static final String TAG = "ServiceActionReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            Log.d(TAG, "onReceive: "+action);
+
+            if(action != null && !action.isEmpty() ) {
+                switch (action) {
+                    case ACTION_CONTROL_PAUSE:
+                        break;
+                    case ACTION_CONTROL_CLEAR:
+                        break;
+                    case ACTION_CONTROL_CANCEL:
+                        break;
+                    case ACTION_CONTROL_OPEN:
+                        break;
+                    case ACTION_CONTROL_RESTART:
+                        break;
+                    case ACTION_CONTROL_DUPLICATE:
+                        break;
+                }
+            }
+        }
     }
 
 

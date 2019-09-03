@@ -185,4 +185,5 @@
     <string name="index">Chỉ mục</string>
     <string name="success">Thành công</string>
     <string name="failed_notification_message">Tải về thất bại. %1$s.</string>
+    <string name="empty">Trống</string>
 </resources>
