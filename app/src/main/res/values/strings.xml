@@ -204,4 +204,9 @@
     <string name="failed_notification_message">Failed to download file. %1$s. Tap for more info.</string>
     <string name="empty">Empty</string>
     <string name="delete">Delete</string>
+    <string name="files">Files</string>
+    <string name="files_description">Files manager application</string>
+    <string name="restore_default">Restore Default</string>
+    <string name="opengl">Open GL</string>
+    <string name="opengl_description">Learn how to create graphics</string>
 </resources>

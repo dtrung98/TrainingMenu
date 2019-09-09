@@ -349,6 +349,6 @@ public class NotificationController {
         Intent intent = new Intent(action);
         intent.putExtra(BaseTask.EXTRA_TASK_ID,id);
         intent.setComponent(serviceName);
-        return PendingIntent.getService(mService, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(mService, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

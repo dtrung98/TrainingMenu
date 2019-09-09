@@ -24,7 +24,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class FolderChooserDialog extends DialogFragment implements View.OnClickListener, FolderChooserAdapter.OnClickFolderItem {
     public static final String TAG = "FolderChooserDialog";
@@ -165,8 +167,6 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
         return builder.build();
     }*/
 
-
-
     public void onSelection(int i, String s) {
         if (canGoUp && i == 0) {
             parentFolder = parentFolder.getParentFile();
@@ -174,6 +174,7 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
                 parentFolder = parentFolder.getParentFile();
             }
             checkIfCanGoUp();
+        } else if(i==0) {
         } else {
             parentFolder = parentContents[canGoUp ? i - 1 : i];
             canGoUp = true;
@@ -185,7 +186,8 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
     }
 
     private void checkIfCanGoUp() {
-        canGoUp = parentFolder.getParent() != null;
+        File parentFile = parentFolder.getParentFile();
+        canGoUp = parentFile != null && parentFolder.getParentFile().canWrite();
     }
 
     private void reload() {
@@ -196,7 +198,8 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
         //dialog.setTitle(parentFolder.getAbsolutePath());
         //dialog.setItems((CharSequence[]) getContentsArray());
         mTitle.setText(parentFolder.getName());
-        mAdapter.setData(getContentsArray());
+        String[] data = getContentsArray();
+        mAdapter.setData(data);
     }
 
     @Override
@@ -217,7 +220,9 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
                 dismiss();
                 break;
             case R.id.button:
-                Log.d(TAG, "folder chosen: "+parentFolder.getAbsolutePath());
+                String path = parentFolder.getAbsolutePath();
+                if(path.isEmpty()||path.equals("/")) parentFolder = Util.getDefaultDirectory();
+                Log.d(TAG, "folder chosen: \""+parentFolder.getAbsolutePath()+"\"");
                 if(mCallback!=null) mCallback.onFolderSelection(parentFolder);
                 else {
                     SharedPreferences.Editor editor = App.getDefaultSharedPreferences().edit();
@@ -238,7 +243,7 @@ public class FolderChooserDialog extends DialogFragment implements View.OnClickL
 
     @Override
     public void onClickFolderItem(int position, String name) {
-        Log.d(TAG, "on click folder item");
+        Log.d(TAG, "on click folder item :"+name);
         onSelection(position, name);
     }
 

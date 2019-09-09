@@ -186,4 +186,7 @@
     <string name="success">Thành công</string>
     <string name="failed_notification_message">Tải về thất bại. %1$s.</string>
     <string name="empty">Trống</string>
+    <string name="delete">Xóa Tác Vụ</string>
+    <string name="files">Quản lý Files</string>
+    <string name="files_description">Ứng dụng quản lý tập tin</string>
 </resources>

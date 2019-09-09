@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.index.ContentProviderDemoActivity;
 import com.zalo.trainingmenu.fundamental.index.MultithreadingActivity;
+import com.zalo.trainingmenu.fundamental.opengl.OpenGLActivity;
 import com.zalo.trainingmenu.model.Item;
 import com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity;
 import com.zalo.trainingmenu.mainui.base.AbsMenuActivity;
@@ -20,7 +21,7 @@ public class FundamentalActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-
+        list.add(Item.with(this).setTitle(R.string.opengl).setDescription(R.string.opengl_description).setDestinationActivityClass(OpenGLActivity.class).get());
         list.add(Item.with(this).setTitle(R.string.service).setDescription(R.string.service_description).setDestinationActivityClass(ServiceDemoActivity.class).get());
         list.add(Item.with(this).setTitle(R.string.content_provider).setDescription(R.string.content_provider_description).setDestinationActivityClass(ContentProviderDemoActivity.class).get());
         list.add(Item.with(this).setTitle(R.string.network).setDescription(R.string.network_description).setDestinationActivityClass(NetworkMenuActivity.class).get());

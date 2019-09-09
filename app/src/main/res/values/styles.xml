@@ -26,6 +26,10 @@
 <item name="android:background">@color/DarkerColorL3</item>
 <item name="android:windowBackground">@android:color/transparent</item>
 </style>
+    <style name="FullScreenTheme" parent="AppTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:statusBarColor">@android:color/transparent</item>
