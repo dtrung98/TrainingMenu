@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 
+import java.io.BufferedReader;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -42,6 +43,14 @@ class BitmapDrawingRenderer implements GLSurfaceView.Renderer {
             1.0f, 1.0f
     };
 
+    private static final float[] VERTICES = new float[] {
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, 1
+    };
+
+
     private static final Buffer TEXCOORD_BUFFER = ByteBuffer.allocateDirect(TEXTURE_COORDINATES.length * 4)
             .order(ByteOrder.nativeOrder()).asFloatBuffer().put(TEXTURE_COORDINATES).rewind();
     private static final Buffer VERTEX_BUFFER = ByteBuffer.allocateDirect(VERTEX_COORDINATES.length * 4)
@@ -65,6 +74,10 @@ class BitmapDrawingRenderer implements GLSurfaceView.Renderer {
 
         if(mBitmap!=null)
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0,mBitmap, 0);
+
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(VERTICES.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+
     }
 
     @Override
