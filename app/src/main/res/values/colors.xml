@@ -30,7 +30,7 @@
     <color name="splash_color">@color/DarkerBlack</color>
     <color name="bottom_navigation_color">#DD23202B</color>
     <color name="FocusYellowColor">#D97F68</color>
-    <color name="DarkUnfocusColor">#6E6C6B</color>
+    <color name="DarkUnFocusColor">#6E6C6B</color>
     <color name="quite_green">#559E74</color>
     <color name="event_background_color">#FAF3DD</color>
     <color name="item_event_list_color">#1F1C26</color>

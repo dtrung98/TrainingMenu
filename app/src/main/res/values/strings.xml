@@ -209,4 +209,8 @@
     <string name="restore_default">Restore Default</string>
     <string name="opengl">Open GL</string>
     <string name="opengl_description">Learn how to create graphics</string>
+    <string name="quick_download_notification_title">Quick download from this url</string>
+    <string name="tap_to_download" >%1$s\nTap to download file from this url</string>
+    <string name="download_now">Download now</string>
+    <string name="open_in_app">Edit</string>
 </resources>

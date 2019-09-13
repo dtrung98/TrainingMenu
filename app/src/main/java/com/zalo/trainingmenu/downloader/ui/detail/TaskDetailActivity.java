@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
@@ -94,7 +95,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
         list.add(Item.with(this).setTitle(R.string.support_resume).setDescription((mTaskInfo.isProgressSupport()) ? R.string.yes : R.string.no).get());
         list.add(Item.with(this).setTitle(R.string.connections_number).setDescription(mTaskInfo.getPartialInfoList().size()+ " "+getResources().getString(R.string.connections)).get());
         list.add(Item.with(this).setTitle(R.string.index).setDescription(String.valueOf(mTaskInfo.getId())).get());
-        list.add(Item.with(this).setTitle(R.string.state).setDescription(BaseTask.getStateName(this,mTaskInfo.getState())).get());
+        list.add(Item.with(this).setTitle(R.string.state).setDescription(Task.getStateName(this,mTaskInfo.getState())).get());
         list.add(Item.with(this).setTitle(R.string.message).setDescription((mTaskInfo.getMessage().isEmpty())? this.getResources().getString(R.string.empty): mTaskInfo.getMessage()).get());
         list.add(Item.with(this).setTitle(R.string.size).setDescription(Util.humanReadableByteCount(mTaskInfo.getFileContentLength())).get());
         list.add(Item.with(this).setTitle(R.string.downloaded_size).setDescription(Util.humanReadableByteCount(mTaskInfo.getDownloadedInBytes())).get());

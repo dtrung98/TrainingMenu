@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.task.partial.PartialDownloadTask;
 
 public class PartialInfo implements Parcelable {
@@ -46,7 +46,7 @@ public class PartialInfo implements Parcelable {
 
     private final int mId;
     private long mDownloadedInBytes;
-    private int mState = BaseTask.PENDING;
+    private int mState = Task.PENDING;
 
 
 

@@ -6,6 +6,7 @@ import android.webkit.URLUtil;
 
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.base.BaseTaskController;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.database.DownloadDBHelper;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.PartialInfo;
@@ -235,7 +236,7 @@ public class FileDownloadTask extends BaseTask<PartialTaskController> {
         for (PartialDownloadTask task :
                 mPartialDownloadTasks) {
             if(task.getState()!=BaseTask.SUCCESS) {
-                Log.d(TAG, "check success: partial task id "+task.getId() +" is "+BaseTask.getStateName(task.getState()));
+                Log.d(TAG, "check success: partial task id "+task.getId() +" is "+ Task.getStateName(task.getState()));
                 success = false;
                 break;
             }
@@ -251,7 +252,7 @@ public class FileDownloadTask extends BaseTask<PartialTaskController> {
                 setState(BaseTask.FAILURE_TERMINATED);
                 break;
             default:
-                Log.d(TAG, "check success: failed and task state now is "+ BaseTask.getStateName(getState()));
+                Log.d(TAG, "check success: failed and task state now is "+ Task.getStateName(getState()));
                 break;
         }
         notifyTaskChanged();

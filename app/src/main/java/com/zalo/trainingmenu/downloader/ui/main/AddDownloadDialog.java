@@ -28,6 +28,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 
 
@@ -41,9 +42,19 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
     private View mCloseButton;
     private TextView mPasteAndGoButton;
     private ImageView mPasteIcon;
+    private String mIntentUrl;
 
     public static AddDownloadDialog newInstance() {
         return new AddDownloadDialog();
+    }
+
+    public static AddDownloadDialog newInstance(String url) {
+
+        Bundle args = new Bundle();
+        args.putString(Task.EXTRA_URL,url);
+        AddDownloadDialog fragment = new AddDownloadDialog();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Nullable
@@ -64,6 +75,12 @@ public class AddDownloadDialog extends DialogFragment implements View.OnClickLis
             ClipboardManager clipboardManager = (ClipboardManager) App.getInstance().getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboardManager != null) {
                 clipboardManager.addPrimaryClipChangedListener(this);
+            }
+
+           Bundle bundle = getArguments();
+            if(bundle!=null) {
+               String url = bundle.getString(Task.EXTRA_URL);
+               if(url!=null && !url.isEmpty()) mUrlEditText.setText(url);
             }
         updateDownloadButton();
         updatePasteButton();

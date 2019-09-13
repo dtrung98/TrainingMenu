@@ -78,7 +78,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
 
     public void addNewTask(DownloadItem item) {
         T task = newInstance(item);
-        task.setMode(BaseTask.EXECUTE_MODE_NEW_DOWNLOAD);
+        task.setMode(Task.EXECUTE_MODE_NEW_DOWNLOAD);
         mTaskList.add(task);
         if(mExecutor==null) throw new NullPointerException("Executor is null");
         mExecutor.execute(task);
@@ -119,7 +119,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
     public synchronized boolean isSomeTaskRunning() {
         for (T task :
                 mTaskList) {
-            if(task.getState()== BaseTask.RUNNING) return true;
+            if(task.getState()== Task.RUNNING) return true;
         }
         return false;
     }
@@ -194,7 +194,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
             }
         }
 
-        if(task!=null&&task.getState()== BaseTask.PAUSED) {
+        if(task!=null&&task.getState()== Task.PAUSED) {
             task.resumeByUser();
         }
     }
@@ -212,7 +212,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
         }
 
         if(task!=null) {
-            if(task.getState()==BaseTask.SUCCESS) {
+            if(task.getState()==Task.SUCCESS) {
                 DownloadDBHelper.getInstance().deleteTask(TaskInfo.newInstance(task));
                 mTaskList.remove(pos);
                 if(mCallBack!=null) mCallBack.onClearTask(id);
@@ -225,7 +225,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
     public void restartAll() {
         for (BaseTask task :
                 mTaskList) {
-            if(task.getState()!=BaseTask.RUNNING) task.restartByUser();
+            if(task.getState()!= Task.RUNNING) task.restartByUser();
         }
     }
 
@@ -244,7 +244,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
     public synchronized void clearTask(int id) {
         T task = findTaskById(id);
 
-        if(task!=null&&task.getState()!=BaseTask.RUNNING) {
+        if(task!=null&&task.getState()!=Task.RUNNING) {
             Log.d(TAG, "clearTask");
             if(mCallBack!=null) mCallBack.onClearTask(task.getId());
             mTaskList.remove(task);
@@ -289,7 +289,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
         synchronized (mTaskList) {
             for (BaseTask task :
                     mTaskList) {
-                if(task.getState()==BaseTask.RUNNING) task.cancelByUser();
+                if(task.getState()== Task.RUNNING) task.cancelByUser();
             }
         }
 
@@ -324,7 +324,7 @@ public abstract class BaseTaskController<T extends BaseTask> {
         }
 
         if(task!=null) {
-            task.setState(BaseTask.PAUSED);
+            task.setState(Task.PAUSED);
             task.resumeByUser();
         }
     }

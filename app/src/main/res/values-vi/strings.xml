@@ -189,4 +189,11 @@
     <string name="delete">Xóa Tác Vụ</string>
     <string name="files">Quản lý Files</string>
     <string name="files_description">Ứng dụng quản lý tập tin</string>
+    <string name="restore_default">Khôi phục mặc định</string>
+    <string name="opengl">Open GL</string>
+    <string name="opengl_description">Học cách dùng OpenGL</string>
+    <string name="quick_download_notification_title">Tải nhanh liên kết đã sao chép</string>
+    <string name="tap_to_download" >%1$s.\nChạm để tải tập tin từ liên kết này.</string>
+    <string name="download_now">Tải ngay</string>
+    <string name="open_in_app">Sửa liên kết</string>
 </resources>

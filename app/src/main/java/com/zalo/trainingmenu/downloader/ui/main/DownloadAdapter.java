@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
@@ -649,7 +650,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         void bindProgressSupport(TaskInfo info) {
           //  if(true) return;
-            Log.d(TAG, "bind progress support : "+info.isProgressSupport()+" when state is "+BaseTask.getStateName(null, info.getState()));
+            Log.d(TAG, "bind progress support : "+info.isProgressSupport()+" when state is "+ Task.getStateName(null, info.getState()));
             if(info.isProgressSupport()) {
                 mProgressBar.setIndeterminate(false);
             } else {

@@ -19,16 +19,19 @@ import androidx.preference.PreferenceManager;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.base.BaseTaskController;
+import com.zalo.trainingmenu.downloader.base.Task;
+import com.zalo.trainingmenu.downloader.helper.URLCopyBoardHelper;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.task.partial.PartialTaskController;
+import com.zalo.trainingmenu.downloader.ui.main.DownloadActivity;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskService extends Service implements BaseTaskController.CallBack, SharedPreferences.OnSharedPreferenceChangeListener {
+public class TaskService extends Service implements BaseTaskController.CallBack, SharedPreferences.OnSharedPreferenceChangeListener, URLCopyBoardHelper.CopyBoardCallback {
     public static final String TAG = "TaskService";
     public static final String PACKAGE_NAME = "com.zalo.trainingmenu.downloader";
     public static final String ACTION_CONTROL_PAUSE = PACKAGE_NAME +".pause";
@@ -40,6 +43,9 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
     public static final String ACTION_CONTROL_RESUME = PACKAGE_NAME + ".resume";
     public static final String ACTION_CONTROL_TRY_TO_RESUME = PACKAGE_NAME +".try_to_resume";
     public static final String ACTION_CONTROL_DUPLICATE = PACKAGE_NAME +".duplicate";
+    public static final String ACTION_NEW_TASK_QUICK_DOWNLOAD = PACKAGE_NAME+ ".new_task_quick_download";
+    public static final String ACTION_OPEN_NEW_TASK_DIALOG = PACKAGE_NAME+".open_new_task_dialog";
+    public static final String ACTION_CLEAR_QUICK_DOWNLOAD_NOTIFICATION = PACKAGE_NAME +".clear_quick_download_notification";
     public static final int ACTION_CONTROLS_SIZE = 8;
 
     public static int DOWNLOAD_MODE_SIMPLE = 0;
@@ -51,6 +57,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     private BaseTaskController mDownloadManager;
     private NotificationController mNotificationController;
+    private URLCopyBoardHelper mCopyBoardHelper;
 
     private ActionForServiceReceiver mReceiver;
     private boolean mReceiverRegistered = false;
@@ -60,6 +67,13 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
             mDownloadManager = new PartialTaskController();
             mDownloadManager.init(this);
             mDownloadManager.restoreInstance();
+        }
+    }
+
+    public void initCopyBoardHelper() {
+        if(mCopyBoardHelper==null) {
+            mCopyBoardHelper = new URLCopyBoardHelper();
+            mCopyBoardHelper.init(this);
         }
     }
 
@@ -147,6 +161,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
         initReceiver();
         initManager();
         initNotification();
+        initCopyBoardHelper();
     }
 
     public void releaseWakeLock() {
@@ -174,6 +189,7 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
+        mCopyBoardHelper.destroy();
         mNotificationController.cancelAll();
         mDownloadManager.destroy();
         releaseReceiver();
@@ -186,8 +202,36 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(!controlQuickDownload(intent))
         controlService(intent);
         return START_NOT_STICKY;
+    }
+
+    private boolean controlQuickDownload(Intent intent) {
+        if(intent!=null) {
+            String action = intent.getAction();
+            String url = intent.getStringExtra(Task.EXTRA_URL);
+            int id = intent.getIntExtra(Task.EXTRA_TASK_ID,-1);
+            if(action!=null && url!=null && !url.isEmpty()) {
+                switch (action) {
+                    case ACTION_NEW_TASK_QUICK_DOWNLOAD:
+                        if(id!=-1 && mNotificationController!=null) mNotificationController.notifyTaskClear(id);
+                        addNewTask(new DownloadItem(url));
+                        break;
+                    case ACTION_OPEN_NEW_TASK_DIALOG:
+                        if(id!=-1 && mNotificationController!=null) mNotificationController.notifyTaskClear(id);
+                        Intent call = new Intent(this, DownloadActivity.class);
+                        call.setAction(action);
+                        call.putExtra(Task.EXTRA_URL,url);
+                        startActivity(call);
+                        break;
+
+                    case ACTION_CLEAR_QUICK_DOWNLOAD_NOTIFICATION:
+                        if(id!=-1 && mNotificationController!=null) mNotificationController.notifyTaskClear(id);
+                }
+            }
+        }
+        return false;
     }
 
     private void controlService(Intent intent) {
@@ -342,6 +386,11 @@ public class TaskService extends Service implements BaseTaskController.CallBack,
             mReceiver = null;
             mReceiverRegistered = false;
         }
+    }
+
+    @Override
+    public void onNewURLCopyBoard(String url) {
+        if(mNotificationController!=null) mNotificationController.postQuickDownloadNotification(url);
     }
 
     public static final class ActionForServiceReceiver extends BroadcastReceiver {

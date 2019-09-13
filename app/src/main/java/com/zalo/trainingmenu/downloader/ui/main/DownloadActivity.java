@@ -1,9 +1,11 @@
 package com.zalo.trainingmenu.downloader.ui.main;
 
 
+import android.content.ComponentName;
 import android.content.Intent;
 
 import android.content.res.ColorStateList;
+import android.os.IBinder;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -20,9 +22,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
+import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
+import com.zalo.trainingmenu.downloader.service.TaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingActivity;
@@ -45,6 +49,11 @@ public class DownloadActivity extends BaseActivity {
     public static final String ACTION_RESTART_DOWNLOAD = "restart_download";
     public static final String ACTION_OPEN_FILE = "open_file";
 
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        super.onServiceConnected(componentName, iBinder);
+        handleIntent(getIntent());
+    }
 
     FloatingActionButton mAddButton;
     ImageView mMenuButton;
@@ -56,11 +65,16 @@ public class DownloadActivity extends BaseActivity {
         executeWriteStorageAction(intent);
     }
 
+    void addNewTask(String url) {
+        AddDownloadDialog.newInstance(url).show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+    }
+
     void plusButtonClick() {
         if(mAdapter!=null && mAdapter.isInSelectMode()) {
             mAdapter.goOutSelectMode();
         } else addNewTask();
     }
+
 
     @Override
     public void onPermissionResult(Intent intent, boolean granted) {
@@ -331,6 +345,23 @@ public class DownloadActivity extends BaseActivity {
     @Override
     protected void onClearTask(int id) {
         mAdapter.onTaskCleared(id);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(handleIntent(intent)) setIntent(null);
+    }
+    private boolean handleIntent(Intent intent) {
+        if(intent!=null) {
+            String action = intent.getAction();
+            if (TaskService.ACTION_OPEN_NEW_TASK_DIALOG.equals(action)) {
+                String url = intent.getStringExtra(Task.EXTRA_URL);
+                addNewTask(url);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
