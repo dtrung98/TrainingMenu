@@ -15,12 +15,13 @@ import androidx.annotation.Nullable;
 
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
 
 public class OpenGLActivity extends PermissionActivity implements View.OnClickListener {
 
     public static final String ACTION_PICK_IMAGE = "PICK_IMAGE";
     public static final int REQUEST_CODE_PICK_IMAGE = 1;
-    private GLSurfaceView mGLView;
+    private GLTextureView mGLView;
     private BitmapDrawingRenderer mRenderer;
 
 

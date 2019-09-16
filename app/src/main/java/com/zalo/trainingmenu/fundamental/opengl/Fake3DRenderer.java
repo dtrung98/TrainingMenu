@@ -16,7 +16,7 @@ import javax.microedition.khronos.opengles.GL10;
 import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.fragmentShader;
 import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.vertexShader;
 
-class BitmapDrawingRenderer implements GLTextureView.Renderer {
+class Fake3DRenderer implements GLTextureView.Renderer {
 
     private int[] textures;
     private float mImageWidth = 0;
@@ -72,24 +72,12 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
         return ByteBuffer.allocateDirect(VERTEX_COORDINATES.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer().put(VERTEX_COORDINATES).rewind();
     }
 
+    private int mBackgroundRenderer = 0;
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        textures = new int[1];
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-
-        gl.glGenTextures(1, textures, 0);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
-
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-
-        if(mBitmap!=null)
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0,mBitmap, 0);
-
+        GLES20.glClearColor(0,0,0,0);
+        enableTransparency();
     }
 
     @Override
@@ -97,21 +85,63 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
         mDrawWidth = width;
         mDrawHeight = height;
         gl.glViewport(0, 0, width, height);
+        initialize();
+    }
+
+    private void initialize() {
+
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        gl.glActiveTexture(GL10.GL_TEXTURE0);
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        // Draw
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, getVertexBuffer());
-        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, TEXCOORD_BUFFER);
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
     }
 
+    private void enableTransparency() {
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        attachShaders();
+    }
+
+    private int mProgramId = 0;
+    private int mMouseX = 0;
+    private int mMouseY = 0;
+
+
+    private void attachShaders() {
+        mProgramId = createProgram(createShader( GLES20.GL_VERTEX_SHADER, vertexShader),
+                createShader( GLES20.GL_FRAGMENT_SHADER, fragmentShader));
+        GLES20.glUseProgram(mProgramId);
+    }
+
+    private int  createProgram(int vertexShader, int fragmentShader) {
+        int id =  GLES20.glCreateProgram();
+        GLES20.glAttachShader(id, vertexShader);
+        GLES20.glAttachShader(id, fragmentShader);
+        GLES20.glLinkProgram(id);
+        return id;
+    }
+
+    private int createShader(int type, String shader) {
+        int id = GLES20.glCreateShader(type);
+        GLES20.glShaderSource(id, shader);
+        GLES20.glCompileShader(id);
+
+        return id;
+    }
 
     @Override
     public void onSurfaceDestroyed(GL10 gl) {
 
+    }
+
+    public Bitmap getDepthMap() {
+        return mDepthMap;
+    }
+
+    public void setDepthMap(Bitmap depthMap) {
+        mDepthMap = depthMap;
     }
 }
