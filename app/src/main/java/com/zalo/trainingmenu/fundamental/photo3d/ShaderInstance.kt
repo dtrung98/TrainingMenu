@@ -1,4 +1,4 @@
-package com.zalo.trainingmenu.fundamental.opengl
+package com.zalo.trainingmenu.fundamental.photo3d
 
 object ShaderInstance {
     const val A_POSITION = "a_position"

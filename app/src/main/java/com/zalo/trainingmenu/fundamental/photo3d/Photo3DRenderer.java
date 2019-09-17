@@ -12,19 +12,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.A_POSITION;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.IMAGE0;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.IMAGE1;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.MOUSE;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.PIXEL_RATIO;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.RESOLUTION;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.THRESHOLD;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.TIME;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.fragmentShader;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.vertexShader;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.A_POSITION;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.IMAGE0;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.IMAGE1;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.MOUSE;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.PIXEL_RATIO;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.RESOLUTION;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.THRESHOLD;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.TIME;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.fragmentShader;
+import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.vertexShader;
 
 class Photo3DRenderer implements GLTextureView.Renderer {
     private static final String TAG = "Photo3DRenderer";
@@ -107,9 +106,17 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private float imageAspect = 1f;
 
     private void onPhotosSet() {
-        if(mBitmaps[0]==null) return;
+      //  if(mBitmaps[0]==null) return;
 
+        if(mBitmaps[0] != null)
         imageAspect = (float) mBitmaps[0].getHeight()/ mBitmaps[0].getWidth();
+        else if(mBitmaps[1] != null) imageAspect = (float) mBitmaps[1].getHeight()/mBitmaps[1].getWidth();
+        else imageAspect = 1;
+        if(textures!=null) {
+            int[] tem = new int[] {textures[0],textures[1]};
+            GLES20.glDeleteTextures(2, tem, 0);
+        }
+
         textures = new int[2];
 
         GLES20.glGenTextures(2, textures, 0);
@@ -177,8 +184,11 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         long time = ( now - startTime ) / 1000;
 
         GLES20.glUniform1f(uTimeLocation,(int)time);
-        mMouseX = 4f *((now % 2200)  / 2200f);
-        mMouseY = 4f * (((now + 573) % 1100 ) / 1100f);
+        mMouseX = ((now % 3700)  / 3700f);
+        mMouseY = (((now + 573) % 6000 ) / 6000f);
+
+        mMouseX*= 4;
+        mMouseY*= 4;
 
         // 0 ->2 mean -1 -> 1, how ?
         // 2 -> 4 mean 1 ->-1, how ?
@@ -188,6 +198,8 @@ class Photo3DRenderer implements GLTextureView.Renderer {
 
         if(mMouseY<2) mMouseY = -1 + mMouseY; // min = -1 + 0 = -1 ; max = -1 + 2 = 1
         else mMouseY = (4 - mMouseY) - 1; // min = 4 - 2 - 1 = 1; max =  -1
+
+        // mMouseY = mMouseX = -1f;
 
         GLES20.glUniform2f(uMouseLocation,mMouseX, mMouseY);
 
@@ -268,7 +280,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     public void removeBitmaps() {
         mBitmaps[0] = null;
         mBitmaps[1] = null;
-
+        onPhotosSet();
     }
 
     private int uResolutionLocation;

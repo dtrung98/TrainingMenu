@@ -2,7 +2,6 @@ package com.zalo.trainingmenu.fundamental.opengl;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
@@ -13,9 +12,6 @@ import java.nio.ByteOrder;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.fragmentShader;
-import static com.zalo.trainingmenu.fundamental.opengl.ShaderInstance.vertexShader;
 
 class BitmapDrawingRenderer implements GLTextureView.Renderer {
 

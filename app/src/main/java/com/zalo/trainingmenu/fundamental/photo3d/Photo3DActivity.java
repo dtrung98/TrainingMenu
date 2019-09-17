@@ -28,24 +28,30 @@ public class Photo3DActivity extends PermissionActivity {
     public static final int REQUEST_CODE_PICK_ORIGINAL_PHOTO = 1;
     public static final int REQUEST_CODE_PICK_DEPTH_PHOTO = 2;
     public static final String ACTION_PICK_DEPTH_PHOTO = "pick_depth_photo";
-    private Photo3DRenderer mRenderer;
 
     @BindView(R.id.gl_view)
-    GLTextureView mGLView;
+    Photo3DView mGLView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo3d_layout);
         ButterKnife.bind(this);
-        mRenderer = new Photo3DRenderer();
-        mRenderer.setBitmap(BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg"));
-        mRenderer.setDepthMap(BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg"));
+        Bitmap b;
+        try {
+            b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");
+            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro.jpg");
+            if(b!=null)
+            mGLView.setOriginalPhoto(b);
 
-        mGLView.setEGLContextClientVersion(2);
-        mGLView.setRenderer(mRenderer);
-        mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        } catch (Exception ignored) {}
 
+        try {
+            b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
+            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro_depth.jpg");
+            if(b!=null)
+                mGLView.setDepthPhoto(b);
+        } catch (Exception ignored) {};
     }
 
     @OnClick(R.id.back_button)
@@ -67,7 +73,7 @@ public class Photo3DActivity extends PermissionActivity {
 
     @OnClick(R.id.remove_button)
     void removeClicked() {
-        mRenderer.removeBitmaps();
+        mGLView.removeBitmaps();
     }
 
     @OnClick(R.id.original_button)
@@ -122,8 +128,11 @@ public class Photo3DActivity extends PermissionActivity {
                             Log.d(TAG, "onActivityResult: "+path);
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
+
+
+
                             //mImageView.setImageBitmap(bitmap);
-                            mRenderer.setBitmap(bitmap);
+                            mGLView.setOriginalPhoto(bitmap);
                             mGLView.requestRender();
                         }
                     }
@@ -143,7 +152,7 @@ public class Photo3DActivity extends PermissionActivity {
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
                             //mImageView.setImageBitmap(bitmap);
-                            mRenderer.setDepthMap(bitmap);
+                           mGLView.setDepthPhoto(bitmap);
                             mGLView.requestRender();
                         }
                     }
