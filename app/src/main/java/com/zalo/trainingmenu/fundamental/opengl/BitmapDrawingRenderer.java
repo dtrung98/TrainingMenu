@@ -1,6 +1,7 @@
 package com.zalo.trainingmenu.fundamental.opengl;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
@@ -41,8 +42,8 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
         VERTEX_COORDINATES[7] = VERTEX_COORDINATES[10] = - result;
     }
 
-    private Bitmap mBitmap;
-    private Bitmap mDepthMap;
+    private Bitmap mBitmap = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");;
+    private Bitmap mDepthMap = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
     private static float[] VERTEX_COORDINATES = new float[] {
             -1f, +0.75f, 0.0f,
             +1.0f, +0.75f, 0.0f,
@@ -65,6 +66,8 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
     };
 
 
+
+
     private static Buffer TEXCOORD_BUFFER = ByteBuffer.allocateDirect(TEXTURE_COORDINATES.length * 4)
             .order(ByteOrder.nativeOrder()).asFloatBuffer().put(TEXTURE_COORDINATES).rewind();
 
@@ -74,12 +77,12 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        textures = new int[1];
+        textures = new int[2];
         gl.glEnable(GL10.GL_TEXTURE_2D);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
-        gl.glGenTextures(1, textures, 0);
+        gl.glGenTextures(2, textures, 0);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
@@ -87,8 +90,28 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
 
+        gl.glActiveTexture(GL10.GL_TEXTURE0);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+
         if(mBitmap!=null)
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0,mBitmap, 0);
+
+
+        // Depth
+
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);
+
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+
+        gl.glActiveTexture(GL10.GL_TEXTURE1);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+
+       // if(mDepthMap!=null)
+          //  GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0,mDepthMap, 0);
+
 
     }
 
@@ -101,8 +124,12 @@ class BitmapDrawingRenderer implements GLTextureView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
+
         gl.glActiveTexture(GL10.GL_TEXTURE0);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+
+       /* gl.glActiveTexture(GL10.GL_TEXTURE1);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);*/
 
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, getVertexBuffer());
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, TEXCOORD_BUFFER);

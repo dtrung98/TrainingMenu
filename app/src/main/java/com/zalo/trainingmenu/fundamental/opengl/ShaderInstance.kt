@@ -20,6 +20,8 @@ object ShaderInstance {
     """
 
     const val fragmentShader = """
+        precision mediump float;
+        
         uniform vec4 resolution;
         uniform vec2 mouse;
         uniform vec2 threshold;

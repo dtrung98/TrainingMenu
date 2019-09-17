@@ -350,6 +350,7 @@ public class GLTextureView
      * @see #RENDERMODE_WHEN_DIRTY
      */
     public void setRenderMode(int renderMode) {
+        if(mGLThread!=null)
         mGLThread.setRenderMode(renderMode);
     }
 
@@ -361,7 +362,9 @@ public class GLTextureView
      * @see #RENDERMODE_WHEN_DIRTY
      */
     public int getRenderMode() {
-        return mGLThread.getRenderMode();
+        if(mGLThread!=null)
+            return mGLThread.getRenderMode();
+        return RENDERMODE_CONTINUOUSLY;
     }
 
     /**
@@ -380,7 +383,8 @@ public class GLTextureView
      * not normally called or subclassed by clients of GLTextureView.
      */
     public void surfaceCreated(SurfaceTexture texture) {
-        mGLThread.surfaceCreated();
+        if(mGLThread!=null)
+            mGLThread.surfaceCreated();
     }
 
     /**
@@ -389,7 +393,8 @@ public class GLTextureView
      */
     public void surfaceDestroyed(SurfaceTexture texture) {
         // Surface will be destroyed when we return
-        mGLThread.surfaceDestroyed();
+        if(mGLThread!=null)
+            mGLThread.surfaceDestroyed();
     }
 
     /**
@@ -397,7 +402,8 @@ public class GLTextureView
      * not normally called or subclassed by clients of GLTextureView.
      */
     public void surfaceChanged(SurfaceTexture texture, int format, int w, int h) {
-        mGLThread.onWindowResize(w, h);
+        if(mGLThread!=null)
+            mGLThread.onWindowResize(w, h);
     }
 
     /**
@@ -407,7 +413,8 @@ public class GLTextureView
      * Must not be called before a renderer has been set.
      */
     public void onPause() {
-        mGLThread.onPause();
+        if(mGLThread!=null)
+            mGLThread.onPause();
     }
 
     /**
@@ -418,7 +425,8 @@ public class GLTextureView
      * Must not be called before a renderer has been set.
      */
     public void onResume() {
-        mGLThread.onResume();
+        if(mGLThread!=null)
+            mGLThread.onResume();
     }
 
     /**
@@ -428,7 +436,8 @@ public class GLTextureView
      * @param r the runnable to be run on the GL rendering thread.
      */
     public void queueEvent(Runnable r) {
-        mGLThread.queueEvent(r);
+        if(mGLThread!=null)
+            mGLThread.queueEvent(r);
     }
 
     /**

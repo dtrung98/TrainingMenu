@@ -213,4 +213,8 @@
     <string name="tap_to_download" >%1$s\nTap to download file from this url</string>
     <string name="download_now">Download now</string>
     <string name="open_in_app">Edit</string>
+    <string name="photo3D">Photo 3D</string>
+    <string name="photo3D_description">A Photo 3d viewer</string>
+    <string name="choose_original_photo">Choose Original Photo</string>
+    <string name="choose_depth_photo">Choose Depth Photo</string>
 </resources>

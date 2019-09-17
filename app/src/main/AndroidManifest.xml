@@ -74,6 +74,7 @@
             android:theme="@style/PreferenceAppTheme"/>
         <activity android:name=".fundamental.opengl.OpenGLActivity"
             android:theme="@style/FullScreenTheme"/>
+        <activity android:name=".fundamental.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
 
 
         <service
