@@ -72,10 +72,11 @@
         <activity android:name="com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity" />
         <activity android:name="com.zalo.trainingmenu.downloader.ui.setting.SettingActivity"
             android:theme="@style/PreferenceAppTheme"/>
-        <activity android:name=".fundamental.opengl.OpenGLActivity"
+        <activity android:name=".fundamental.opengl.SimpleBitmapActivity"
             android:theme="@style/FullScreenTheme"/>
-        <activity android:name=".fundamental.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
-
+        <activity android:name="com.zalo.trainingmenu.fundamental.opengl.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
+        <activity android:name=".fundamental.index.OpenGLActivity" />
+        <activity android:name=".fundamental.opengl.photo3d.ShaderSetActivity" android:theme="@style/FullScreenTheme"/>
 
         <service
             android:label="@string/time_track_service"

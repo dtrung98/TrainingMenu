@@ -1,4 +1,4 @@
-package com.zalo.trainingmenu.fundamental.texture;
+package com.zalo.trainingmenu.fundamental.opengl.texture;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;

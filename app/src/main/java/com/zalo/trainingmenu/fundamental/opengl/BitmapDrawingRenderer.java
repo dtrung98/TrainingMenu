@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
 
-import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
+import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;

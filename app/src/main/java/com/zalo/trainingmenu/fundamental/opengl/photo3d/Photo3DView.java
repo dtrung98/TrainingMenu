@@ -1,28 +1,35 @@
-package com.zalo.trainingmenu.fundamental.photo3d;
+package com.zalo.trainingmenu.fundamental.opengl.photo3d;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
-import android.view.View;
 
-import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
+import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
+
+import javax.microedition.khronos.opengles.GL10;
 
 public class Photo3DView extends GLTextureView {
     private Photo3DRenderer mRenderer;
 
     public void setOriginalPhoto(Bitmap bitmap) {
-        mRenderer.setBitmap(bitmap);
-        requestLayout();
+        if(mRenderer!=null) {
+            mRenderer.setBitmap(bitmap);
+            requestLayout();
+        }
     }
 
     public void setDepthPhoto(Bitmap bitmap) {
-        mRenderer.setDepthMap(bitmap);
-        requestLayout();
+        if(mRenderer!=null) {
+            mRenderer.setDepthMap(bitmap);
+            requestLayout();
+        }
     }
 
     public void removeBitmaps() {
-        mRenderer.removeBitmaps();
-        requestLayout();
+        if(mRenderer!=null) {
+            mRenderer.removeBitmaps();
+            requestLayout();
+        }
     }
 
     public Photo3DView(Context context) {
@@ -40,13 +47,22 @@ public class Photo3DView extends GLTextureView {
         init();
     }
 
-    private void init() {
+    public void init() {
+    }
 
+    public void createRenderer() {
         setEGLContextClientVersion(2);
         mRenderer = new Photo3DRenderer();
         setRenderer(mRenderer);
         setRenderMode(RENDERMODE_CONTINUOUSLY);
 
+    }
+
+    public void createRenderer(String vertex, String shader) {
+        setEGLContextClientVersion(2);
+        mRenderer = new Photo3DRenderer(vertex,shader);
+        setRenderer(mRenderer);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
     }
 
     @Override

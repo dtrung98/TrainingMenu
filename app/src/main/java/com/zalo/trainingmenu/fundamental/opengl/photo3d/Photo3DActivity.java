@@ -1,4 +1,4 @@
-package com.zalo.trainingmenu.fundamental.photo3d;
+package com.zalo.trainingmenu.fundamental.opengl.photo3d;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,16 +6,16 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
-import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
+import com.zalo.trainingmenu.util.PreferenceUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,9 +37,29 @@ public class Photo3DActivity extends PermissionActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo3d_layout);
         ButterKnife.bind(this);
-        Bitmap b;
+
+        Intent intent = getIntent();
+        boolean valid = false;
+        if(intent!=null) {
+            String action = intent.getAction();
+            if(ShaderSetActivity.ACTION_SHADER_SET.equals(action)) {
+                String vertex = intent.getStringExtra(ShaderSetActivity.VERTEX_SHADER);
+                String fragment = intent.getStringExtra(ShaderSetActivity.FRAGMENT_SHADER);
+                if(vertex!=null && !vertex.isEmpty() && fragment!=null && !fragment.isEmpty()) {
+                    valid = true;
+                    mGLView.createRenderer(vertex,fragment);
+                }
+            }
+        }
+
+        if(!valid)
+        mGLView.createRenderer();
+
+        Bitmap b = null;
         try {
-            b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");
+            String original = PreferenceUtil.getInstance().getSavedOriginal3DPhoto();
+            if(original!=null && !original.isEmpty()) b = BitmapFactory.decodeFile(original);
+            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");
             if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro.jpg");
             if(b!=null)
             mGLView.setOriginalPhoto(b);
@@ -47,7 +67,10 @@ public class Photo3DActivity extends PermissionActivity {
         } catch (Exception ignored) {}
 
         try {
-            b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
+            b = null;
+            String depth = PreferenceUtil.getInstance().getSavedDepthPhoto();
+            if(depth!=null && !depth.isEmpty()) b = BitmapFactory.decodeFile(depth);
+            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
             if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro_depth.jpg");
             if(b!=null)
                 mGLView.setDepthPhoto(b);
@@ -129,7 +152,7 @@ public class Photo3DActivity extends PermissionActivity {
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
 
-
+                            if(bitmap!=null) PreferenceUtil.getInstance().setSavedOriginal3DPhoto(path);
 
                             //mImageView.setImageBitmap(bitmap);
                             mGLView.setOriginalPhoto(bitmap);
@@ -151,6 +174,7 @@ public class Photo3DActivity extends PermissionActivity {
                             Log.d(TAG, "onActivityResult: "+path);
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
+                            if(bitmap!=null) PreferenceUtil.getInstance().setSavedDepthPhoto(path);
                             //mImageView.setImageBitmap(bitmap);
                            mGLView.setDepthPhoto(bitmap);
                             mGLView.requestRender();

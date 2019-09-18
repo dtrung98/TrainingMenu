@@ -217,4 +217,8 @@
     <string name="photo3D_description">A Photo 3d viewer</string>
     <string name="choose_original_photo">Choose Original Photo</string>
     <string name="choose_depth_photo">Choose Depth Photo</string>
+    <string name="photo3D_dynamic">Dynamic Shader</string>
+    <string name="dynamic_shader_description">for Photo 3D Viewer</string>
+    <string name="simple_bitmap">Simple Bitmap</string>
+    <string name="simple_bitmap_description">Draw a photo in the screen</string>
 </resources>

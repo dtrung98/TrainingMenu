@@ -1,4 +1,4 @@
-package com.zalo.trainingmenu.fundamental.photo3d
+package com.zalo.trainingmenu.fundamental.opengl.photo3d
 
 object ShaderInstance {
     const val A_POSITION = "a_position"
@@ -11,6 +11,7 @@ object ShaderInstance {
     const val IMAGE0 = "image0"
     const val IMAGE1 = "image1"
 
+    // language=GLSL
     const val vertexShader = """
         attribute vec2 a_position;
 
@@ -19,6 +20,7 @@ object ShaderInstance {
         }
     """
 
+    // language=GLSL
     const val fragmentShader = """
         precision mediump float;
         
@@ -41,9 +43,10 @@ object ShaderInstance {
             vec2 uv = pixelRatio*gl_FragCoord.xy / resolution.xy ;
             vec2 vUv = (uv - vec2(0.5))*resolution.zw + vec2(0.5);
             vUv.y = 1. - vUv.y;
-             vec4 tex1 = texture2D(image1,mirrored(vUv));
-             vec2 fake3d = vec2(vUv.x + (tex1.r - 0.5)*mouse.x/threshold.x, vUv.y + (tex1.r - 0.5)*mouse.y/threshold.y);
-            gl_FragColor = texture2D(image0,mirrored(fake3d));
+             vec4 depthTex = texture2D(image1,(vUv));
+             vec2 fake3d = vec2(vUv.x + (depthTex.r - 0.5)*mouse.x/threshold.x, vUv.y + (depthTex.r - 0.5)*mouse.y/threshold.y);
+             vec2 onlyMouse = vec2(vUv.x + mouse.x/threshold.x,vUv.y + mouse.y/threshold.y);
+            gl_FragColor = texture2D(image0,(fake3d));
         }
     """
 }

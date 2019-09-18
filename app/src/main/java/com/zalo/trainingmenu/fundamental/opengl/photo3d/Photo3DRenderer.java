@@ -1,11 +1,11 @@
-package com.zalo.trainingmenu.fundamental.photo3d;
+package com.zalo.trainingmenu.fundamental.opengl.photo3d;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
-import com.zalo.trainingmenu.fundamental.texture.GLTextureView;
+import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -14,16 +14,16 @@ import java.nio.ByteOrder;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.A_POSITION;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.IMAGE0;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.IMAGE1;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.MOUSE;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.PIXEL_RATIO;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.RESOLUTION;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.THRESHOLD;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.TIME;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.fragmentShader;
-import static com.zalo.trainingmenu.fundamental.photo3d.ShaderInstance.vertexShader;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.A_POSITION;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.IMAGE0;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.IMAGE1;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.MOUSE;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.PIXEL_RATIO;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.RESOLUTION;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.THRESHOLD;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.TIME;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.fragmentShader;
+import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.vertexShader;
 
 class Photo3DRenderer implements GLTextureView.Renderer {
     private static final String TAG = "Photo3DRenderer";
@@ -33,6 +33,15 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private float mImageHeight = 0;
     private float mDrawWidth = 0;
     private float mDrawHeight = 0;
+
+    public Photo3DRenderer(String vertexSet, String fragmentSet) {
+        this.vertexSet = vertexSet;
+        this.fragmentSet = fragmentSet;
+    }
+
+    public Photo3DRenderer() {
+    }
+
     public Bitmap getBitmap() {
         return mBitmaps[0];
     }
@@ -121,7 +130,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
 
         GLES20.glGenTextures(2, textures, 0);
 
-        for (int i = 0; i < 2; i++) {
+        for (int i =1; i >=0; i--) {
 
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[i]);
 
@@ -199,7 +208,11 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         if(mMouseY<2) mMouseY = -1 + mMouseY; // min = -1 + 0 = -1 ; max = -1 + 2 = 1
         else mMouseY = (4 - mMouseY) - 1; // min = 4 - 2 - 1 = 1; max =  -1
 
-        // mMouseY = mMouseX = -1f;
+
+       // mMouseX *=3;
+       // mMouseY *=3;
+        //mMouseY =-3;
+       // mMouseX = -3f;
 
         GLES20.glUniform2f(uMouseLocation,mMouseX, mMouseY);
 
@@ -216,10 +229,22 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private int programId = 0;
     private float mMouseX = 0.5f;
     private float mMouseY = 0.5f;
+    private String vertexSet;
+    private String fragmentSet;
+    private String getVertex() {
+        if(vertexSet==null||vertexSet.isEmpty())
+            return vertexShader;
+        return vertexSet;
+    }
 
+    private String getFragment() {
+        if(fragmentSet==null||fragmentSet.isEmpty())
+            return fragmentShader;
+        return fragmentSet;
+    }
 
     private void attachShaders() {
-        programId = createProgram(createShader( GLES20.GL_VERTEX_SHADER, vertexShader), createShader( GLES20.GL_FRAGMENT_SHADER, fragmentShader));
+        programId = createProgram(createShader( GLES20.GL_VERTEX_SHADER, getVertex()), createShader( GLES20.GL_FRAGMENT_SHADER, getFragment()));
         GLES20.glUseProgram(programId);
 
         uResolutionLocation = GLES20.glGetUniformLocation(programId,RESOLUTION);
