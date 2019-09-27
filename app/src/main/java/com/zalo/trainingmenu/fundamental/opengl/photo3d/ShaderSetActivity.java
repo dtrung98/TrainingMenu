@@ -7,7 +7,7 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

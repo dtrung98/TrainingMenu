@@ -186,8 +186,6 @@
     <string name="choose_folder">Choose folder</string>
     <string name="choose_this_folder">Choose this folder</string>
     <string name="folder_chooser" translatable="false">Folder Chooser</string>
-    <string name="access_external_storage">Access External Storage</string>
-    <string name="permission_description">Downloader requires storage permission to run this feature. Just accept the dialog that appears in next screen.</string>
     <string name="ok_got_it">Ok, got it</string>
     <string name="note_description">* This message will not display anymore when you pressed Ok button</string>
     <string name="download_completed">Download completed</string>
@@ -221,4 +219,16 @@
     <string name="dynamic_shader_description">for Photo 3D Viewer</string>
     <string name="simple_bitmap">Simple Bitmap</string>
     <string name="simple_bitmap_description">Draw a photo in the screen</string>
+    <string name="camera">Camera</string>
+    <string name="camera_description">Camera using TextureView</string>
+
+    <string name="app_require_permissions">Permission required</string>
+    <string name="access_external_storage">Access External Storage</string>
+    <string name="access_camera">Access Camera</string>
+    <string name="storage_permission_description">Scanner requires storage permission to run correctly. Just accept the dialog that appears in next screen.</string>
+    <string name="camera_permisison_description">Allow Scanner access camera to take photos. Just accept the dialog that appear in next screen.</string>
+    <string name="permission_description">Scanner requires permission to run correctly. Please accept following dialogs that appear in next screen.</string>
+    <string name="cameraX">Camera X</string>
+    <string name="cameraX_description">Camera X Api in Support Library</string>
+
 </resources>

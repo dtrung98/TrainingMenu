@@ -1,6 +1,7 @@
 package com.zalo.trainingmenu.fundamental.index;
 
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.fundamental.camera.CameraActivity;
 import com.zalo.trainingmenu.fundamental.opengl.SimpleBitmapActivity;
 import com.zalo.trainingmenu.fundamental.opengl.photo3d.Photo3DActivity;
 import com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderSetActivity;

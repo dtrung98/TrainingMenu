@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -29,6 +28,7 @@ import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.service.TaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingActivity;
 import com.zalo.trainingmenu.model.CountSectionItem;
 import com.zalo.trainingmenu.util.Util;
@@ -75,54 +75,54 @@ public class DownloadActivity extends BaseActivity {
         } else addNewTask();
     }
 
-
     @Override
-    public void onPermissionResult(Intent intent, boolean granted) {
+    public void onRequestPermissionsResult(Intent intent, int permissionType, boolean granted) {
+        super.onRequestPermissionsResult(intent, permissionType, granted);
         if(intent==null) return;
         String action = intent.getAction();
-        if(action!=null&&!action.isEmpty())
-        switch (action) {
+        if(action!=null&&!action.isEmpty()&&permissionType== PermissionActivity.PERMISSION_STORAGE)
+            switch (action) {
 
-            case ACTION_NEW_DOWNLOAD_DIALOG:
-                if(granted) {
-                    AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
-                }
-                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_new_download_dialog).show();
-                break;
-            case ACTION_APPEND_TASK:
-                if(granted) {
-                    DownloadItem item = intent.getParcelableExtra(BaseTask.EXTRA_DOWNLOAD_ITEM);
-                    if(item!=null) RemoteForTaskService.appendTask(item);
-                } else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_append_task).show();
-            case ACTION_RESUME_DOWNLOAD:
-                if(granted) {
-                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
-                    if(id!=-1) RemoteForTaskService.resumeTaskWithTaskId(id);
-                }
-                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_resume_download).show();
-                break;
-            case ACTION_RESTART_DOWNLOAD:
-                if(granted) {
-                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
-                    if(id!=-1) RemoteForTaskService.restartTaskWithTaskId(id);
-                }
-                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_restart).show();
-                break;
-            case ACTION_TRY_TO_RESUME:
-                if(granted) {
-                    int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
-                    if(id!=-1) RemoteForTaskService.tryToResume(id);
-                }
-                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_try_to_resume).show();
-                break;
-            case ACTION_OPEN_FILE:
-                if(granted) {
-                    TaskInfo info = intent.getParcelableExtra(BaseTask.EXTRA_TASK_INFO);
-                    if(info!=null) RemoteForTaskService.openFinishedTaskInfo(this,info);
-                }
-                else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_open_file).show();
-                break;
-        }
+                case ACTION_NEW_DOWNLOAD_DIALOG:
+                    if(granted) {
+                        AddDownloadDialog.newInstance().show(getSupportFragmentManager(), AddDownloadDialog.TAG);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_new_download_dialog).show();
+                    break;
+                case ACTION_APPEND_TASK:
+                    if(granted) {
+                        DownloadItem item = intent.getParcelableExtra(BaseTask.EXTRA_DOWNLOAD_ITEM);
+                        if(item!=null) RemoteForTaskService.appendTask(item);
+                    } else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_append_task).show();
+                case ACTION_RESUME_DOWNLOAD:
+                    if(granted) {
+                        int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                        if(id!=-1) RemoteForTaskService.resumeTaskWithTaskId(id);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_resume_download).show();
+                    break;
+                case ACTION_RESTART_DOWNLOAD:
+                    if(granted) {
+                        int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                        if(id!=-1) RemoteForTaskService.restartTaskWithTaskId(id);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_restart).show();
+                    break;
+                case ACTION_TRY_TO_RESUME:
+                    if(granted) {
+                        int id = intent.getIntExtra(BaseTask.EXTRA_TASK_ID,-1);
+                        if(id!=-1) RemoteForTaskService.tryToResume(id);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_try_to_resume).show();
+                    break;
+                case ACTION_OPEN_FILE:
+                    if(granted) {
+                        TaskInfo info = intent.getParcelableExtra(BaseTask.EXTRA_TASK_INFO);
+                        if(info!=null) RemoteForTaskService.openFinishedTaskInfo(this,info);
+                    }
+                    else Toasty.error(App.getInstance().getApplicationContext(),R.string.error_permissions_open_file).show();
+                    break;
+            }
     }
 
     private void addButtons() {

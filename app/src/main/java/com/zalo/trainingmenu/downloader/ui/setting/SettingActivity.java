@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.main.AddDownloadDialog;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.mainui.MainActivity;
 import com.zalo.trainingmenu.mainui.base.AbsLocaleActivity;
 
@@ -107,10 +107,11 @@ public class SettingActivity extends AbsLocaleActivity {
     }
 
     @Override
-    public void onPermissionResult(Intent intent, boolean granted) {
+    public void onRequestPermissionsResult(Intent intent, int permissionType, boolean granted) {
+        super.onRequestPermissionsResult(intent, permissionType, granted);
         if(intent==null) return;
         String action = intent.getAction();
-        if(action!=null&&!action.isEmpty())
+        if(action!=null&&!action.isEmpty()&&permissionType== PermissionActivity.PERMISSION_STORAGE)
             switch (action) {
                 case ACTION_CHOOSE_DOWNLOAD_FOLDER:
                     if(granted) {

@@ -9,10 +9,9 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.zalo.trainingmenu.downloader.helper.LocaleHelper;
-import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 
 import java.util.Locale;
 

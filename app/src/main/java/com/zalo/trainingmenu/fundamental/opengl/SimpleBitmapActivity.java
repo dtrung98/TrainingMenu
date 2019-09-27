@@ -14,7 +14,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
 
 public class SimpleBitmapActivity extends PermissionActivity implements View.OnClickListener {
@@ -65,15 +65,15 @@ public class SimpleBitmapActivity extends PermissionActivity implements View.OnC
     }
 
     @Override
-    public void onPermissionResult(Intent intent, boolean granted) {
-        super.onPermissionResult(intent, granted);
-        if(intent!=null&&granted) {
+    public void onRequestPermissionsResult(Intent intent, int permissionType, boolean granted) {
+        super.onRequestPermissionsResult(intent, permissionType, granted);
+        if(intent!=null&&permissionType==PermissionActivity.PERMISSION_STORAGE&&granted) {
             String action = intent.getAction();
             if(action!=null) {
                 switch (action) {
                     case ACTION_PICK_IMAGE:
                         Intent i = new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(i, REQUEST_CODE_PICK_IMAGE);
                 }
             }

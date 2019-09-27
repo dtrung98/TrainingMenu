@@ -12,9 +12,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.base.PermissionActivity;
+import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.util.PreferenceUtil;
 
 import butterknife.BindView;
@@ -31,6 +30,8 @@ public class Photo3DActivity extends PermissionActivity {
 
     @BindView(R.id.gl_view)
     Photo3DView mGLView;
+
+    private final boolean RESTORE_MODE = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,26 +56,35 @@ public class Photo3DActivity extends PermissionActivity {
         if(!valid)
         mGLView.createRenderer();
 
-        Bitmap b = null;
-        try {
-            String original = PreferenceUtil.getInstance().getSavedOriginal3DPhoto();
-            if(original!=null && !original.isEmpty()) b = BitmapFactory.decodeFile(original);
-            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");
-            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro.jpg");
-            if(b!=null)
-            mGLView.setOriginalPhoto(b);
+        if(RESTORE_MODE) {
+            Bitmap b = null;
+            try {
+                String original = PreferenceUtil.getInstance().getSavedOriginal3DPhoto();
+                if (original != null && !original.isEmpty()) b = BitmapFactory.decodeFile(original);
+                if (b == null)
+                    b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball.jpg");
+                if (b == null)
+                    b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro.jpg");
+                if (b != null)
+                    mGLView.setOriginalPhoto(b);
 
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
-        try {
-            b = null;
-            String depth = PreferenceUtil.getInstance().getSavedDepthPhoto();
-            if(depth!=null && !depth.isEmpty()) b = BitmapFactory.decodeFile(depth);
-            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
-            if(b==null) b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro_depth.jpg");
-            if(b!=null)
-                mGLView.setDepthPhoto(b);
-        } catch (Exception ignored) {};
+            try {
+                b = null;
+                String depth = PreferenceUtil.getInstance().getSavedDepthPhoto();
+                if (depth != null && !depth.isEmpty()) b = BitmapFactory.decodeFile(depth);
+                if (b == null)
+                    b = BitmapFactory.decodeFile("/storage/emulated/0/Download/ball_depth.jpg");
+                if (b == null)
+                    b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro_depth.jpg");
+                if (b != null)
+                    mGLView.setDepthPhoto(b);
+            } catch (Exception ignored) {
+            }
+            ;
+        }
     }
 
     @OnClick(R.id.back_button)
@@ -112,16 +122,16 @@ public class Photo3DActivity extends PermissionActivity {
     }
 
     @Override
-    public void onPermissionResult(Intent intent, boolean granted) {
-        super.onPermissionResult(intent, granted);
-        if(intent!=null&&granted) {
+    public void onRequestPermissionsResult(Intent intent, int permissionType, boolean granted) {
+        super.onRequestPermissionsResult(intent, permissionType, granted);
+        if(intent!=null&&permissionType==Photo3DActivity.PERMISSION_STORAGE&&granted) {
             String action = intent.getAction();
             if(action!=null) {
                 Intent i;
                 switch (action) {
                     case ACTION_PICK_ORIGINAL_PHOTO:
                         i = new Intent(Intent.ACTION_PICK,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(i, REQUEST_CODE_PICK_ORIGINAL_PHOTO);
                         break;
                     case ACTION_PICK_DEPTH_PHOTO:
