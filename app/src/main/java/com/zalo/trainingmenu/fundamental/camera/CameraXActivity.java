@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.display.DisplayManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +15,8 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Rational;
+import android.view.TextureView;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.camera.core.CameraX;
@@ -23,7 +24,6 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageAnalysisConfig;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureConfig;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -33,8 +33,6 @@ import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.fundamental.camera.util.AutoFitPreviewBuilder;
 import com.zalo.trainingmenu.fundamental.camera.util.LuminosityAnalyzer;
 import com.zalo.trainingmenu.util.PreferenceUtil;
-
-import org.jetbrains.annotations.NotNull;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,10 +46,10 @@ public class CameraXActivity extends PermissionActivity {
     public static final String ACTION_PICK_PHOTO = "pick_photo";
 
     @BindView(R.id.root)
-    ConstraintLayout mRoot;
+    ConstraintLayout mContainer;
 
     @BindView(R.id.textureView)
-    CameraTextureView mCameraTextureView;
+    TextureView mCameraTextureView;
 
     private int mDisplayId = -1;
     private CameraX.LensFacing mLensFacing = CameraX.LensFacing.BACK;
@@ -61,9 +59,6 @@ public class CameraXActivity extends PermissionActivity {
 
     private HandlerThread mAnalyzerThread;
     private DisplayManager mDisplayManager;
-
-    private final boolean RESTORE_MODE = true;
-
     private DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
         @Override
         public void onDisplayAdded(int i) {
@@ -76,7 +71,7 @@ public class CameraXActivity extends PermissionActivity {
         @Override
         public void onDisplayChanged(int id) {
             if(mDisplayId == id) {
-                int rotation = mRoot.getDisplay().getRotation();
+                int rotation = mContainer.getDisplay().getRotation();
                 Log.d(TAG, "onDisplayChanged: "+rotation);
                 if(mPreview!=null)
                 mPreview.setTargetRotation(rotation);
@@ -103,7 +98,7 @@ public class CameraXActivity extends PermissionActivity {
 
         mCameraTextureView.post(() -> {
             mDisplayId = mCameraTextureView.getDisplay().getDisplayId();
-            buildCameraUi();
+            updateCameraUi();
             bindCameraUsecases();
         });
     }
@@ -146,10 +141,14 @@ public class CameraXActivity extends PermissionActivity {
         CameraX.bindToLifecycle(this,mPreview,mImageCapture, mImageAnalyzer);
     }
 
+    private void updateCameraUi() {
+
+    }
+
 
     @Override
     protected void onPause() {
-        mCameraTextureView.closeCamera();
+
         super.onPause();
     }
 
@@ -169,7 +168,7 @@ public class CameraXActivity extends PermissionActivity {
     }
 
     void activeCamera() {
-        mCameraTextureView.activeCamera();
+
     }
 
     @Override
