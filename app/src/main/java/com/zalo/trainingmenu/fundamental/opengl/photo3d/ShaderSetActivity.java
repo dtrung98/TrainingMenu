@@ -43,7 +43,7 @@ public class ShaderSetActivity extends PermissionActivity {
         setContentView(R.layout.shader_set_layout);
         ButterKnife.bind(this);
        mVertexEditText.setText(ShaderInstance.vertexShader);
-       mFragmentEditText.setText(ShaderInstance.fragmentShader);
+       mFragmentEditText.setText(ShaderInstance.INSTANCE.getFragmentShader());
     }
 
     @OnClick(R.id.back_button)

@@ -22,7 +22,6 @@ import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.PI
 import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.RESOLUTION;
 import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.THRESHOLD;
 import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.TIME;
-import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.fragmentShader;
 import static com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance.vertexShader;
 
 class Photo3DRenderer implements GLTextureView.Renderer {
@@ -239,7 +238,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
 
     private String getFragment() {
         if(fragmentSet==null||fragmentSet.isEmpty())
-            return fragmentShader;
+            return ShaderInstance.INSTANCE.getFragmentShader();
         return fragmentSet;
     }
 
