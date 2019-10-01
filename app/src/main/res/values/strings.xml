@@ -230,5 +230,7 @@
     <string name="permission_description">Scanner requires permission to run correctly. Please accept following dialogs that appear in next screen.</string>
     <string name="cameraX">Camera X</string>
     <string name="cameraX_description">Camera X Api in Support Library</string>
+    <string name="cameraKit">CameraKit</string>
+    <string name="cameraKit_description">Camera using CameraKit Library</string>
 
 </resources>
