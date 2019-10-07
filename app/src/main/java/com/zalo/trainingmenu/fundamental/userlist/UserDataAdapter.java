@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.UserData;
 
 
 import java.io.IOException;

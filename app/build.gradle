@@ -34,6 +34,10 @@ android {
 }
 
 dependencies {
+
+    // Basic Menu UI Layout
+    implementation project(path: ':menulayout')
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -84,6 +88,7 @@ dependencies {
     // CameraKit
     implementation 'com.camerakit:camerakit:1.0.0-beta3.11'
     implementation 'com.camerakit:jpegkit:0.1.0'
+
 }
 repositories {
     mavenCentral()

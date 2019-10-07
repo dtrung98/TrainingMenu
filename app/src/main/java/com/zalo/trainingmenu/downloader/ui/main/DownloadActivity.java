@@ -18,6 +18,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.ldt.menulayout.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
@@ -28,9 +29,8 @@ import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.service.TaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
-import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.downloader.ui.setting.SettingActivity;
-import com.zalo.trainingmenu.model.CountSectionItem;
+import com.zalo.trainingmenu.downloader.model.CountSectionItem;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;

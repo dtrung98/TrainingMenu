@@ -25,9 +25,8 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ldt.menulayout.ui.AbsListActivity;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.UserData;
-import com.zalo.trainingmenu.mainui.base.AbsListActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

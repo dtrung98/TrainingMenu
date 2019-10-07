@@ -27,7 +27,7 @@ import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
 import com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity;
 import com.zalo.trainingmenu.downloader.ui.widget.MultipartProgressBar;
-import com.zalo.trainingmenu.model.CountSectionItem;
+import com.zalo.trainingmenu.downloader.model.CountSectionItem;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;

@@ -19,7 +19,7 @@ import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.DownloadItem;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
-import com.zalo.trainingmenu.model.ServiceToken;
+import com.zalo.trainingmenu.fundamental.servicedemo.service.ServiceToken;
 
 import java.io.File;
 import java.util.ArrayList;

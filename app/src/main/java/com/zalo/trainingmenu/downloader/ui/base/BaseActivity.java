@@ -12,12 +12,12 @@ import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.ldt.menulayout.ui.AbsListActivity;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.service.TaskService;
-import com.zalo.trainingmenu.mainui.base.AbsListActivity;
-import com.zalo.trainingmenu.model.ServiceToken;
+import com.zalo.trainingmenu.fundamental.servicedemo.service.ServiceToken;
 
 import java.lang.ref.WeakReference;
 

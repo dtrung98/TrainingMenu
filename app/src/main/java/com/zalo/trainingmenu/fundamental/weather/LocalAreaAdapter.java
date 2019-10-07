@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.LocalArea;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class LocalAreaAdapter extends RecyclerView.Adapter<LocalAreaAdapter.Menu
     public MenuItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-         return new MenuItemHolder(inflater.inflate(R.layout.item_card,parent,false));
+         return new MenuItemHolder(inflater.inflate(com.ldt.menulayout.R.layout.item_card,parent,false));
 
     }
 

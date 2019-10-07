@@ -1,16 +1,15 @@
 package com.zalo.trainingmenu.fundamental.index;
 
+import com.ldt.menulayout.model.Item;
+import com.ldt.menulayout.ui.AbsMenuActivity;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.userlist.UserDataListActivity;
 import com.zalo.trainingmenu.fundamental.weather.DemoWeatherApp;
-import com.zalo.trainingmenu.model.Item;
-import com.zalo.trainingmenu.mainui.base.MenuAdapter;
-import com.zalo.trainingmenu.mainui.base.AbsMenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkMenuActivity extends AbsMenuActivity implements MenuAdapter.OnItemClickListener {
+public class NetworkMenuActivity extends AbsMenuActivity {
     private static final String TAG = "NetworkMenuActivity";
 
     @Override

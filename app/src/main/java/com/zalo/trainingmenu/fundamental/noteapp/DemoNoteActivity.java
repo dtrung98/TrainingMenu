@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.ldt.menulayout.ui.AbsListActivity;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.noteapp.data.NoteDatabaseHelper;
-import com.zalo.trainingmenu.model.Note;
-import com.zalo.trainingmenu.mainui.base.AbsListActivity;
+import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import java.util.List;
 

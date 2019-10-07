@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.Note;
+import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;

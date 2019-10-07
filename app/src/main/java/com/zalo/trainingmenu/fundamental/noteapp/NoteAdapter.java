@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.Note;
+import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import java.util.ArrayList;
 import java.util.List;

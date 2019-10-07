@@ -1,20 +1,16 @@
 package com.zalo.trainingmenu.fundamental.index;
 
+import com.ldt.menulayout.model.Item;
+import com.ldt.menulayout.ui.AbsMenuActivity;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.fundamental.camera.CameraActivity;
 import com.zalo.trainingmenu.fundamental.opengl.SimpleBitmapActivity;
-import com.zalo.trainingmenu.fundamental.opengl.photo3d.Photo3DActivity;
-import com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderSetActivity;
-import com.zalo.trainingmenu.fundamental.userlist.UserDataListActivity;
-import com.zalo.trainingmenu.fundamental.weather.DemoWeatherApp;
-import com.zalo.trainingmenu.mainui.base.AbsMenuActivity;
-import com.zalo.trainingmenu.mainui.base.MenuAdapter;
-import com.zalo.trainingmenu.model.Item;
+import com.zalo.trainingmenu.newsfeed3d.photo3d.Photo3DActivity;
+import com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderSetActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenGLActivity extends AbsMenuActivity implements MenuAdapter.OnItemClickListener {
+public class OpenGLActivity extends AbsMenuActivity {
     private static final String TAG = "OpemGLActivity";
 
     @Override

@@ -29,7 +29,7 @@
         <activity
             android:theme="@style/SplashTheme"
             android:label="@string/menu"
-            android:name="com.zalo.trainingmenu.mainui.MainActivity">
+            android:name="com.zalo.trainingmenu.MenuActivity">
             <intent-filter android:label="@string/menu">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -75,13 +75,13 @@
             android:theme="@style/PreferenceAppTheme"/>
         <activity android:name=".fundamental.opengl.SimpleBitmapActivity"
             android:theme="@style/FullScreenTheme"/>
-        <activity android:name="com.zalo.trainingmenu.fundamental.opengl.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
         <activity android:name=".fundamental.index.OpenGLActivity" />
-        <activity android:name=".fundamental.opengl.photo3d.ShaderSetActivity" android:theme="@style/FullScreenTheme"/>
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderSetActivity" android:theme="@style/FullScreenTheme"/>
         <activity android:name=".fundamental.camera.CameraActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
-        <activity android:name=".fundamental.opengl.photo3d.Photo3DListActivity" />
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity" />
 
         <service
             android:label="@string/time_track_service"

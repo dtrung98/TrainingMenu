@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.zalo.trainingmenu.App;
-import com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderSetActivity;
 
 public final class PreferenceUtil {
     public static final String SAVED_VERTEX_SHADER = "saved_vertex_shader";

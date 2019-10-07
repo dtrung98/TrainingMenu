@@ -13,8 +13,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.ldt.menulayout.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
 
 public class SimpleBitmapActivity extends PermissionActivity implements View.OnClickListener {

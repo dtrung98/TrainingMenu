@@ -14,13 +14,10 @@
     <string name="basic">Basic</string>
 
     <string name="cancel">Cancel</string>
-    <string name="cancel_all">Cancel all</string>
 
     <string name="cancelled">Cancelled</string>
 
-    <string name="catch_it">Catch it</string>
 
-    <string name="choose_folders">Choose folders</string>
     <string name="choose_number_connections">Choose number connections</string>
     <string name="choose_number_downloads">Choose max number simultaneous downloads</string>
 
@@ -35,7 +32,6 @@
     <string name="content_provider">Content Provider</string>
     <string name="content_provider_description">A note app using SQLite to store data</string>
 
-    <string name="create_new_task">Create new task</string>
 
     <string name="creation_time">Created at</string>
 
@@ -116,7 +112,6 @@
 
     <string name="pending">Pending</string>
 
-    <string name="preference">Preference</string>
 
     <string name="progress">Progress</string>
 
@@ -144,16 +139,11 @@
 
     <string name="state">State</string>
 
-    <string name="stop_all">Stop all</string>
 
-    <string name="string_false">False</string>
-    <string name="string_true">True</string>
 
     <string name="support_resume">Support resume</string>
 
-    <string name="task_not_exist">Task doesn\'t exist anymore!</string>
 
-    <string name="three_dot">… </string>
 
     <string name="time_track_service">Time Track Service</string>
     <string name="time_track_service_channel" translatable="false">Time Track Service Channel</string>
@@ -177,17 +167,14 @@
     <string name="other">Other</string>
     <string name="pipe_example">Pipe Example</string>
     <string name="pipe_example_description">Simple program that using pipes.</string>
-    <string name="copy_url_link">Copy Url Link</string>
     <string name="restart_selected_tasks">Restart all selected items</string>
     <string name="clear_selected_tasks">Clear all selected items</string>
     <string name="title">Title</string>
     <string name="write_something_here">Write something here…</string>
     <string name="try_to_resume">Try to resume</string>
-    <string name="choose_folder">Choose folder</string>
     <string name="choose_this_folder">Choose this folder</string>
     <string name="folder_chooser" translatable="false">Folder Chooser</string>
-    <string name="ok_got_it">Ok, got it</string>
-    <string name="note_description">* This message will not display anymore when you pressed Ok button</string>
+
     <string name="download_completed">Download completed</string>
     <string name="duplicate">Duplicate</string>
     <string name="error_permissions_new_download_dialog">Couldn\'t create new download task because you denied permissions!</string>
@@ -202,13 +189,9 @@
     <string name="failed_notification_message">Failed to download file. %1$s. Tap for more info.</string>
     <string name="empty">Empty</string>
     <string name="delete">Delete</string>
-    <string name="files">Files</string>
-    <string name="files_description">Files manager application</string>
-    <string name="restore_default">Restore Default</string>
     <string name="opengl">Open GL</string>
     <string name="opengl_description">Learn how to create graphics</string>
     <string name="quick_download_notification_title">Quick download from this url</string>
-    <string name="tap_to_download" >%1$s\nTap to download file from this url</string>
     <string name="download_now">Download now</string>
     <string name="open_in_app">Edit</string>
     <string name="photo3D">Photo 3D</string>
@@ -233,5 +216,7 @@
     <string name="cameraKit">CameraKit</string>
     <string name="cameraKit_description">Camera using CameraKit Library</string>
     <string name="photo_3d_list">New Feeds</string>
+    <string name="news_feed_3d">News Feed 3D</string>
+    <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
 
 </resources>

@@ -2,7 +2,6 @@ package com.zalo.trainingmenu.fundamental.camera.util
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import com.zalo.trainingmenu.fundamental.opengl.photo3d.ShaderInstance
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.TimeUnit

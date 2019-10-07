@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.noteapp.data.NoteDatabaseHelper;
-import com.zalo.trainingmenu.model.Note;
+import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

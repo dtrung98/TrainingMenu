@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.zalo.trainingmenu.model.Note;
+import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import java.util.ArrayList;
 import java.util.List;

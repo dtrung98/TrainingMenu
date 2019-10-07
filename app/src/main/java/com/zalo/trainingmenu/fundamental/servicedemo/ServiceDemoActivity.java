@@ -16,11 +16,11 @@ import android.widget.TextView;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.ldt.menulayout.ui.AbsLocaleActivity;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.model.ServiceToken;
+import com.zalo.trainingmenu.fundamental.servicedemo.service.ServiceToken;
 import com.zalo.trainingmenu.fundamental.servicedemo.service.TimeTrackRemote;
 import com.zalo.trainingmenu.fundamental.servicedemo.service.TimeTrackService;
-import com.zalo.trainingmenu.mainui.base.AbsLocaleActivity;
 
 import java.lang.ref.WeakReference;
 

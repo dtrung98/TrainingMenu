@@ -16,7 +16,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Rational;
 import android.view.TextureView;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.camera.core.CameraX;
@@ -28,8 +27,8 @@ import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.ldt.menulayout.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.fundamental.camera.util.AutoFitPreviewBuilder;
 import com.zalo.trainingmenu.fundamental.camera.util.LuminosityAnalyzer;
 import com.zalo.trainingmenu.util.PreferenceUtil;

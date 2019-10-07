@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+}
+
+dependencies {
+    api fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    // App Compat
+    api 'androidx.appcompat:appcompat:1.0.2'
+
+    // ConstraintLayout
+    api 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
+
+    // Design
+    api 'com.google.android.material:material:1.1.0-alpha07'
+
+    // Preference
+    api "androidx.legacy:legacy-preference-v14:1.0.0"
+    api 'androidx.preference:preference:1.1.0-rc01'
+
+    // Toasty
+    api 'com.github.GrenderG:Toasty:1.4.2'
+
+    // CardView
+    api 'androidx.cardview:cardview:1.0.0'
+    api 'androidx.recyclerview:recyclerview:1.0.0'
+}

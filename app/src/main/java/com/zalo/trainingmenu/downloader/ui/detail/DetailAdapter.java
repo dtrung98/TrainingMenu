@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.ldt.menulayout.ui.MenuAdapter;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.mainui.base.MenuAdapter;
 
 public class DetailAdapter extends MenuAdapter {
     @NonNull
