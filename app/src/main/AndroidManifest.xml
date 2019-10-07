@@ -81,6 +81,7 @@
         <activity android:name=".fundamental.camera.CameraActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
+        <activity android:name=".fundamental.opengl.photo3d.Photo3DListActivity" />
 
         <service
             android:label="@string/time_track_service"
