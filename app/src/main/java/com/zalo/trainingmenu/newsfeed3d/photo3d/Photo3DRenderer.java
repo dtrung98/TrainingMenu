@@ -5,7 +5,9 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
+import com.zalo.trainingmenu.util.Util;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -22,6 +24,7 @@ import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.PIXEL_RATI
 import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.RESOLUTION;
 import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.THRESHOLD;
 import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.TIME;
+import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.TRANSLATE;
 import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.vertexShader;
 
 class Photo3DRenderer implements GLTextureView.Renderer {
@@ -32,6 +35,19 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private float mImageHeight = 0;
     private float mDrawWidth = 0;
     private float mDrawHeight = 0;
+    private int[] mViewLocation = new int[2];
+    private int[] mWindowsSize = new int[2];
+
+    public Photo3DView getPhoto3DView() {
+        return mPhoto3DView;
+    }
+
+    public void setPhoto3DView(Photo3DView photo3DView) {
+        mPhoto3DView = photo3DView;
+    }
+
+    Photo3DView mPhoto3DView;
+
 
     public Photo3DRenderer(String vertexSet, String fragmentSet) {
         this.vertexSet = vertexSet;
@@ -103,12 +119,17 @@ class Photo3DRenderer implements GLTextureView.Renderer {
 
     }
 
+
+
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         mDrawWidth = width;
         mDrawHeight = height;
         resize();
         gl.glViewport(0, 0, width, height);
+        mWindowsSize = Util.getScreenSize(App.getInstance());
+        if(mWindowsSize[0]==0) mWindowsSize[0] = 1;
+        if(mWindowsSize[1]==0) mWindowsSize[1] = 1;
     }
 
     private float imageAspect = 1f;
@@ -214,6 +235,13 @@ class Photo3DRenderer implements GLTextureView.Renderer {
        // mMouseX = -3f;
 
         GLES20.glUniform2f(uMouseLocation,mMouseX, mMouseY);
+        if(mPhoto3DView!=null) mPhoto3DView.getLocationInWindow(mViewLocation);
+        else {
+            mViewLocation[0] = 0;
+            mViewLocation[1] = 1;
+        }
+
+        GLES20.glUniform2f(uTranslateLocation,(float)mViewLocation[0]/mWindowsSize[0], (float)mViewLocation[1]/mWindowsSize[1]);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
     }
@@ -247,6 +275,8 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         GLES20.glUseProgram(programId);
 
         uResolutionLocation = GLES20.glGetUniformLocation(programId,RESOLUTION);
+        uTranslateLocation = GLES20.glGetUniformLocation(programId,TRANSLATE);
+
         uMouseLocation = GLES20.glGetUniformLocation(programId,MOUSE);
         uTimeLocation = GLES20.glGetUniformLocation(programId,TIME);
         uRatioLocation = GLES20.glGetUniformLocation(programId,PIXEL_RATIO);
@@ -308,6 +338,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     }
 
     private int uResolutionLocation;
+    private int uTranslateLocation;
     private int uMouseLocation;
     private int uRatioLocation;
     private int uTimeLocation;

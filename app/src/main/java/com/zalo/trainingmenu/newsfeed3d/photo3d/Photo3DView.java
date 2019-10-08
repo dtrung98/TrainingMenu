@@ -51,6 +51,7 @@ public class Photo3DView extends GLTextureView {
     public void createRenderer() {
         setEGLContextClientVersion(2);
         mRenderer = new Photo3DRenderer();
+        mRenderer.setPhoto3DView(this);
         setRenderer(mRenderer);
         setRenderMode(RENDERMODE_CONTINUOUSLY);
 

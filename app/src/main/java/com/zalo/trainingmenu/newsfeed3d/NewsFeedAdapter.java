@@ -83,19 +83,9 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
             super(itemView);
             ButterKnife.bind(this,itemView);
             itemView.addOnAttachStateChangeListener(this);
+            mPhoto3DView.setOpaque(false);
             mPhoto3DView.createRenderer();
-            mPhoto3DView.onResume();
         }
-
-        public void onPause() {
-
-        }
-
-        public void onResume() {
-
-        }
-
-
 
         @Override
         public void bind(Object o) {
@@ -130,12 +120,12 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
 
         @Override
         public void onViewAttachedToWindow(View view) {
-           // mPhoto3DView.onResume();
+            mPhoto3DView.onResume();
         }
 
         @Override
         public void onViewDetachedFromWindow(View view) {
-          //  mPhoto3DView.onPause();
+            mPhoto3DView.onPause();
         }
     }
 }

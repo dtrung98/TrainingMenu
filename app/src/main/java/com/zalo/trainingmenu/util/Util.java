@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -220,5 +221,21 @@ public final class Util {
         } catch (Exception e) {
             Toasty.error(App.getInstance().getApplicationContext(), "Sorry, something went wrong!").show();
         }
+    }
+
+    static int[] screenSize;
+    public static boolean HAD_GOT_SCREEN_SIZE = false;
+    public static int[] getScreenSize(Context context)
+    {
+        if(!HAD_GOT_SCREEN_SIZE) {
+            Point p = new Point();
+            Display d = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay(); // this will get the view of screen
+            d.getRealSize(p);
+            int width = p.x;
+            int height = p.y;
+            screenSize = new int[] {width,height};
+            HAD_GOT_SCREEN_SIZE = true;
         }
+        return screenSize;
+    }
     }

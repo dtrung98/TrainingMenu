@@ -170,6 +170,7 @@ public class MultipartProgressBar extends View {
         } else if(!mIsIndeterminate && mIVAnimator.isRunning()) mIVAnimator.cancel();
         update();
     }
+
     float mCurrentIVValue = 0;
     ValueAnimator mIVAnimator = ValueAnimator.ofFloat(0,1);
 

@@ -11,6 +11,7 @@ object ShaderInstance {
     const val PIXEL_RATIO = "pixelRatio"
     const val IMAGE0 = "image0"
     const val IMAGE1 = "image1"
+    const val TRANSLATE = "translate"
 
     // language=GLSL
     const val vertexShader = """
@@ -37,6 +38,8 @@ object ShaderInstance {
         uniform sampler2D image0;
         uniform sampler2D image1;
         
+        uniform vec2 translate;
+        
         vec2 getCoord() {
             vec2 uv = pixelRatio*gl_FragCoord.xy / resolution.xy ;
             vec2 vUv = (uv - vec2(0.5))*resolution.zw + vec2(0.5);
@@ -46,10 +49,16 @@ object ShaderInstance {
 
         void main() {
              vec2 vUv = getCoord();
+             vUv = vec2(vUv.x,vUv.y + translate.y);
              vec4 depthTex = texture2D(image1,vUv);
-             vec2 onlyMouse = vUv + (mouse/threshold);
-             vec2 fake3d = vUv + (depthTex.r - 0.5)*mouse/threshold;
-             vec2 disCords = vUv + ( depthTex.r) *  mouse/threshold;
+             //vec2 onlyMouse = vUv + (mouse/threshold);
+             //vec2 fake3d = vUv + (depthTex.r - 0.5)*mouse/threshold;
+             //vec2 disCords = vUv + ( depthTex.r) *  mouse/threshold;
+             
+             vec2 fake3d = vec2(
+             vUv.x + (depthTex.r - 0.5)*mouse.x/threshold.x, 
+             vUv.y + (depthTex.r - 0.5)*mouse.y/threshold.y
+             );
 
             gl_FragColor = texture2D(image0,fake3d);
         }
