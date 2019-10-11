@@ -13,6 +13,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.ldt.menulayout.ui.permission.PermissionActivity;
+import com.ldt.parallaximageview.ParallaxImageView;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.util.PreferenceUtil;
 
@@ -29,7 +30,7 @@ public class Photo3DActivity extends PermissionActivity {
     public static final String ACTION_PICK_DEPTH_PHOTO = "pick_depth_photo";
 
     @BindView(R.id.gl_view)
-    Photo3DView mGLView;
+    ParallaxImageView mGLView;
 
     private final boolean RESTORE_MODE = true;
 

@@ -194,6 +194,7 @@ public class MultipartProgressBar extends View {
 
         mProgressBarWidth = mProgressBarRight - mProgressBarLeft;
     }
+
     private int mDrawTop;
     private int mDrawBottom;
     private int mDrawLeft;

@@ -7,6 +7,7 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 
 import com.ldt.menulayout.ui.permission.PermissionActivity;
+import com.ldt.parallaximageview.shader.ShaderInstance;
 import com.zalo.trainingmenu.R;
 
 import butterknife.BindView;

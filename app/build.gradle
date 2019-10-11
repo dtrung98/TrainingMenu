@@ -38,6 +38,9 @@ dependencies {
     // Basic Menu UI Layout
     implementation project(path: ':menulayout')
 
+    // Parallax Image View
+    implementation project(path: ':parallaximageview')
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

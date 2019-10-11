@@ -1,18 +1,15 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.camera.core.PreviewConfig;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ldt.parallaximageview.ParallaxImageView;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.newsfeed3d.photo3d.Photo3DView;
-import com.zalo.trainingmenu.util.PreferenceUtil;
+import com.zalo.trainingmenu.newsfeed3d.model.ParallaxImageObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +34,7 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
     @NonNull
     @Override
     public BindableHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new Photo3DHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_news_feed_3d,parent,false));
+        return new Photo3DHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_news_feed_3d_square,parent,false));
     }
 
     @Override
@@ -77,20 +74,24 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
 
     public static class Photo3DHolder extends NewsFeedHolder implements View.OnAttachStateChangeListener {
         @BindView(R.id.photo_3d_view)
-        Photo3DView mPhoto3DView;
+        ParallaxImageView mParallaxImageView;
 
         public Photo3DHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
             itemView.addOnAttachStateChangeListener(this);
-            mPhoto3DView.setOpaque(false);
-            mPhoto3DView.createRenderer();
+//            mParallaxImageView.setOpaque(false);
+            mParallaxImageView.createRenderer();
         }
 
         @Override
         public void bind(Object o) {
             super.bind(o);
-            Bitmap b = null;
+            if(o instanceof ParallaxImageObject) {
+                mParallaxImageView.setOriginalPath(((ParallaxImageObject) o).getOriginal());
+                mParallaxImageView.setDepthPath(((ParallaxImageObject) o).getDepth());
+            }
+           /* Bitmap b = null;
             try {
                 String original = PreferenceUtil.getInstance().getSavedOriginal3DPhoto();
                 if (original != null && !original.isEmpty()) b = BitmapFactory.decodeFile(original);
@@ -99,7 +100,7 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
                 if (b == null)
                     b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro.jpg");
                 if (b != null)
-                    mPhoto3DView.setOriginalPhoto(b);
+                    mParallaxImageView.setOriginalPhoto(b);
 
             } catch (Exception ignored) {
             }
@@ -113,19 +114,19 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
                 if (b == null)
                     b = BitmapFactory.decodeFile("/storage/emulated/0/download/poro_depth.jpg");
                 if (b != null)
-                    mPhoto3DView.setDepthPhoto(b);
+                    mParallaxImageView.setDepthPhoto(b);
             } catch (Exception ignored) {
-            }
+            }*/
         }
 
         @Override
         public void onViewAttachedToWindow(View view) {
-            mPhoto3DView.onResume();
+            mParallaxImageView.onResume();
         }
 
         @Override
         public void onViewDetachedFromWindow(View view) {
-            mPhoto3DView.onPause();
+            mParallaxImageView.onPause();
         }
     }
 }

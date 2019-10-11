@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.hardware.camera2.full" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
     <dist:module dist:instant="true" />
@@ -81,7 +82,7 @@
         <activity android:name=".fundamental.camera.CameraActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
-        <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity" />
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"  android:theme="@style/LightAppTheme"/>
 
         <service
             android:label="@string/time_track_service"

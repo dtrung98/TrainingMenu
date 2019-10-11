@@ -1,13 +1,13 @@
-package com.zalo.trainingmenu.newsfeed3d.photo3d;
+package com.ldt.parallaximageview;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.Log;
 
-import com.zalo.trainingmenu.App;
-import com.zalo.trainingmenu.fundamental.opengl.texture.GLTextureView;
-import com.zalo.trainingmenu.util.Util;
+import com.ldt.parallaximageview.base.GLTextureView;
+import com.ldt.parallaximageview.shader.ShaderInstance;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -16,19 +16,8 @@ import java.nio.ByteOrder;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.A_POSITION;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.IMAGE0;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.IMAGE1;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.MOUSE;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.PIXEL_RATIO;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.RESOLUTION;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.THRESHOLD;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.TIME;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.TRANSLATE;
-import static com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderInstance.vertexShader;
-
-class Photo3DRenderer implements GLTextureView.Renderer {
-    private static final String TAG = "Photo3DRenderer";
+class ParallaxRenderer implements GLTextureView.Renderer {
+    private static final String TAG = "ParallaxRenderer";
 
     private int[] textures;
     private float mImageWidth = 0;
@@ -38,23 +27,13 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private int[] mViewLocation = new int[2];
     private int[] mWindowsSize = new int[2];
 
-    public Photo3DView getPhoto3DView() {
-        return mPhoto3DView;
-    }
-
-    public void setPhoto3DView(Photo3DView photo3DView) {
-        mPhoto3DView = photo3DView;
-    }
-
-    Photo3DView mPhoto3DView;
-
-
-    public Photo3DRenderer(String vertexSet, String fragmentSet) {
+    public ParallaxRenderer(String vertexSet, String fragmentSet) {
         this.vertexSet = vertexSet;
         this.fragmentSet = fragmentSet;
     }
 
-    public Photo3DRenderer() {
+    public ParallaxRenderer() {
+
     }
 
     public Bitmap getBitmap() {
@@ -119,6 +98,25 @@ class Photo3DRenderer implements GLTextureView.Renderer {
 
     }
 
+    interface PositionDeterminer {
+        void screenView(int[] size);
+         void currentLocation(int[] location);
+    }
+
+    public void setPositionDeterminer(PositionDeterminer positionDeterminer) {
+        mPositionDeterminer = positionDeterminer;
+    }
+
+    public void removePositionDeterminer() {
+        mPositionDeterminer = null;
+    }
+
+    private PositionDeterminer mPositionDeterminer;
+
+    public void shouldPositionTranslate(boolean active) {
+        mActivePositionTranslate = active;
+    }
+    private boolean mActivePositionTranslate = false;
 
 
     @Override
@@ -126,8 +124,9 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         mDrawWidth = width;
         mDrawHeight = height;
         resize();
-        gl.glViewport(0, 0, width, height);
-        mWindowsSize = Util.getScreenSize(App.getInstance());
+        GLES20.glViewport(0, 0, width, height);
+        if(mPositionDeterminer!=null)
+        mPositionDeterminer.screenView(mWindowsSize);
         if(mWindowsSize[0]==0) mWindowsSize[0] = 1;
         if(mWindowsSize[1]==0) mWindowsSize[1] = 1;
     }
@@ -166,8 +165,8 @@ class Photo3DRenderer implements GLTextureView.Renderer {
             GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmaps[i], 0);
         }
 
-        int u_image0Location = GLES20.glGetUniformLocation(programId,IMAGE0);
-        int u_image1Location = GLES20.glGetUniformLocation(programId,IMAGE1);
+        int u_image0Location = GLES20.glGetUniformLocation(programId, ShaderInstance.IMAGE0);
+        int u_image1Location = GLES20.glGetUniformLocation(programId, ShaderInstance.IMAGE1);
 
         // set which texture units to render with
         GLES20.glUniform1i(u_image0Location,0);
@@ -235,10 +234,11 @@ class Photo3DRenderer implements GLTextureView.Renderer {
        // mMouseX = -3f;
 
         GLES20.glUniform2f(uMouseLocation,mMouseX, mMouseY);
-        if(mPhoto3DView!=null) mPhoto3DView.getLocationInWindow(mViewLocation);
+        if(mActivePositionTranslate&&mPositionDeterminer!=null)
+           mPositionDeterminer.currentLocation(mViewLocation);
         else {
             mViewLocation[0] = 0;
-            mViewLocation[1] = 1;
+            mViewLocation[1] = 0;
         }
 
         GLES20.glUniform2f(uTranslateLocation,(float)mViewLocation[0]/mWindowsSize[0], (float)mViewLocation[1]/mWindowsSize[1]);
@@ -260,7 +260,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
     private String fragmentSet;
     private String getVertex() {
         if(vertexSet==null||vertexSet.isEmpty())
-            return vertexShader;
+            return ShaderInstance.vertexShader;
         return vertexSet;
     }
 
@@ -274,13 +274,13 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         programId = createProgram(createShader( GLES20.GL_VERTEX_SHADER, getVertex()), createShader( GLES20.GL_FRAGMENT_SHADER, getFragment()));
         GLES20.glUseProgram(programId);
 
-        uResolutionLocation = GLES20.glGetUniformLocation(programId,RESOLUTION);
-        uTranslateLocation = GLES20.glGetUniformLocation(programId,TRANSLATE);
+        uResolutionLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.RESOLUTION);
+        uTranslateLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.TRANSLATE);
 
-        uMouseLocation = GLES20.glGetUniformLocation(programId,MOUSE);
-        uTimeLocation = GLES20.glGetUniformLocation(programId,TIME);
-        uRatioLocation = GLES20.glGetUniformLocation(programId,PIXEL_RATIO);
-        uThresholdLocation = GLES20.glGetUniformLocation(programId,THRESHOLD);
+        uMouseLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.MOUSE);
+        uTimeLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.TIME);
+        uRatioLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.PIXEL_RATIO);
+        uThresholdLocation = GLES20.glGetUniformLocation(programId, ShaderInstance.THRESHOLD);
 
         int buffer[] = new int[1];
         GLES20.glGenRenderbuffers(1,buffer,0);
@@ -288,7 +288,7 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         //GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,VERTICES,GLES20.GL_STATIC_DRAW);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,VERTICES.length * 4,VERTICES_BUFFER,GLES20.GL_STATIC_DRAW);
 
-        positionLocation = GLES20.glGetAttribLocation(programId,A_POSITION);
+        positionLocation = GLES20.glGetAttribLocation(programId, ShaderInstance.A_POSITION);
         GLES20.glEnableVertexAttribArray(positionLocation);
         GLES20.glVertexAttribPointer(positionLocation,2,GLES20.GL_FLOAT,false,0,0);
     }
@@ -317,7 +317,6 @@ class Photo3DRenderer implements GLTextureView.Renderer {
         return id;
     }
 
-    @Override
     public void onSurfaceDestroyed(GL10 gl) {
 
     }

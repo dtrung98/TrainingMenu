@@ -1,4 +1,4 @@
-package com.zalo.trainingmenu.newsfeed3d.photo3d
+package com.ldt.parallaximageview.shader
 
 object OriginalShaderInstance {
     const val A_POSITION = "a_position"

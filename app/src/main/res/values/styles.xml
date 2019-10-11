@@ -10,6 +10,17 @@
         <item name="android:navigationBarColor">@color/DarkerBlack</item>
         <item name="android:dialogTheme">@style/DialogDimDisabled</item>
     </style>
+    <style name="LightAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimaryDark">@color/FlatWhite</item>
+        <item name="colorPrimary">@color/FlatWhite</item>
+        <item name="colorAccent">@color/FlatOrange</item>
+        <item name="android:windowBackground">@color/FlatWhite</item>
+        <item name="android:statusBarColor">@color/FlatWhite</item>
+        <item name="android:navigationBarColor">@color/FlatWhite</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
     <style name="PreferenceAppTheme" parent="AppTheme">
         <item name="android:dialogTheme">@style/MyDialogStyle</item>
         <item name="android:alertDialogTheme">@style/MyDialogStyle</item>
