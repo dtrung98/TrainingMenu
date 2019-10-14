@@ -109,6 +109,11 @@ public class Photo3DActivity extends PermissionActivity {
         mGLView.removeBitmaps();
     }
 
+    @OnClick(R.id.remove_button_2)
+    void removeOriginal() {
+        mGLView.setDepthPhoto(null);
+    }
+
     @OnClick(R.id.original_button)
     void chooseOriginalPhoto() {
         Intent intent = new Intent(ACTION_PICK_ORIGINAL_PHOTO);
@@ -162,11 +167,13 @@ public class Photo3DActivity extends PermissionActivity {
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
 
-                            if(bitmap!=null) PreferenceUtil.getInstance().setSavedOriginal3DPhoto(path);
+                            if(bitmap!=null) {
+                                PreferenceUtil.getInstance().setSavedOriginal3DPhoto(path);
 
-                            //mImageView.setImageBitmap(bitmap);
-                            mGLView.setOriginalPhoto(bitmap);
-                            mGLView.requestRender();
+                                //mImageView.setImageBitmap(bitmap);
+                                mGLView.setOriginalPhoto(bitmap);
+                                mGLView.requestRender();
+                            }
                         }
                     }
                 }
@@ -184,10 +191,12 @@ public class Photo3DActivity extends PermissionActivity {
                             Log.d(TAG, "onActivityResult: "+path);
                             c.close();
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
-                            if(bitmap!=null) PreferenceUtil.getInstance().setSavedDepthPhoto(path);
-                            //mImageView.setImageBitmap(bitmap);
-                           mGLView.setDepthPhoto(bitmap);
-                            mGLView.requestRender();
+                            if(bitmap!=null) {
+                                PreferenceUtil.getInstance().setSavedDepthPhoto(path);
+                                //mImageView.setImageBitmap(bitmap);
+                                mGLView.setDepthPhoto(bitmap);
+                                mGLView.requestRender();
+                            }
                         }
                     }
                 }

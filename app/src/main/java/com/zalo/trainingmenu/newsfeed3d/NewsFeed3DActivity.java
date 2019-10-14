@@ -1,13 +1,12 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
-import android.graphics.Color;
 import android.widget.ImageView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ldt.menulayout.ui.AbsListActivity;
+import com.ldt.parallaximageview.model.ParallaxImageObject;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.newsfeed3d.model.ParallaxImageObject;
 
 import java.util.ArrayList;
 

@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp">
 <ImageView
     android:id="@+id/avatar_icon"
     android:layout_width="50dp"
@@ -85,7 +86,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"
-        app:shouldTranslateByScroll="false"
+        app:shouldTranslateByScroll="true"
         app:motionWithTouch="true"
         app:motionWithSensor="true"/>
     <View

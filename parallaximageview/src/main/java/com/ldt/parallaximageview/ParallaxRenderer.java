@@ -1,6 +1,7 @@
 package com.ldt.parallaximageview;
 
 import android.graphics.Bitmap;
+import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
@@ -16,16 +17,19 @@ import java.nio.ByteOrder;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import okhttp3.internal.Util;
+
 class ParallaxRenderer implements GLTextureView.Renderer {
     private static final String TAG = "ParallaxRenderer";
+    public static final int TYPE_ORIGINAL = 0;
+    public static final int TYPE_DEPTH = 1;
 
-    private int[] textures;
-    private float mImageWidth = 0;
-    private float mImageHeight = 0;
+    private int[] textures = new int[2];
     private float mDrawWidth = 0;
     private float mDrawHeight = 0;
     private int[] mViewLocation = new int[2];
     private int[] mWindowsSize = new int[2];
+    private float[] mTranslate = new float[2];
 
     public ParallaxRenderer(String vertexSet, String fragmentSet) {
         this.vertexSet = vertexSet;
@@ -41,27 +45,11 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     }
 
     public void setBitmap(Bitmap bitmap) {
-        mBitmaps[0] = bitmap;
-        mImageWidth = bitmap.getWidth();
-        mImageHeight = bitmap.getHeight();
-
-        // ex : 1280 x 1920, bitmap is 800 x 480;
-        // => This mean the bitmap will be drawn on 1280 x (1280 * 480 / 800 ) == 1280 x 768
-        // => 768 / 1920 which means from - (768/1920)/2 and (768/1920)
-
-        float result = ((mDrawWidth * mImageHeight/mImageWidth) / mDrawHeight);
-        VERTEX_COORDINATES[1] = VERTEX_COORDINATES[4] =  result;
-        VERTEX_COORDINATES[7] = VERTEX_COORDINATES[10] = - result;
-        onPhotosSet();
+        requestUpdatePhoto(bitmap,TYPE_ORIGINAL);
     }
 
     private Bitmap[] mBitmaps = new Bitmap[2];
-    private static float[] VERTEX_COORDINATES = new float[] {
-            -1f, +0.75f, 0.0f,
-            +1.0f, +0.75f, 0.0f,
-            -1.0f, -0.75f, 0.0f,
-            +1.0f, -0.75f, 0.0f
-    };
+
 
     private static final float[] TEXTURE_COORDINATES = new float[] {
             0f, 0.0f,
@@ -71,10 +59,10 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     };
 
     private static final float[] VERTICES = new float[] {
-            -1, -1f,
-            1, -1,
-            -1, 1,
-            1, 1
+            -1, -1,
+             1, -1,
+            -1,  1,
+             1,  1
     };
 
     private static Buffer VERTICES_BUFFER = ByteBuffer.allocateDirect(VERTICES.length * 4)
@@ -83,19 +71,12 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     private static Buffer TEXCOORD_BUFFER = ByteBuffer.allocateDirect(TEXTURE_COORDINATES.length * 4)
             .order(ByteOrder.nativeOrder()).asFloatBuffer().put(TEXTURE_COORDINATES).rewind();
 
-    private Buffer getVertexBuffer() {
-        return ByteBuffer.allocateDirect(VERTEX_COORDINATES.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer().put(VERTEX_COORDINATES).rewind();
-    }
-
-    private int mBackgroundRenderer = 0;
-
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(0,0,0,0);
+       // GLES20.glClearColor(1.0f,1.0f,0.0f,0f);
         GLES20.glEnable(GLES20.GL_TEXTURE_2D);
         createScene();
-        onPhotosSet();
-
+        updatePhotoIfNeed();
     }
 
     interface PositionDeterminer {
@@ -127,29 +108,107 @@ class ParallaxRenderer implements GLTextureView.Renderer {
         GLES20.glViewport(0, 0, width, height);
         if(mPositionDeterminer!=null)
         mPositionDeterminer.screenView(mWindowsSize);
-        if(mWindowsSize[0]==0) mWindowsSize[0] = 1;
-        if(mWindowsSize[1]==0) mWindowsSize[1] = 1;
+        if(mWindowsSize[0] == 0) mWindowsSize[0] = 1;
+        if(mWindowsSize[1] == 0) mWindowsSize[1] = 1;
+
     }
 
     private float imageAspect = 1f;
+    private boolean requestUpdateOriginal = false;
+    private boolean requestUpdateDepth = false;
+    private synchronized void requestUpdatePhoto(Bitmap bitmap, int which) {
+        if(which==TYPE_ORIGINAL) {
+            requestUpdateOriginal = true;
+            mBitmaps[0] = bitmap;
+        }
+        else if(which== TYPE_DEPTH) {
+            requestUpdateDepth = true;
+            mBitmaps[1] = bitmap;
+        }
+    }
 
-    private void onPhotosSet() {
-      //  if(mBitmaps[0]==null) return;
+    private synchronized void updatePhotoIfNeed() {
 
+        if(requestUpdateOriginal) {
+            requestUpdateOriginal = false;
+            onPhotosSet();
+        }
+
+        if(requestUpdateDepth) {
+            requestUpdateDepth = false;
+            onPhotosSet();
+        }
+    }
+
+    public void checkGLError() {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            Log.e(TAG, "glError: " + error);
+        }
+    }
+
+    public void onPhotoSet(Bitmap bitmap, int which) {
+        if(which!=TYPE_ORIGINAL&&which!=TYPE_DEPTH) return;
+        configAspect();
+
+        // remove old texture if any
+        if(textures[which]!=0) {
+            GLES20.glDeleteTextures(1,textures,which);
+            textures[which] = 0;
+        }
+        // generate new texture if bitmap available
+        if(bitmap!=null) {
+            GLES20.glGenTextures(1, textures, which);
+
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textures[which]);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D,0,bitmap,0);
+
+
+        }
+        if(textures[0]!=0) {
+            int uImageLocation = GLES20.glGetUniformLocation(programId,ShaderInstance.IMAGE0);
+            GLES20.glUniform1i(uImageLocation, 0);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
+        }
+        if(textures[1]!=0) {
+            int uImageLocation = GLES20.glGetUniformLocation(programId,ShaderInstance.IMAGE1);
+            GLES20.glUniform1i(uImageLocation, 1);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[1]);
+        }
+    }
+
+    private void configAspect() {
         if(mBitmaps[0] != null)
-        imageAspect = (float) mBitmaps[0].getHeight()/ mBitmaps[0].getWidth();
+            imageAspect = (float) mBitmaps[0].getHeight()/ mBitmaps[0].getWidth();
         else if(mBitmaps[1] != null) imageAspect = (float) mBitmaps[1].getHeight()/mBitmaps[1].getWidth();
         else imageAspect = 1;
+        Log.d(TAG, "configAspect: "+imageAspect);
+
+    }
+
+    private void onPhotosSet() {
+
+        // config image aspect
+
+        configAspect();
+
         if(textures!=null) {
-            int[] tem = new int[] {textures[0],textures[1]};
-            GLES20.glDeleteTextures(2, tem, 0);
+            GLES20.glDeleteTextures(1, textures, 0);
+            GLES20.glDeleteTextures(1, textures, 1);
         }
 
         textures = new int[2];
 
         GLES20.glGenTextures(2, textures, 0);
 
-        for (int i =1; i >=0; i--) {
+        for (int i =0; i < 2; i++) {
 
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[i]);
 
@@ -207,7 +266,8 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         // Draw
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        updatePhotoIfNeed();
+      //  GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         long now = System.currentTimeMillis();
         long time = ( now - startTime ) / 1000;
 
@@ -234,19 +294,34 @@ class ParallaxRenderer implements GLTextureView.Renderer {
        // mMouseX = -3f;
 
         GLES20.glUniform2f(uMouseLocation,mMouseX, mMouseY);
-        if(mActivePositionTranslate&&mPositionDeterminer!=null)
-           mPositionDeterminer.currentLocation(mViewLocation);
-        else {
-            mViewLocation[0] = 0;
-            mViewLocation[1] = 0;
+        if(mActivePositionTranslate&&mPositionDeterminer!=null) {
+            mPositionDeterminer.currentLocation(mViewLocation);
+            if(mViewLocation[1] > mWindowsSize[1])
+            mTranslate[1] = 0.5f;
+            else if(mViewLocation[1]>mWindowsSize[1]/2 - mDrawHeight/2)
+                mTranslate[1] = 0.5f * fraction(mWindowsSize[1]/2f - mDrawHeight/2f,mWindowsSize[1],mViewLocation[1]);
+            else if(mViewLocation[1] > -mDrawHeight)
+                mTranslate[1] =  -0.5f + 0.5f*fraction( -mDrawHeight,mWindowsSize[1]/2f - mDrawHeight/2f,mViewLocation[1]);
+            else mTranslate[1] = -0.5f;
         }
-
-        GLES20.glUniform2f(uTranslateLocation,(float)mViewLocation[0]/mWindowsSize[0], (float)mViewLocation[1]/mWindowsSize[1]);
+        else {
+           mTranslate[0] = mTranslate[1] = 0;
+        }
+        Log.d(TAG, "onDrawFrame: translateY "+mTranslate[1]);
+        GLES20.glUniform2f(uTranslateLocation,mTranslate[0], mTranslate[1]);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
     }
 
     private long startTime;
+
+    public static float interpolate(float start,float end,float f) {
+        return start + f * (end - start);
+    }
+
+    public static float fraction(float start, float end, float current) {
+        return (current - start)/(end - start);
+    }
 
     private void createScene() {
         startTime = System.currentTimeMillis();
@@ -326,14 +401,12 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     }
 
     public void setDepthMap(Bitmap depthMap) {
-        mBitmaps[1] = depthMap;
-        onPhotosSet();
+        requestUpdatePhoto(depthMap,TYPE_DEPTH);
     }
 
     public void removeBitmaps() {
-        mBitmaps[0] = null;
-        mBitmaps[1] = null;
-        onPhotosSet();
+        requestUpdatePhoto(null, TYPE_ORIGINAL);
+        requestUpdatePhoto(null, TYPE_DEPTH);
     }
 
     private int uResolutionLocation;

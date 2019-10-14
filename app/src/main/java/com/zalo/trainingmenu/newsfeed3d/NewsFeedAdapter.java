@@ -3,13 +3,14 @@ package com.zalo.trainingmenu.newsfeed3d;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ldt.parallaximageview.ParallaxImageView;
+import com.ldt.parallaximageview.model.ParallaxImageObject;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.newsfeed3d.model.ParallaxImageObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,9 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
         @BindView(R.id.photo_3d_view)
         ParallaxImageView mParallaxImageView;
 
+        @BindView(R.id.content_text_view)
+        TextView mContentTextView;
+
         public Photo3DHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
@@ -88,8 +92,8 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
         public void bind(Object o) {
             super.bind(o);
             if(o instanceof ParallaxImageObject) {
-                mParallaxImageView.setOriginalPath(((ParallaxImageObject) o).getOriginal());
-                mParallaxImageView.setDepthPath(((ParallaxImageObject) o).getDepth());
+                mParallaxImageView.load((ParallaxImageObject) o);
+                mContentTextView.setText(((ParallaxImageObject) o).getDepth().toString());
             }
            /* Bitmap b = null;
             try {
