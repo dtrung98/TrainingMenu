@@ -307,7 +307,11 @@ class ParallaxRenderer implements GLTextureView.Renderer {
         else {
            mTranslate[0] = mTranslate[1] = 0;
         }
-        Log.d(TAG, "onDrawFrame: translateY "+mTranslate[1]);
+        if(mPositionDeterminer instanceof ParallaxImageView)
+        Log.d(TAG, "render view "+((ParallaxImageView) mPositionDeterminer).getName()+" with location ["+mViewLocation[0]+", "+mViewLocation[1]+"], translateY= "+mTranslate[1]+", drawHeight = "+mDrawHeight+", windowsSize");
+        else
+            Log.d(TAG, "render view unknown with location ["+mViewLocation[0]+", "+mViewLocation[1]+"], translateY= "+mTranslate[1]);
+
         GLES20.glUniform2f(uTranslateLocation,mTranslate[0], mTranslate[1]);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);

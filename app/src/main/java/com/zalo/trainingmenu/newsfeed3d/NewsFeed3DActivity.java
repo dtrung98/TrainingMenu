@@ -1,5 +1,7 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -7,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.ldt.menulayout.ui.AbsListActivity;
 import com.ldt.parallaximageview.model.ParallaxImageObject;
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.newsfeed3d.model.NewsFeedObject;
 
 import java.util.ArrayList;
 
@@ -31,16 +34,18 @@ public class NewsFeed3DActivity extends AbsListActivity {
 
     @Override
     protected void refreshData() {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/girl.jpg","/storage/emulated/0/Download/girl_depth.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/poro.jpg","/storage/emulated/0/Download/poro_depth.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/source.jpg","/storage/emulated/0/Download/source_depth.jpeg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/img/ball.jpg","/storage/emulated/0/Download/img/ball-map.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/img/canyon.jpg","/storage/emulated/0/Download/img/canyon-map.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/img/lady.jpg","/storage/emulated/0/Download/img/lady-map.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/img/mount.jpg","/storage/emulated/0/Download/img/mount-map.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/dog1.jpg","/storage/emulated/0/Download/dog3.jpg"));
-        list.add(new ParallaxImageObject("/storage/emulated/0/Download/img/ball.jpg","/storage/emulated/0/Download/img/ball-map.jpg"));
+        ArrayList<NewsFeedObject> list = new ArrayList<>();
+        list.add(new NewsFeedObject().setContentText("Office").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/office.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/office_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Girl").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/girl.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/girl_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Yamasa").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/yamasa.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/yamasa_depth.png"))));
+        list.add(new NewsFeedObject().setContentText("Mountain").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/source.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/source_depth.jpeg"))));
+        list.add(new NewsFeedObject().setContentText("A bowl").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/bow.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/bow_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("A ball").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/img/ball.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/img/ball_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Canyon").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/img/canyon.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/img/canyon_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Lady").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/img/lady.jpg"),BitmapFactory.decodeFile("/storage/emulated/0/Download/img/lady_depth.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Another mountain").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/img/mount.jpg"), BitmapFactory.decodeFile("/storage/emulated/0/Download/img/mount-map.jpg"))));
+        list.add(new NewsFeedObject().setContentText("Dog").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/dog1.jpg"), BitmapFactory.decodeFile("/storage/emulated/0/Download/dog3.jpg"))));
+        list.add(new NewsFeedObject().setContentText("A coffee").setImageObject(new ParallaxImageObject(BitmapFactory.decodeFile("/storage/emulated/0/Download/download.jpeg"), BitmapFactory.decodeFile("/storage/emulated/0/Download/download_depth.png"))));
 
         mAdapter.setData(list);
         getSwipeRefreshLayout().setRefreshing(false);

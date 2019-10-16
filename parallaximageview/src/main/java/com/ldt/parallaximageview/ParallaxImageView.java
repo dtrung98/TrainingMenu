@@ -8,8 +8,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
-import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -19,12 +17,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.CustomViewTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.ldt.parallaximageview.base.GLTextureView;
 import com.ldt.parallaximageview.model.ParallaxImageObject;
+import com.ldt.parallaximageview.util.Util;
 
 import java.lang.ref.WeakReference;
 
@@ -33,10 +36,12 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
     public static final int TYPE_ORIGINAL = 0;
     public static final int TYPE_DEPTH = 1;
     private ParallaxRenderer mRenderer;
+    private String mName = "";
 
     public void setOriginalPhoto(Bitmap bitmap) {
         if(mRenderer!=null) {
             mRenderer.setBitmap(bitmap);
+            Log.d(TAG, "view "+mName+" set original"+((bitmap == null) ? ", null" : ", not null"));
             requestLayout();
         }
     }
@@ -80,6 +85,8 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
 
         if(mRenderer!=null) {
             mRenderer.setDepthMap(bitmap);
+            Log.d(TAG, "view "+mName+" set depth"+((bitmap == null) ? ", null" : ", not null"));
+
             requestLayout();
         }
     }
@@ -117,22 +124,37 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
 
     public void load(ParallaxImageObject pio) {
         mPio = pio;
-        Glide.with(this)
-                .asBitmap()
-                .load(pio.getOriginal())
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                //.error(Glide.with(this).asBitmap().load(pio.getOriginal()))
-                .into(mOriginalTarget.setLoadObject(pio.getOriginal()));
+        if(pio!=null) {
+            if (pio.getOriginal() instanceof Bitmap)
+                setOriginalPhoto((Bitmap) pio.getOriginal());
+            else
+                Glide.with(getContext())
+                        .asBitmap()
+                        .load(pio.getOriginal())
+                        //.error(Glide.with(this).asBitmap().load(pio.getOriginal()))
+                        .into(mOriginalTarget.setLoadObject(pio.getOriginal()));
 
-        Glide.with(this)
-                .asBitmap()
-                .load(pio.getDepth())
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                //.error(Glide.with(this).asBitmap().load(pio.getOriginal()))
-                .into(mDepthTarget.setLoadObject(pio.getDepth()));
+            if (pio.getDepth() instanceof Bitmap)
+                setDepthPhoto((Bitmap) pio.getDepth());
+            else
+                Glide.with(getContext())
+                        .asBitmap()
+                        .load(pio.getDepth())
+                        // .override(Target.SIZE_ORIGINAL)
+                        //.error(Glide.with(this).asBitmap().load(pio.getOriginal()))
+                        .into(mDepthTarget.setLoadObject(pio.getDepth()));
+        }
     }
 
     private ParallaxTarget mOriginalTarget = new ParallaxTarget(this,TYPE_ORIGINAL);
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
 
     private static class ParallaxTarget extends CustomTarget<Bitmap> {
 
@@ -141,6 +163,7 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
             mRef = new WeakReference<>(view);
             mType = type;
         }
+
 
         private final WeakReference<ParallaxImageView> mRef;
 
@@ -168,13 +191,12 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
 
         @Override
         public void onLoadCleared(@Nullable Drawable placeholder) {
-
+            mRef.get().removeBitmaps();
         }
 
         @Override
         public void onLoadFailed(@Nullable Drawable errorDrawable) {
-            super.onLoadFailed(errorDrawable);
-            Log.d(TAG, "onResourceReady: object ["+mLoadObject.toString()+"] failed");
+            Log.d(TAG, "onResourceReady: object ["+mLoadObject+"] failed");
             if(mRef.get()!=null) {
                 if(mType==TYPE_ORIGINAL)
                     mRef.get().setOriginalPhoto(null);
@@ -353,15 +375,22 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
 
     @Override
     public void screenView(int[] size) {
+        Util.getScreenSize(getContext(),size);
+      /*
        ViewParent parent =  getParent();
        if(parent instanceof View) {
            size[0] = ((View) parent).getWidth();
            size[1] = ((View) parent).getHeight();
        }
+       */
     }
 
     @Override
     public void currentLocation(int[] location) {
         getLocationInWindow(location);
+        Log.d(TAG, "currentLocation: view "+mName+" with location ["+location[0]+", "+location[1]+"), bitmap "
+                +((mRenderer.getBitmap()==null) ? "is null" :"exists") +" and depth "
+                +((mRenderer.getDepthMap()==null) ? "is null" :"exists")
+        );
     }
 }

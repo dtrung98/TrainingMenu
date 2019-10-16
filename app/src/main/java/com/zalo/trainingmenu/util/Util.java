@@ -223,7 +223,7 @@ public final class Util {
         }
     }
 
-    static int[] screenSize;
+    private static int[] screenSize;
     public static boolean HAD_GOT_SCREEN_SIZE = false;
     public static int[] getScreenSize(Context context)
     {
@@ -238,4 +238,4 @@ public final class Util {
         }
         return screenSize;
     }
-    }
+}

@@ -1,5 +1,7 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ldt.parallaximageview.ParallaxImageView;
 import com.ldt.parallaximageview.model.ParallaxImageObject;
 import com.zalo.trainingmenu.R;
+import com.zalo.trainingmenu.newsfeed3d.model.NewsFeedObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +23,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.BindableHolder> {
-    private ArrayList<Object> mData = new ArrayList<>();
+    private ArrayList<NewsFeedObject> mData = new ArrayList<>();
 
-    public void setData(List<Object> data) {
+    public void setData(List<NewsFeedObject> data) {
         mData.clear();
         if(data!=null)
             mData.addAll(data);
@@ -48,12 +52,12 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
         return mData.size();
     }
 
-    public abstract static class BindableHolder extends RecyclerView.ViewHolder {
+    public abstract static class BindableHolder<T> extends RecyclerView.ViewHolder {
         public BindableHolder(@NonNull View itemView) {
             super(itemView);
         }
 
-        public void bind(Object model) {
+        public void bind(T t) {
 
         }
     }
@@ -66,7 +70,7 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
 
     }
 
-    public static class NewsFeedHolder extends BindableHolder {
+    public static class NewsFeedHolder extends BindableHolder<NewsFeedObject> {
 
         public NewsFeedHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,15 +90,15 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
             itemView.addOnAttachStateChangeListener(this);
 //            mParallaxImageView.setOpaque(false);
             mParallaxImageView.createRenderer();
+            mParallaxImageView.onResume();
         }
 
         @Override
-        public void bind(Object o) {
+        public void bind(NewsFeedObject o) {
             super.bind(o);
-            if(o instanceof ParallaxImageObject) {
-                mParallaxImageView.load((ParallaxImageObject) o);
-                mContentTextView.setText(((ParallaxImageObject) o).getDepth().toString());
-            }
+                mParallaxImageView.load(o.getImageObject());
+                mContentTextView.setText(o.getContentText());
+                mParallaxImageView.setName(getAdapterPosition()+" - "+o.getContentText());
            /* Bitmap b = null;
             try {
                 String original = PreferenceUtil.getInstance().getSavedOriginal3DPhoto();
@@ -125,12 +129,10 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
 
         @Override
         public void onViewAttachedToWindow(View view) {
-            mParallaxImageView.onResume();
         }
 
         @Override
         public void onViewDetachedFromWindow(View view) {
-            mParallaxImageView.onPause();
         }
     }
 }
