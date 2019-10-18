@@ -3,6 +3,7 @@ package com.ldt.parallaximageview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -10,20 +11,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewParent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.CustomViewTarget;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.ldt.parallaximageview.base.GLTextureView;
 import com.ldt.parallaximageview.model.ParallaxImageObject;
@@ -35,15 +28,24 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
     private static final String TAG = "ParallaxImageView";
     public static final int TYPE_ORIGINAL = 0;
     public static final int TYPE_DEPTH = 1;
-    private ParallaxRenderer mRenderer;
+    private final ParallaxRenderer mRenderer = new ParallaxRenderer();
     private String mName = "";
+    public void getColor(float[] color) {
+        mRenderer.getColor(color);
+    }
+
+    public void setBackColor(float r, float g, float b, float a) {
+        mRenderer.setBackColor(r,g,b,a);
+    }
+
+    public void setBackColor(int color) {
+        mRenderer.setBackColor(Color.red(color)/255f,Color.green(color)/255f,Color.blue(color)/255f,Color.alpha(color)/255f);
+    }
 
     public void setOriginalPhoto(Bitmap bitmap) {
-        if(mRenderer!=null) {
             mRenderer.setBitmap(bitmap);
             Log.d(TAG, "view "+mName+" set original"+((bitmap == null) ? ", null" : ", not null"));
             requestLayout();
-        }
     }
 
     Sensor mSensor;
@@ -63,8 +65,7 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
 
     void stopSensor() {
         if(mSensor!=null) {
-            SensorManager
-            mSensor = null;
+
         }
     }
 
@@ -82,28 +83,18 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
     */
 
     public void setDepthPhoto(Bitmap bitmap) {
+        mRenderer.setDepthMap(bitmap);
+        Log.d(TAG, "view "+mName+" set depth"+((bitmap == null) ? ", null" : ", not null"));
 
-        if(mRenderer!=null) {
-            mRenderer.setDepthMap(bitmap);
-            Log.d(TAG, "view "+mName+" set depth"+((bitmap == null) ? ", null" : ", not null"));
-
-            requestLayout();
-        }
-    }
-
-    @Override
-    public void setRenderer(Renderer renderer) {
-        super.setRenderer(renderer);
+        requestLayout();
     }
 
     private void requestUpdateBitmaps() {
     }
 
     public void removeBitmaps() {
-        if(mRenderer!=null) {
-            mRenderer.removeBitmaps();
-            requestLayout();
-        }
+        mRenderer.removeBitmaps();
+        requestLayout();
     }
 
     public void loadOriginal(Object uri) {
@@ -235,7 +226,8 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
             setMotionBySensor(t.getBoolean(R.styleable.ParallaxImageView_motionWithSensor,true));
             setMotionByTouch(t.getBoolean(R.styleable.ParallaxImageView_motionWithTouch,true));
             shouldPositionTranslate(t.getBoolean(R.styleable.ParallaxImageView_shouldTranslateByScroll,false));
-
+            int color = t.getColor(R.styleable.ParallaxImageView_backColor,-1);
+            if(color!=1) setBackColor(color);
             t.recycle();
         }
     }
@@ -269,9 +261,11 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
         mSensorManager.unregisterListener(this);
     }
 
-    public void createRenderer() {
+
+
+    public void initRenderer() {
         setEGLContextClientVersion(2);
-        mRenderer = new ParallaxRenderer();
+        mRenderer.init();
         mRenderer.setPositionDeterminer(this);
         mRenderer.shouldPositionTranslate(mShouldPositionTranslate);
         setRenderer(mRenderer);
@@ -283,15 +277,14 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
     public void shouldPositionTranslate(boolean active) {
         if(active!= mShouldPositionTranslate) {
             mShouldPositionTranslate = active;
-            if(mRenderer!=null) mRenderer.shouldPositionTranslate(mShouldPositionTranslate);
+            mRenderer.shouldPositionTranslate(mShouldPositionTranslate);
         }
 
     }
 
-    public void createRenderer(String vertex, String shader) {
+    public void initRenderer(String vertex, String shader) {
         setEGLContextClientVersion(2);
-        mRenderer = new ParallaxRenderer(vertex,shader);
-        mRenderer.shouldPositionTranslate(mShouldPositionTranslate);
+        mRenderer.init(vertex,shader);
         mRenderer.setPositionDeterminer(this);
         setRenderer(mRenderer);
         setRenderMode(RENDERMODE_CONTINUOUSLY);

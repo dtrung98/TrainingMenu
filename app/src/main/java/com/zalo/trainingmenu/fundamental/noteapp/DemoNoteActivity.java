@@ -18,15 +18,9 @@ import com.zalo.trainingmenu.fundamental.noteapp.model.Note;
 
 import java.util.List;
 
-import butterknife.BindView;
-
 public class DemoNoteActivity extends AbsListActivity implements NoteAdapter.OnItemClickListener {
     private static final String TAG = "DemoNoteActivity";
     public static final int DETAIL_REQUEST_CODE = 1;
-
-    @BindView(R.id.root)
-    CoordinatorLayout mRoot;
-
 
     NoteAdapter mAdapter;
 
@@ -50,6 +44,7 @@ public class DemoNoteActivity extends AbsListActivity implements NoteAdapter.OnI
     }
 
     private void addPlusButton() {
+        CoordinatorLayout mRoot = findViewById(R.id.root);
         mAddButton = new FloatingActionButton(this);
         mAddButton.setImageResource(R.drawable.ic_add_black_24dp);
         float oneDP = getResources().getDimension(R.dimen.oneDp);

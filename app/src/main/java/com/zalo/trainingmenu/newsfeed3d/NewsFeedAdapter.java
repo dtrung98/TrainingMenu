@@ -1,7 +1,5 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ldt.parallaximageview.ParallaxImageView;
-import com.ldt.parallaximageview.model.ParallaxImageObject;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.newsfeed3d.model.NewsFeedObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +85,7 @@ public class NewsFeedAdapter extends RecyclerView.Adapter<NewsFeedAdapter.Bindab
             ButterKnife.bind(this,itemView);
             itemView.addOnAttachStateChangeListener(this);
 //            mParallaxImageView.setOpaque(false);
-            mParallaxImageView.createRenderer();
+            mParallaxImageView.initRenderer();
             mParallaxImageView.onResume();
         }
 

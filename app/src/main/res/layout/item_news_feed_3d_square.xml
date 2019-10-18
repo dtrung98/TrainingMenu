@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp">
+    xmlns:tools="http://schemas.android.com/tools"
+
+    tools:theme="@style/LightAppTheme">
 <ImageView
     android:id="@+id/avatar_icon"
     android:layout_width="50dp"
@@ -88,7 +89,8 @@
         android:layout_marginTop="8dp"
         app:shouldTranslateByScroll="true"
         app:motionWithTouch="true"
-        app:motionWithSensor="true"/>
+        app:motionWithSensor="true"
+        app:backColor="@color/FlatOrange"/>
     <View
         android:layout_width="0dp"
         android:layout_height="6dp"

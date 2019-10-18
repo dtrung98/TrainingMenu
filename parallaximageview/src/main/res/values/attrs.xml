@@ -4,5 +4,6 @@
         <attr name="motionWithSensor" format="boolean"/>
         <attr name="motionWithTouch" format="boolean" />
         <attr name="shouldTranslateByScroll" format="boolean"/>
+        <attr name="backColor" format="color"/>
     </declare-styleable>
 </resources>

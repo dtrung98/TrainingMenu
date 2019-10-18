@@ -49,13 +49,13 @@ public class Photo3DActivity extends PermissionActivity {
                 String fragment = intent.getStringExtra(ShaderSetActivity.FRAGMENT_SHADER);
                 if(vertex!=null && !vertex.isEmpty() && fragment!=null && !fragment.isEmpty()) {
                     valid = true;
-                    mGLView.createRenderer(vertex,fragment);
+                    mGLView.initRenderer(vertex,fragment);
                 }
             }
         }
 
         if(!valid)
-        mGLView.createRenderer();
+        mGLView.initRenderer();
 
         if(RESTORE_MODE) {
             Bitmap b = null;

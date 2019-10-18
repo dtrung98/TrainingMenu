@@ -1,6 +1,7 @@
 package com.ldt.parallaximageview;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -15,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 import okhttp3.internal.Util;
@@ -31,10 +33,30 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     private int[] mWindowsSize = new int[2];
     private float[] mTranslate = new float[2];
 
-    public ParallaxRenderer(String vertexSet, String fragmentSet) {
+    public void getColor(float[] color) {
+        if(mBackColor==null) return;
+        mBackColor[0] = color[0];
+    }
+
+    public void setBackColor(float r, float g, float b, float a) {
+        if(mBackColor==null) mBackColor = new float[4];
+        mBackColor[0] = r;
+        mBackColor[1] = g;
+        mBackColor[2] = b;
+        mBackColor[3] = a;
+    }
+
+    private float[] mBackColor;
+
+    public void init(String vertexSet, String fragmentSet) {
         this.vertexSet = vertexSet;
         this.fragmentSet = fragmentSet;
     }
+
+    public void init() {
+
+    }
+
 
     public ParallaxRenderer() {
 
@@ -74,7 +96,11 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
        // GLES20.glClearColor(1.0f,1.0f,0.0f,0f);
+        if(mBackColor!=null)
+        GLES20.glClearColor(mBackColor[0],mBackColor[1],mBackColor[2],mBackColor[3]);
         GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         createScene();
         updatePhotoIfNeed();
     }
@@ -127,15 +153,15 @@ class ParallaxRenderer implements GLTextureView.Renderer {
         }
     }
 
+    public void autoRequestUpdate() {
+        if(textures[0]==0&&mBitmaps[0]!=null) requestUpdateOriginal = true;
+        if(textures[1]==0&&mBitmaps[1]!=null) requestUpdateDepth = true;
+    }
+
     private synchronized void updatePhotoIfNeed() {
-
-        if(requestUpdateOriginal) {
+        autoRequestUpdate();
+        if(requestUpdateOriginal || requestUpdateDepth ) {
             requestUpdateOriginal = false;
-            onPhotosSet();
-        }
-
-        if(requestUpdateDepth) {
-            requestUpdateDepth = false;
             onPhotosSet();
         }
     }
@@ -267,7 +293,10 @@ class ParallaxRenderer implements GLTextureView.Renderer {
     public void onDrawFrame(GL10 gl) {
         // Draw
         updatePhotoIfNeed();
-      //  GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        if(mBackColor!=null)
+            GLES20.glClearColor(mBackColor[0],mBackColor[1],mBackColor[2],mBackColor[3]);
+        else GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
         long now = System.currentTimeMillis();
         long time = ( now - startTime ) / 1000;
 
@@ -370,11 +399,6 @@ class ParallaxRenderer implements GLTextureView.Renderer {
         positionLocation = GLES20.glGetAttribLocation(programId, ShaderInstance.A_POSITION);
         GLES20.glEnableVertexAttribArray(positionLocation);
         GLES20.glVertexAttribPointer(positionLocation,2,GLES20.GL_FLOAT,false,0,0);
-    }
-
-
-    private void addTexture() {
-
     }
 
     private int  createProgram(int vertexShader, int fragmentShader) {
