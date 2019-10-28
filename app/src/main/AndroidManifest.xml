@@ -31,15 +31,19 @@
             android:theme="@style/SplashTheme"
             android:label="@string/menu"
             android:name="com.zalo.trainingmenu.MenuActivity">
+
+        </activity>
+        <activity
+            android:label="@string/service"
+            android:name="com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity"
+            />
+        <activity android:name=".vrsample.VRListActivity" android:theme="@style/LightAppTheme"/>
+        <activity android:name=".vrsample.VRMenuActivity" >
             <intent-filter android:label="@string/menu">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:label="@string/service"
-            android:name="com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity" />
-
         <activity
             android:label="@string/content_provider"
             android:name="com.zalo.trainingmenu.fundamental.index.ContentProviderDemoActivity" />
@@ -83,6 +87,8 @@
         <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
         <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"  android:theme="@style/LightAppTheme"/>
+        <activity android:name=".vrsample.VrSampleActivity" android:theme="@style/VRTheme"/>
+
 
         <service
             android:label="@string/time_track_service"

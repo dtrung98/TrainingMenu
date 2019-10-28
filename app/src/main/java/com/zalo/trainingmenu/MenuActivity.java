@@ -8,6 +8,7 @@ import com.ldt.menulayout.ui.AbsMenuActivity;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.ui.main.DownloadActivity;
 import com.zalo.trainingmenu.fundamental.FundamentalActivity;
+import com.zalo.trainingmenu.vrsample.VRMenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class MenuActivity extends AbsMenuActivity {
         ArrayList<Item> list = new ArrayList<>();
         list.add(Item.with(this).setTitle(R.string.downloader).setDescription(R.string.downloads_description).setDestinationActivityClass(DownloadActivity.class).setDrawableRes(R.drawable.download_icon).setDrawablePadding(6).get());
         list.add(Item.with(this).setTitle(R.string.basic).setDrawableRes(R.drawable.redo).setDestinationActivityClass(FundamentalActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.vr).setDescription(R.string.vr_description).setDestinationActivityClass(VRMenuActivity.class).setDrawableRes(R.drawable.download_icon).setDrawablePadding(6).get());
         return list;
     }
 

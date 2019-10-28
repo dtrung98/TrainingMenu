@@ -218,5 +218,12 @@
     <string name="photo_3d_list">New Feeds</string>
     <string name="news_feed_3d">News Feed 3D</string>
     <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
+    <string name="vr_sample">VR Sample</string>
+    <string name="vr_list_sample">VR Sample List</string>
+    <string name="vr">VR</string>
+    <string name="vr_description">View some panorama photos</string>
+    <string name="vr_sample_description">Show a fullscreen panorama photo</string>
+    <string name="vr_list_description">Show a panorama photos newsfeed</string>
+    <string name="learn_how_to_create_3d_photos">Learn how to create 3D photos</string>
 
 </resources>

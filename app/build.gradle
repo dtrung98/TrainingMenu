@@ -41,6 +41,9 @@ dependencies {
     // Parallax Image View
     implementation project(path: ':parallaximageview')
 
+    // VR View
+    implementation project(path: ':vrview')
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -62,7 +65,7 @@ dependencies {
 
     // Preference
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
-    implementation 'androidx.preference:preference:1.1.0-rc01'
+    implementation 'androidx.preference:preference:1.1.0'
 
     // ButterKnife
     implementation 'com.jakewharton:butterknife:10.1.0'

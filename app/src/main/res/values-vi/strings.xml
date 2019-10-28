@@ -180,6 +180,32 @@
     <string name="quick_download_notification_title">Tải nhanh liên kết đã sao chép</string>
     <string name="download_now">Tải ngay</string>
     <string name="open_in_app">Sửa liên kết</string>
+    <string name="photo3D">Ảnh 3D</string>
+    <string name="photo3D_description">Trình xem ảnh 3D</string>
+    <string name="choose_original_photo">Chọn ảnh gốc</string>
+    <string name="choose_depth_photo">Chọn ảnh độ sâu</string>
+    <string name="photo3D_dynamic">Dynamic Shader</string>
+    <string name="dynamic_shader_description">for Photo 3D Viewer</string>
+    <string name="simple_bitmap">Simple Bitmap</string>
+    <string name="simple_bitmap_description">Draw a photo in the screen</string>
+    <string name="camera">Camera</string>
+    <string name="camera_description">Camera using TextureView</string>
 
-
+    <string name="app_require_permissions">Permission required</string>
+    <string name="access_camera">Access Camera</string>
+    <string name="storage_permission_description">Scanner requires storage permission to run correctly. Just accept the dialog that appears in next screen.</string>
+    <string name="camera_permisison_description">Allow Scanner access camera to take photos. Just accept the dialog that appear in next screen.</string>
+    <string name="cameraX">Camera X</string>
+    <string name="cameraX_description">Camera X Api in Support Library</string>
+    <string name="cameraKit">CameraKit</string>
+    <string name="cameraKit_description">Camera using CameraKit Library</string>
+    <string name="photo_3d_list">New Feeds</string>
+    <string name="news_feed_3d">News Feed 3D</string>
+    <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
+    <string name="vr_sample">VR</string>
+    <string name="vr_list_sample">VR List Mẫu</string>
+    <string name="vr">VR</string>
+    <string name="vr_description">Trình xem các bức ảnh panorama</string>
+    <string name="vr_sample_description">Xem ảnh toàn cảnh toàn màn hình</string>
+    <string name="vr_list_description">Xem newfeeds gồm các ảnh toàn cảnh</string>
 </resources>

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FundamentalActivity extends AbsMenuActivity {
-    public static final String TAG = "MainActivity";
+    private static final String TAG = "FundamentalActivity";
 
     @Override
     protected List<Item> onRefreshDataList() {

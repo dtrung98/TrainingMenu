@@ -210,11 +210,6 @@ public class ParallaxImageView extends GLTextureView implements SensorEventListe
         init(attrs);
     }
 
-   /* public ParallaxImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(attrs);
-    }*/
-
     public void init(AttributeSet attrs) {
         mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         if (mSensorManager != null) {
