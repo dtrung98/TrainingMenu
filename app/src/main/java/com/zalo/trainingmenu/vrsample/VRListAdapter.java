@@ -28,6 +28,16 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
         notifyDataSetChanged();
     }
 
+    @Override
+    public void onViewAttachedToWindow(@NonNull VRListHolder holder) {
+        holder.mView.onResume();
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull VRListHolder holder) {
+        holder.mView.onPause();
+    }
+
     @NonNull
     @Override
     public VRListHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -51,7 +61,6 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
             super(itemView);
             mView = itemView.findViewById(R.id.vr_view);
             mView.setOnClickListener(this);
-           mView.onResume();
         }
 
         public void bind() {
