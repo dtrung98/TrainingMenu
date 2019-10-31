@@ -3,7 +3,7 @@ package com.ldt.vrview.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-public class VRImage {
+public class VRPhoto {
     private static final String TAG = "VRImageObject";
 
     private final float[] mStartingVector;
@@ -14,7 +14,7 @@ public class VRImage {
     private final Bitmap mThumbnailBitmap;
     private final Bitmap mBitmap;
 
-    public VRImage(Builder builder) {
+    public VRPhoto(Builder builder) {
         mThumbnailBitmap = builder.mThumbnailBitmap;
         mBitmap = builder.mBitmap;
         mCurrentVector = mStartingVector = builder.mStartingVector;
@@ -34,14 +34,14 @@ public class VRImage {
     }
 
 
-    public VRImage setStartingVector(float x, float y, float z) {
+    public VRPhoto setStartingVector(float x, float y, float z) {
         mStartingVector[0] = x;
         mStartingVector[1] = y;
         mStartingVector[2] = z;
         return this;
     }
 
-    public VRImage setCurrentVector(float x, float y, float z) {
+    public VRPhoto setCurrentVector(float x, float y, float z) {
         mCurrentVector[0] = x;
         mCurrentVector[1] = y;
         mCurrentVector[2] = z;
@@ -105,9 +105,9 @@ public class VRImage {
             return this;
         }
 
-        public VRImage build() {
+        public VRPhoto build() {
             mContext = null;
-            return new VRImage(this);
+            return new VRPhoto(this);
         }
     }
 }

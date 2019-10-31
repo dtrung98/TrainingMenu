@@ -4,11 +4,11 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.ldt.vrview.gesture.ViewGestureAttacher;
+import com.ldt.vrview.gesture.Attacher;
 
 public class GestureRotation extends BaseRotation {
 
-    private ViewGestureAttacher mAttacher = new ViewGestureAttacher(this);
+    private Attacher mAttacher;// = new ViewGestureAttacher(this);
     private boolean isAttached = false;
     public GestureRotation() {
     }
@@ -16,11 +16,13 @@ public class GestureRotation extends BaseRotation {
     public void init(View view) {
         if(isAttached) destroy();
         isAttached = true;
-        mAttacher.attach(view);
+        if(mAttacher!=null)
+            mAttacher.attach(view);
     }
 
     public void destroy() {
         isAttached = false;
-        mAttacher.detach();
+        if(mAttacher!=null)
+            mAttacher.detach();
     }
 }

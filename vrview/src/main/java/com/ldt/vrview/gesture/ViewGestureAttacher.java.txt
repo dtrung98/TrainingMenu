@@ -12,14 +12,13 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.OverScroller;
 
 import com.ldt.vrview.rotate.GestureRotation;
 import com.ldt.vrview.util.Util;
 
-public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutChangeListener {
+public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.OnLayoutChangeListener {
     private static float DEFAULT_MAX_SCALE = 3.0f;
     private static float DEFAULT_MID_SCALE = 1.75f;
     private static float DEFAULT_MIN_SCALE = 1.0f;
@@ -73,7 +72,16 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
     private float mBaseRotation;
 
     private boolean mZoomEnabled = true;
-    private ScaleType mScaleType = ScaleType.FIT_CENTER;
+
+    private void postTranslate(float dx, float dy) {
+
+    }
+
+    private void postScale(float sX, float sY, float pX, float pY) {
+    }
+
+    private void setScale(float sX, float sY, float pX, float pY) {
+    }
 
     private OnGestureListener onGestureListener = new OnGestureListener() {
         @Override
@@ -84,9 +92,8 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
             if (mOnViewDragListener != null) {
                 mOnViewDragListener.onDrag(dx, dy);
             }
-            mGestureRotation.scrollBy(dx,dy,0);
-            mSuppMatrix.postTranslate(dx, dy);
-            checkAndDisplayMatrix();
+            postTranslate(dx,dy);
+            //checkAndDisplayMatrix();
 
             /*
              * Here we decide whether to let the ImageView's parent to start taking
@@ -129,8 +136,8 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
                 if (mScaleChangeListener != null) {
                     mScaleChangeListener.onScaleChange(scaleFactor, focusX, focusY);
                 }
-                mSuppMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY);
-                checkAndDisplayMatrix();
+                postScale(scaleFactor, scaleFactor, focusX, focusY);
+                //checkAndDisplayMatrix();
             }
         }
     };
@@ -262,31 +269,19 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
         return mZoomEnabled;
     }
 
-    public RectF getDisplayRect() {
+    /*public RectF getDisplayRect() {
         checkMatrixBounds();
         return getDisplayRect(getDrawMatrix());
     }
-
-    public boolean setDisplayMatrix(Matrix finalMatrix) {
-        if (finalMatrix == null) {
-            throw new IllegalArgumentException("Matrix cannot be null");
-        }
-        if (mView.getDrawable() == null) {
-            return false;
-        }
-        mSuppMatrix.set(finalMatrix);
-        checkAndDisplayMatrix();
-        return true;
-    }
-
-    public void setBaseRotation(final float degrees) {
+*/
+   /* public void setBaseRotation(final float degrees) {
         mBaseRotation = degrees % 360;
         update();
         setRotationBy(mBaseRotation);
         checkAndDisplayMatrix();
-    }
+    }*/
 
-    public void setRotationTo(float degrees) {
+  /*  public void setRotationTo(float degrees) {
         mSuppMatrix.setRotate(degrees % 360);
         checkAndDisplayMatrix();
     }
@@ -294,7 +289,7 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
     public void setRotationBy(float degrees) {
         mSuppMatrix.postRotate(degrees % 360);
         checkAndDisplayMatrix();
-    }
+    }*/
 
     public float getMinimumScale() {
         return mMinScale;
@@ -312,17 +307,14 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
         return mGestureRotation.getScale();
     }
 
-    public ScaleType getScaleType() {
-        return mScaleType;
-    }
-
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int
             oldRight, int oldBottom) {
         // Update our base matrix, as the bounds have changed
-        if (left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom) {
+
+       /* if (left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom) {
             updateBaseMatrix(mView.getDrawable());
-        }
+        }*/
     }
 
     @Override
@@ -455,7 +447,7 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
             mView.post(new AnimatedZoomRunnable(getScale(), scale,
                     focalX, focalY));
         } else {
-            mSuppMatrix.setScale(scale, scale, focalX, focalY);
+            setScale(scale, scale, focalX, focalY);
             checkAndDisplayMatrix();
         }
     }
@@ -467,13 +459,6 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
      */
     public void setZoomInterpolator(Interpolator interpolator) {
         mInterpolator = interpolator;
-    }
-
-    public void setScaleType(ScaleType scaleType) {
-        if (Util.isSupportedScaleType(scaleType) && scaleType != mScaleType) {
-            mScaleType = scaleType;
-            update();
-        }
     }
 
     public boolean isZoomable() {
@@ -488,83 +473,19 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
     public void update() {
         if (mZoomEnabled) {
             // Update the base matrix using the current drawable
-            updateBaseMatrix(mView.getDrawable());
+
+            /*
+            updateBaseMatrix();
+             */
+
         } else {
             // Reset the Matrix...
             resetMatrix();
         }
     }
 
-    /**
-     * Get the display matrix
-     *
-     * @param matrix target matrix to copy to
-     */
-    public void getDisplayMatrix(Matrix matrix) {
-        matrix.set(getDrawMatrix());
-    }
-
-    /**
-     * Get the current support matrix
-     */
-    public void getSuppMatrix(Matrix matrix) {
-        matrix.set(mSuppMatrix);
-    }
-
-    private Matrix getDrawMatrix() {
-        mDrawMatrix.set(mBaseMatrix);
-        mDrawMatrix.postConcat(mSuppMatrix);
-        return mDrawMatrix;
-    }
-
-    public Matrix getImageMatrix() {
-        return mDrawMatrix;
-    }
-
     public void setZoomTransitionDuration(int milliseconds) {
         this.mZoomDuration = milliseconds;
-    }
-
-    /**
-     * Helper method that 'unpacks' a Matrix and returns the required value
-     *
-     * @param matrix     Matrix to unpack
-     * @param whichValue Which value from Matrix.M* to return
-     * @return returned value
-     */
-    private float getValue(Matrix matrix, int whichValue) {
-        matrix.getValues(mMatrixValues);
-        return mMatrixValues[whichValue];
-    }
-
-    /**
-     * Resets the Matrix back to FIT_CENTER, and then displays its contents
-     */
-    private void resetMatrix() {
-        mSuppMatrix.reset();
-        setRotationBy(mBaseRotation);
-        setImageViewMatrix(getDrawMatrix());
-        checkMatrixBounds();
-    }
-
-    private void setImageViewMatrix(Matrix matrix) {
-        mView.setImageMatrix(matrix);
-        // Call MatrixChangedListener if needed
-        if (mMatrixChangeListener != null) {
-            RectF displayRect = getDisplayRect(matrix);
-            if (displayRect != null) {
-                mMatrixChangeListener.onMatrixChanged(displayRect);
-            }
-        }
-    }
-
-    /**
-     * Helper method that simply checks the Matrix, and then displays the result
-     */
-    private void checkAndDisplayMatrix() {
-        if (checkMatrixBounds()) {
-            setImageViewMatrix(getDrawMatrix());
-        }
     }
 
     /**
@@ -589,7 +510,7 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
      *
      * @param drawable - Drawable being displayed
      */
-    private void updateBaseMatrix(Drawable drawable) {
+    /*private void updateBaseMatrix(Drawable drawable) {
         if (drawable == null) {
             return;
         }
@@ -640,9 +561,9 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
             }
         }
         resetMatrix();
-    }
+    }*/
 
-    private boolean checkMatrixBounds() {
+    /*private boolean checkMatrixBounds() {
         final RectF rect = getDisplayRect(getDrawMatrix());
         if (rect == null) {
             return false;
@@ -698,7 +619,7 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
         // Finally actually translate the matrix
         mSuppMatrix.postTranslate(deltaX, deltaY);
         return true;
-    }
+    }*/
 
     private int getViewWidth(View view) {
         return view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
@@ -801,8 +722,8 @@ public class ViewGestureAttacher implements View.OnTouchListener, View.OnLayoutC
             if (mScroller.computeScrollOffset()) {
                 final int newX = mScroller.getCurrX();
                 final int newY = mScroller.getCurrY();
-                mSuppMatrix.postTranslate(mCurrentX - newX, mCurrentY - newY);
-                checkAndDisplayMatrix();
+                postTranslate(mCurrentX - newX, mCurrentY - newY);
+                //checkAndDisplayMatrix();
                 mCurrentX = newX;
                 mCurrentY = newY;
                 // Post On animation

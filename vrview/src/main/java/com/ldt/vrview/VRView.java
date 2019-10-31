@@ -8,7 +8,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.ldt.vrview.model.VRImage;
+import com.ldt.vrview.model.VRPhoto;
 
 public class VRView extends FrameLayout {
 
@@ -41,7 +41,7 @@ public class VRView extends FrameLayout {
         }
     }
 
-    public void attachVRImageObject(VRImage vrio) {
+    public void attachVRImageObject(VRPhoto vrio) {
 
     }
 
