@@ -31,6 +31,8 @@ import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
+import static android.hardware.camera2.CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_50HZ;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AE_ANTIBANDING_MODE;
 
 public class CameraTextureView extends TextureView {
@@ -199,8 +201,8 @@ public class CameraTextureView extends TextureView {
             // Khởi tạo CaptureRequestBuilder từ cameraDevice với template truyền vào là
             // "CameraDevice.TEMPLATE_PREVIEW"
             // Với template này thì CaptureRequestBuilder chỉ thực hiện View mà thôi
-            mPreviewCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            mPreviewCaptureRequestBuilder.set(CONTROL_AE_ANTIBANDING_MODE, CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_50HZ);
+            mPreviewCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            mPreviewCaptureRequestBuilder.set(CONTROL_AE_ANTIBANDING_MODE, CONTROL_AE_ANTIBANDING_MODE_50HZ);
 
             // Thêm đích đến cho dữ liệu lấy về từ Camera
             // Đích đến này phải nằm trong danh sách các đích đến của dữ liệu

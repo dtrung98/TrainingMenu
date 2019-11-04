@@ -10,11 +10,11 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
+import com.ldt.menulayout.ui.AbsLocaleActivity;
+import com.ldt.menulayout.ui.permission.PermissionActivity;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
-import com.zalo.trainingmenu.downloader.ui.permission.PermissionActivity;
-import com.zalo.trainingmenu.mainui.MainActivity;
-import com.zalo.trainingmenu.mainui.base.AbsLocaleActivity;
+import com.zalo.trainingmenu.MenuActivity;
 
 import java.util.ArrayList;
 
@@ -62,7 +62,7 @@ public class SettingActivity extends AbsLocaleActivity {
                         View navIcon = getToolbarNavigationIcon(toolbar);
                         if (navIcon != null) {
                             navIcon.setOnLongClickListener(v -> {
-                                Intent intent = new Intent(this, MainActivity.class);
+                                Intent intent = new Intent(this, MenuActivity.class);
                                 startActivity(intent);
                                 finish();
                                 return true;

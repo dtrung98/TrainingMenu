@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ParallaxImageView">
+        <attr name="motionWithSensor" format="boolean"/>
+        <attr name="motionWithTouch" format="boolean" />
+        <attr name="shouldTranslateByScroll" format="boolean"/>
+        <attr name="backColor" format="color"/>
+    </declare-styleable>
+</resources>

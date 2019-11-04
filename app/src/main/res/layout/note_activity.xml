@@ -42,7 +42,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.zalo.trainingmenu.mainui.widget.ScaleSwipeRefreshLayout
+    <com.ldt.menulayout.ui.widget.ScaleSwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -58,7 +58,7 @@
             android:paddingEnd="8dp"
             android:overScrollMode="never"
             tools:spanCount="2"/>
-    </com.zalo.trainingmenu.mainui.widget.ScaleSwipeRefreshLayout>
+    </com.ldt.menulayout.ui.widget.ScaleSwipeRefreshLayout>
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_button"
             android:layout_width="60dp"

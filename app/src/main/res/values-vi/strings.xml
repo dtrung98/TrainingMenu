@@ -12,11 +12,9 @@
     <string name="basic">Cơ bản</string>
 
     <string name="cancel">Hủy bỏ</string>
-    <string name="cancel_all">Hủy tất cả</string>
 
     <string name="cancelled">Đã hủy</string>
 
-    <string name="catch_it">Bắt</string>
 
     <string name="clear">Xóa nhiệm vụ</string>
     <string name="clear_all">Xóa tất cả nhiệm vụ</string>
@@ -26,7 +24,6 @@
     <string name="content_provider">Content Provider</string>
     <string name="content_provider_description">Một ứng dụng ghi chú đơn giản</string>
 
-    <string name="create_new_task">Tạo mới nhiệm vụ</string>
 
     <string name="creation_time">Được tạo vào lúc</string>
 
@@ -95,7 +92,6 @@
 
     <string name="pending">Đang chờ tải</string>
 
-    <string name="preference">Tùy chỉnh</string>
 
     <string name="progress">Tiến độ</string>
 
@@ -121,16 +117,11 @@
 
     <string name="state">Trạng thái</string>
 
-    <string name="stop_all">Dừng tất cả</string>
 
-    <string name="string_false">Sai</string>
-    <string name="string_true">Đúng</string>
 
     <string name="support_resume">Hỗ trợ tạm ngưng/tiếp tục</string>
 
-    <string name="task_not_exist">Task không còn tồn tại</string>
 
-    <string name="three_dot">… </string>
 
     <string name="time_track_service">Time Track Service</string>
 
@@ -149,7 +140,6 @@
     <string name="simultaneous_downloads">Tải nhiều tập tin cùng lúc</string>
     <string name="connections">kết nối</string>
     <string name="downloads_same_time"> nhiệm vụ</string>
-    <string name="choose_folders">Chọn thư mục</string>
     <string name="choose_number_connections">Chọn số kết nối đồng thời</string>
     <string name="choose_number_downloads">Chọn số lượng tải đồng thời</string>
     <string name="running_duration">Thời gian tải</string>
@@ -162,12 +152,10 @@
     <string name="weather_app">Thời tiết</string>
     <string name="weather_app_description">Ứng dụng thời tiết lấy dữ liệu từ kết nối mạng</string>
     <string name="clear_selected_tasks">Xóa nhiệm vụ được chọn</string>
-    <string name="copy_url_link">Sao chép liên kết</string>
     <string name="restart_selected_tasks">Tải lại nhiệm vụ được chọn</string>
     <string name="title">Tiêu đề</string>
     <string name="try_to_resume">Thử khôi phục</string>
     <string name="write_something_here">Viết ghi chú ở đây</string>
-    <string name="choose_folder">Chọn thư mục</string>
     <string name="choose_this_folder">Chọn thư mục này</string>
     <string name="access_external_storage">Truy cập bộ nhớ</string>
     <string name="permission_description">Trình tải xuống cần quyền truy cập bộ nhớ để chạy tính năng này. Vui lòng nhấn cho phép lúc một cửa sổ hiện ra ở màn hình kế tiếp.</string>
@@ -187,15 +175,37 @@
     <string name="failed_notification_message">Tải về thất bại. %1$s.</string>
     <string name="empty">Trống</string>
     <string name="delete">Xóa Tác Vụ</string>
-    <string name="files">Quản lý Files</string>
-    <string name="files_description">Ứng dụng quản lý tập tin</string>
-    <string name="restore_default">Khôi phục mặc định</string>
     <string name="opengl">Open GL</string>
     <string name="opengl_description">Học cách dùng OpenGL</string>
     <string name="quick_download_notification_title">Tải nhanh liên kết đã sao chép</string>
-    <string name="tap_to_download" >%1$s.\nChạm để tải tập tin từ liên kết này.</string>
     <string name="download_now">Tải ngay</string>
     <string name="open_in_app">Sửa liên kết</string>
+    <string name="photo3D">Ảnh 3D</string>
+    <string name="photo3D_description">Trình xem ảnh 3D</string>
+    <string name="choose_original_photo">Chọn ảnh gốc</string>
+    <string name="choose_depth_photo">Chọn ảnh độ sâu</string>
+    <string name="photo3D_dynamic">Dynamic Shader</string>
+    <string name="dynamic_shader_description">for Photo 3D Viewer</string>
+    <string name="simple_bitmap">Simple Bitmap</string>
+    <string name="simple_bitmap_description">Draw a photo in the screen</string>
+    <string name="camera">Camera</string>
+    <string name="camera_description">Camera using TextureView</string>
 
-
+    <string name="app_require_permissions">Permission required</string>
+    <string name="access_camera">Access Camera</string>
+    <string name="storage_permission_description">Scanner requires storage permission to run correctly. Just accept the dialog that appears in next screen.</string>
+    <string name="camera_permisison_description">Allow Scanner access camera to take photos. Just accept the dialog that appear in next screen.</string>
+    <string name="cameraX">Camera X</string>
+    <string name="cameraX_description">Camera X Api in Support Library</string>
+    <string name="cameraKit">CameraKit</string>
+    <string name="cameraKit_description">Camera using CameraKit Library</string>
+    <string name="photo_3d_list">New Feeds</string>
+    <string name="news_feed_3d">News Feed 3D</string>
+    <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
+    <string name="vr_sample">VR</string>
+    <string name="vr_list_sample">VR List Mẫu</string>
+    <string name="vr">VR</string>
+    <string name="vr_description">Trình xem các bức ảnh panorama</string>
+    <string name="vr_sample_description">Xem ảnh toàn cảnh toàn màn hình</string>
+    <string name="vr_list_description">Xem newfeeds gồm các ảnh toàn cảnh</string>
 </resources>

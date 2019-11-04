@@ -1,10 +1,10 @@
 package com.zalo.trainingmenu.fundamental.index;
 
 
+import com.ldt.menulayout.model.Item;
+import com.ldt.menulayout.ui.AbsMenuActivity;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.noteapp.DemoNoteActivity;
-import com.zalo.trainingmenu.model.Item;
-import com.zalo.trainingmenu.mainui.base.AbsMenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;

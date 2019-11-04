@@ -6,6 +6,8 @@ import android.widget.ImageView;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.ldt.menulayout.model.Item;
+import com.ldt.menulayout.ui.MenuAdapter;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
@@ -13,8 +15,6 @@ import com.zalo.trainingmenu.downloader.base.Task;
 import com.zalo.trainingmenu.downloader.model.TaskInfo;
 import com.zalo.trainingmenu.downloader.service.RemoteForTaskService;
 import com.zalo.trainingmenu.downloader.ui.base.BaseActivity;
-import com.zalo.trainingmenu.model.Item;
-import com.zalo.trainingmenu.mainui.base.MenuAdapter;
 import com.zalo.trainingmenu.util.Util;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
 
     @Override
     protected int contentLayout() {
-        return R.layout.motion_list_layout;
+        return com.ldt.menulayout.R.layout.motion_list_layout;
     }
 
     private void bind() {

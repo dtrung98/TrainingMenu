@@ -28,12 +28,4 @@
         <item>en</item>
         <item>vi</item>
     </string-array>
-    <integer-array name="percentage_each_chunks">
-        <item>50</item>
-        <item>20</item>
-        <item>60</item>
-        <item>70</item>
-        <item>30</item>
-        <item>90</item>
-    </integer-array>
 </resources>

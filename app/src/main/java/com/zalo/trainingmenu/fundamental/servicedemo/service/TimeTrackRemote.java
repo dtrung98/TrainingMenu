@@ -10,8 +10,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.zalo.trainingmenu.model.ServiceToken;
-
 import java.util.Map;
 import java.util.WeakHashMap;
 
