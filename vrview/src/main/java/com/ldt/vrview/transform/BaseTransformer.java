@@ -1,10 +1,43 @@
-package com.ldt.vrview.rotate;
+package com.ldt.vrview.transform;
 
-public class BaseRotation implements AbsRotation {
-    private float[] mValues = new float[] {0,0,0};
-    private float mScale = 1;
+import android.view.View;
+
+import com.ldt.vrview.gesture.ViewAttacher;
+
+public class BaseTransformer implements Transformer, ViewAttacher {
+    public float[] mValues = new float[] {0,0,0}; // left-right, up-down, and orientation
+    public float mScale = 1;
+    protected float mViewWidth = 1;
+    protected float mViewHeight = 1;
+
+    protected float mTextureWidth = 1;
+    protected float mTextureHeight = 1;
 
     private boolean[] mEnableValues = new boolean[] {true,true,true,true};
+
+    @Override
+    public void setViewSize(int width, int height) {
+        mViewWidth = width;
+        mViewHeight = height;
+        updateSize();
+    }
+
+    @Override
+    public void setTextureSize(float width, float height) {
+        mTextureWidth = width;
+        mTextureHeight = height;
+        updateSize();
+    }
+
+
+    @Override
+    public void updateSize() {
+    }
+
+    @Override
+    public void updateTransform() {
+
+    }
 
     @Override
     public void setValue(int type, float value) {
@@ -44,7 +77,7 @@ public class BaseRotation implements AbsRotation {
     }
 
     @Override
-    public synchronized void resetScroll() {
+    public synchronized void reset() {
         mValues[0] = 0;
         mValues[1] = 0;
         mValues[2] = 0;
@@ -60,11 +93,21 @@ public class BaseRotation implements AbsRotation {
         return mEnableValues[type];
     }
 
+
     public float getScale() {
         return mScale;
     }
 
     public void setScale(float scale) {
         mScale = scale;
+    }
+
+    @Override
+    public void attach(View view) {
+
+    }
+
+    @Override
+    public void detach() {
     }
 }

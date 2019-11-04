@@ -1,24 +1,23 @@
 package com.ldt.vrview.gesture;
 
+import android.util.Log;
 import android.view.View;
 import android.content.Context;
-import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View.OnLongClickListener;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.ImageView.ScaleType;
 import android.widget.OverScroller;
 
-import com.ldt.vrview.rotate.GestureRotation;
+import com.ldt.vrview.transform.GestureTransformer;
 import com.ldt.vrview.util.Util;
 
-public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.OnLayoutChangeListener {
+public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, View.OnLayoutChangeListener {
+    private static final String TAG = "ViewGestureAttacher";
+
     private static float DEFAULT_MAX_SCALE = 3.0f;
     private static float DEFAULT_MID_SCALE = 1.75f;
     private static float DEFAULT_MIN_SCALE = 1.0f;
@@ -40,22 +39,33 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
     private float mMidScale = DEFAULT_MID_SCALE;
     private float mMaxScale = DEFAULT_MAX_SCALE;
 
-    private boolean mAllowParentInterceptOnEdge = true;
+    private boolean mAllowParentInterceptOnEdge = false;
     private boolean mBlockParentIntercept = false;
 
     private View mView;
-    private final GestureRotation mGestureRotation;
+    private final GestureTransformer mTouchRotation;
 
     // Gesture Detectors
     private GestureDetector mGestureDetector;
     private CustomGestureDetector mScaleDragDetector;
+    private int mRangeScrollX = 10000, mRangeScrollY = 5000, mOverScrollRange = 0;
+    public void setRangeScroll(int x, int y) {
+        mRangeScrollX = x;
+        mRangeScrollY = y;
+        Log.d(TAG, "range : x = "+ x +", y = "+ y);
+    }
+    public void setOverScrollRange(int value) {
+        mOverScrollRange = value;
+    }
 
     // These are set so we don't keep allocating them on the heap
  /*   private final Matrix mBaseMatrix = new Matrix();
     private final Matrix mDrawMatrix = new Matrix();
     private final Matrix mSuppMatrix = new Matrix();
-    private final RectF mDisplayRect = new RectF();
     private final float[] mMatrixValues = new float[9];*/
+
+    private final RectF mDisplayRect = new RectF();
+
 
     // Listeners
     private OnMatrixChangedListener mMatrixChangeListener;
@@ -74,13 +84,21 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
     private boolean mZoomEnabled = true;
 
     private void postTranslate(float dx, float dy) {
+        Log.d(TAG, "translate only");
+        mTouchRotation.postTranslate(dx,dy);
+    }
 
+    private void postTranslateByFling(float dx, float dy) {
+        Log.d(TAG, "translate with fling");
+        mTouchRotation.postTranslate(dx,dy);
     }
 
     private void postScale(float sX, float sY, float pX, float pY) {
+        mTouchRotation.postScale( sX, sY, pX, pY);
     }
 
     private void setScale(float sX, float sY, float pX, float pY) {
+        mTouchRotation.setScale(sX,sY,pX,pY);
     }
 
     private OnGestureListener onGestureListener = new OnGestureListener() {
@@ -124,6 +142,7 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
 
         @Override
         public void onFling(float startX, float startY, float velocityX, float velocityY) {
+            Log.d(TAG, "fling with vX = "+velocityX+", vY = "+velocityY);
             mCurrentFlingRunnable = new FlingRunnable(mView.getContext());
             mCurrentFlingRunnable.fling(getViewWidth(mView),
                     getViewHeight(mView), (int) velocityX, (int) velocityY);
@@ -191,23 +210,23 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
                     if (mViewTapListener != null) {
                         mViewTapListener.onViewTap(mView, x, y);
                     }
-                    if (displayRect != null) {
+                /*    if (displayRect != null) {
                         // Check to see if the user tapped on the photo
                         if (displayRect.contains(x, y)) {
                             float xResult = (x - displayRect.left)
                                     / displayRect.width();
                             float yResult = (y - displayRect.top)
                                     / displayRect.height();
-                      /*  if (mPhotoTapListener != null) {
+                        if (mPhotoTapListener != null) {
                             mPhotoTapListener.onPhotoTap(mView, xResult, yResult);
-                        }*/
+                        }
                             return true;
-                        }; /*else {
+                        }; else {
                         if (mOutsidePhotoTapListener != null) {
                             mOutsidePhotoTapListener.onOutsidePhotoTap(mView);
                         }
-                    }*/
                     }
+                    }*/
                     return false;
                 }
 
@@ -248,8 +267,8 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
         mGestureDetector = null;
     }
 
-    public ViewGestureAttacher(GestureRotation gestureRotation) {
-        mGestureRotation = gestureRotation;
+    public ViewGestureAttacher(GestureTransformer touchRotation) {
+        mTouchRotation = touchRotation;
     }
 
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener newOnDoubleTapListener) {
@@ -269,11 +288,12 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
         return mZoomEnabled;
     }
 
-    /*public RectF getDisplayRect() {
-        checkMatrixBounds();
-        return getDisplayRect(getDrawMatrix());
+    public RectF getDisplayRect() {
+        mDisplayRect.top = 0;
+        mDisplayRect.set(0,0,getViewWidth(mView),getViewHeight(mView));
+        //checkMatrixBounds();
+        return mDisplayRect;
     }
-*/
    /* public void setBaseRotation(final float degrees) {
         mBaseRotation = degrees % 360;
         update();
@@ -304,7 +324,7 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
     }
 
     public float getScale() {
-        return mGestureRotation.getScale();
+        return mTouchRotation.getScale();
     }
 
     @Override
@@ -448,7 +468,7 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
                     focalX, focalY));
         } else {
             setScale(scale, scale, focalX, focalY);
-            checkAndDisplayMatrix();
+            //checkAndDisplayMatrix();
         }
     }
 
@@ -480,7 +500,7 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
 
         } else {
             // Reset the Matrix...
-            resetMatrix();
+            //resetMatrix();
         }
     }
 
@@ -488,13 +508,15 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
         this.mZoomDuration = milliseconds;
     }
 
+
     /**
      * Helper method that maps the supplied Matrix to the current Drawable
      *
      * @param matrix - Matrix to map Drawable against
      * @return RectF - Displayed Rectangle
      */
-    private RectF getDisplayRect(Matrix matrix) {
+/*    private RectF getDisplayRect(Matrix matrix) {
+        mView.getDrawingRect();
         Drawable d = mImageView.getDrawable();
         if (d != null) {
             mDisplayRect.set(0, 0, d.getIntrinsicWidth(),
@@ -503,12 +525,12 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
             return mDisplayRect;
         }
         return null;
-    }
+    }*/
 
     /**
      * Calculate Matrix for FIT_CENTER
      *
-     * @param drawable - Drawable being displayed
+     * drawable - Drawable being displayed
      */
     /*private void updateBaseMatrix(Drawable drawable) {
         if (drawable == null) {
@@ -678,6 +700,7 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
 
         public FlingRunnable(Context context) {
             mScroller = new OverScroller(context);
+            mScroller.setFriction(0.055f);
         }
 
         public void cancelFling() {
@@ -686,12 +709,13 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
 
         public void fling(int viewWidth, int viewHeight, int velocityX,
                           int velocityY) {
+
             final RectF rect = getDisplayRect();
             if (rect == null) {
                 return;
             }
-            final int startX = Math.round(-rect.left);
-            final int minX, maxX, minY, maxY;
+            int startX = Math.round(-rect.left);
+            int minX, maxX, minY, maxY;
             if (viewWidth < rect.width()) {
                 minX = 0;
                 maxX = Math.round(rect.width() - viewWidth);
@@ -707,22 +731,31 @@ public class ViewGestureAttacher implements Attacher,View.OnTouchListener, View.
             }
             mCurrentX = startX;
             mCurrentY = startY;
+
+            minX = startX - mRangeScrollX;
+            maxX = startX + mRangeScrollX;
+            minY = startY - mRangeScrollY;
+            maxY = startY + mRangeScrollY;
+
             // If we actually can move, fling the scroller
-            if (startX != maxX || startY != maxY) {
+           // if (true || startX != maxX || startY != maxY) {
                 mScroller.fling(startX, startY, velocityX, velocityY, minX,
-                        maxX, minY, maxY, 0, 0);
-            }
+                        maxX, minY, maxY, mOverScrollRange, mOverScrollRange);
+
+            //}
         }
 
         @Override
         public void run() {
             if (mScroller.isFinished()) {
+                Log.d(TAG, "scroll end");
                 return; // remaining post that should not be handled
             }
             if (mScroller.computeScrollOffset()) {
+                Log.d(TAG, "scroll is running");
                 final int newX = mScroller.getCurrX();
                 final int newY = mScroller.getCurrY();
-                postTranslate(mCurrentX - newX, mCurrentY - newY);
+                postTranslateByFling(mCurrentX - newX, mCurrentY - newY);
                 //checkAndDisplayMatrix();
                 mCurrentX = newX;
                 mCurrentY = newY;

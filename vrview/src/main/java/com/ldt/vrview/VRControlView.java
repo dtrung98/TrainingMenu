@@ -27,6 +27,8 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         init(null);
     }
 
+
+
     public VRControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs);
@@ -53,7 +55,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         setEGLContextClientVersion(2);
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        mSphere = new Sphere(getContext(), R.drawable._360sp);
+        mSphere = new Sphere(this, getContext(), R.drawable._360sp);
         onChangeOrientation();
     }
 
