@@ -352,7 +352,6 @@ public class Sphere {
                 synchronized (this) {
                     System.arraycopy(resultM, 0, mRotateMatrix, 0, 16);
                 }
-
                 break;
             case Surface.ROTATION_90:
                 Matrix.rotateM(temp,0,mCenterMatrix,0,angleChange[1]*FROM_RADS_TO_DEGS,0,0,1);
@@ -367,7 +366,6 @@ public class Sphere {
                 Matrix.rotateM(mRotateMatrix,0,temp,0,-angleChange[2]*FROM_RADS_TO_DEGS,0,1,0);
                 break;
         }
-
     }
 
     private void calculateV3(float[] vectors) {
@@ -430,7 +428,6 @@ public class Sphere {
 
     private void log3(String name, float[] xyz) {
         Log.d(TAG, "report "+name+": x = "+df.format(xyz[0])+", y = "+ df.format(xyz[1])+", z = " + df.format(xyz[2]));
-
     }
 
     private int mOrientation = Surface.ROTATION_0;
