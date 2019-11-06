@@ -14,11 +14,24 @@ public class VRPhoto {
     private final Bitmap mThumbnailBitmap;
     private final Bitmap mBitmap;
 
+    public String getPhotoTitle() {
+        return mPhotoTitle;
+    }
+
+    public String getPhotoDescription() {
+        return mPhotoDescription;
+    }
+
+    private final String mPhotoTitle;
+    private final String mPhotoDescription;
+
     public VRPhoto(Builder builder) {
         mThumbnailBitmap = builder.mThumbnailBitmap;
         mBitmap = builder.mBitmap;
         mCurrentVector = mStartingVector = builder.mStartingVector;
         mCurrentScale = mStartingScale = builder.mStartingScale;
+        mPhotoTitle = builder.mPhotoTitle;
+        mPhotoDescription = builder.mPhotoDescription;
     }
 
     public float getCurrentScale() {
@@ -70,13 +83,13 @@ public class VRPhoto {
         return mBitmap;
     }
 
-    public Builder with(Context context) {
+    public static Builder with(Context context) {
         return new Builder(context);
     }
 
-    private static class Builder {
+    public static class Builder {
         private Context mContext;
-        private Builder(Context context) {
+        public Builder(Context context) {
             mContext = context;
         }
 
@@ -85,6 +98,21 @@ public class VRPhoto {
         private float mStartingScale = 1;
         private Bitmap mThumbnailBitmap;
         private Bitmap mBitmap;
+        private String mPhotoTitle = "";
+
+        public Builder setPhotoDescription(String photoDescription) {
+            mPhotoDescription = photoDescription;
+            return this;
+        }
+
+        private String mPhotoDescription = "";
+        public Builder setPhotoTitle(String title) {
+            if(title!=null)
+            mPhotoTitle = title;
+            return this;
+        }
+
+
         public Builder setStartingScale(float value) {
             mStartingScale = value;
             return this;
@@ -105,7 +133,7 @@ public class VRPhoto {
             return this;
         }
 
-        public VRPhoto build() {
+        public VRPhoto get() {
             mContext = null;
             return new VRPhoto(this);
         }

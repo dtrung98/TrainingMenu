@@ -2,19 +2,22 @@ package com.ldt.vrview.transform;
 
 import android.view.View;
 
-import com.ldt.vrview.VRControlView;
 import com.ldt.vrview.gesture.ViewGestureAttacher;
 
-public class GestureTransformer extends BaseTransformer implements View.OnClickListener {
+public class GestureTransformer extends BaseTransformer {
+
+    public ViewGestureAttacher getGestureAttacher() {
+        return mAttacher;
+    }
 
     private ViewGestureAttacher mAttacher = new ViewGestureAttacher(this);
     private boolean isAttached = false;
-    private View mView;
-    public GestureTransformer() {
+    public GestureTransformer(final int id) {
+        super(id);
     }
 
     @Override
-    public synchronized void reset() {
+    public void reset() {
         super.reset();
         mXViewTranslate = 0f;
         mYViewTranslate = 0f;
@@ -56,12 +59,12 @@ public class GestureTransformer extends BaseTransformer implements View.OnClickL
     }
 
     @Override
-    public synchronized void updateTransform() {
+    public void updateTransform() {
         // left right, up down, and rotation
         mValues[0] = -mXViewTranslate/mViewWidth*wProjectAngle;
         mValues[1] = mYViewTranslate/mViewHeight*hProjectAngle;
         mValues[2] = 0;
-
+        notifyTransformChanged();
     }
     @Override
     public void attach(View view) {
@@ -69,8 +72,6 @@ public class GestureTransformer extends BaseTransformer implements View.OnClickL
         isAttached = true;
         if(mAttacher!=null) {
             mAttacher.attach(view);
-            mView = view;
-            mAttacher.setOnClickListener(this);
         }
     }
 
@@ -79,15 +80,6 @@ public class GestureTransformer extends BaseTransformer implements View.OnClickL
         isAttached = false;
         if(mAttacher!=null) {
             mAttacher.detach();
-            mView = null;
-            mAttacher.setOnClickListener(null);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        if(mView instanceof VRControlView) {
-            ((VRControlView) mView).recalibrate();
         }
     }
 }

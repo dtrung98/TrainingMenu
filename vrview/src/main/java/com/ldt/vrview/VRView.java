@@ -2,6 +2,8 @@ package com.ldt.vrview;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -10,8 +12,11 @@ import androidx.annotation.Nullable;
 
 import com.ldt.vrview.model.VRPhoto;
 
-public class VRView extends FrameLayout {
+import java.util.ArrayList;
 
+public class VRView extends FrameLayout implements View.OnClickListener, View.OnLongClickListener {
+
+    public int id = 0;
     public VRView(@NonNull Context context) {
         super(context);
         init(null);
@@ -28,25 +33,33 @@ public class VRView extends FrameLayout {
     }
 
     private void init(AttributeSet attrs) {
-     initViews();
+     buildLayout();
     }
 
-    private void initViews() {
+    private void buildLayout() {
         if(mControlView==null) {
             removeAllViews();
             mControlView = new VRControlView(getContext());
+            mControlView.getGestureAttacher().setOnClickListener(this);
+            mControlView.getGestureAttacher().setOnLongClickListener(this);
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
             addView(mControlView,params);
+            View mOptionView = LayoutInflater.from(getContext()).inflate(R.layout.vr_option,this,false);
+            addView(mOptionView);
         }
     }
 
-    public void attachVRImageObject(VRPhoto vrio) {
-
+    public void setVRPhoto(VRPhoto vrio) {
+        if(mControlView!=null) {
+            mControlView.setVRPhoto(vrio);
+        }
     }
 
-    public void detachVRImageObject() {
-
+    public void clearVRPhoto() {
+        if(mControlView!=null) {
+            mControlView.setVRPhoto(null);
+        }
     }
 
     public void onPause() {
@@ -61,5 +74,31 @@ public class VRView extends FrameLayout {
 
     public void recalibrate() {
         if(mControlView!=null) mControlView.recalibrate();
+    }
+
+    @Override
+    public void onClick(View v) {
+        mControlView.recalibrate();
+    }
+
+    public ArrayList<VRPhoto> mSampleVRPhotos = new ArrayList<>();
+    public int curSamplePos = 0;
+
+    @Override
+    public boolean onLongClick(View v) {
+        if(!mSampleVRPhotos.isEmpty()) {
+            curSamplePos++;
+            if(curSamplePos==mSampleVRPhotos.size()) mControlView.setVRPhoto(null);
+            else {
+                if(curSamplePos==mSampleVRPhotos.size()+1) curSamplePos=0;
+                mControlView.setVRPhoto(mSampleVRPhotos.get(curSamplePos));
+            }
+        }
+        return true;
+    }
+
+    public void setViewID(int id) {
+        this.id = id;
+        mControlView.setViewID(id);
     }
 }
