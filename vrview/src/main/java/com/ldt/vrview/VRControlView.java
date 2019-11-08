@@ -24,12 +24,21 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     private PanoramaSphere mSphere;
     TransformManager mTransformManager = new TransformManager(TransformManager.TRANSFORM_MANAGER);
 
+
+    public TransformListener getTransformListener() {
+        return mTransformListener;
+    }
+
+    public void setTransformListener(TransformListener transformListener) {
+        mTransformListener = transformListener;
+    }
+
+    TransformListener mTransformListener;
+
     public VRControlView(Context context) {
         super(context);
         init(null);
     }
-
-
 
     public VRControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,12 +89,15 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_FRONT);
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
     private float w, h;
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
         mSphere.setSize(width, height);
         mTransformManager.setViewSize(width,height);
         float[] textureSize = new float[2];
@@ -93,7 +105,6 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         mTransformManager.setTextureSize(textureSize[0],textureSize[1]);
         w = width;
         h = height;
-        GLES20.glViewport(0, 0, width, height);
     }
 
     @Override
@@ -142,6 +153,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     @Override
     public void onTransformChanged(int which, float[] angle3) {
         mSphere.setTransformValue(angle3);
+        if(mTransformListener!=null) mTransformListener.onTransformChanged(which, angle3);
     }
 
     public void setViewID(int id) {

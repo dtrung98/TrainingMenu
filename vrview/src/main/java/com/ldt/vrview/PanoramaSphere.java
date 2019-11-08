@@ -3,16 +3,12 @@ package com.ldt.vrview;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 import android.view.Surface;
-import android.view.View;
-
-import androidx.annotation.DrawableRes;
 
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.transform.BaseTransformer;
@@ -20,6 +16,7 @@ import com.ldt.vrview.shader.Shader;
 import com.ldt.vrview.util.GlSelfUtil;
 
 import java.lang.ref.WeakReference;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -39,10 +36,10 @@ public class PanoramaSphere {
     private static final float UNIT_SIZE = 1f;// 单位尺寸
     private float r = 2f; // 球的半径
 
-    private float radius=2f;
+    private static final float radius=2f;
 
-    final double angleSpan = Math.PI/90f;// 将球进行单位切分的角度
-    int vCount = 0;// 顶点个数，先初始化为0
+    private static final double angleSpan = Math.PI/90;// 将球进行单位切分的角度
+    private static int vCount = 0;// 顶点个数，先初始化为0
 
     public static final float FROM_RADS_TO_DEGS = 57.2957795f;
     private Resources res;
@@ -99,8 +96,8 @@ public class PanoramaSphere {
     private float[] currentOrient = new float[3];
 
 
-    private FloatBuffer posBuffer;
-    private FloatBuffer cooBuffer;
+    private static Buffer posBuffer;
+    private static Buffer cooBuffer;
     private int vSize;
     private float skyRate=3f;
 
@@ -113,14 +110,16 @@ public class PanoramaSphere {
     private VRPhoto mVRPhoto;
     private boolean shouldResetVRPhoto = false;
     public void setVRPhoto(VRPhoto photo) {
-        if(mVRPhoto!=photo) {
-            shouldResetVRPhoto = true;
-            mVRPhoto = photo;
-        }
+        shouldResetVRPhoto = true;
+        mVRPhoto = photo;
     }
 
+    private static boolean isCalculated = false;
+
     public void create(){
+
         mHProgram= GlSelfUtil.createGlProgram(Shader.VERTEX,Shader.FRAGMENT);
+        GLES20.glUseProgram(mHProgram);
         mHProjMatrix=GLES20.glGetUniformLocation(mHProgram,"uProjMatrix");
         mHViewMatrix=GLES20.glGetUniformLocation(mHProgram,"uViewMatrix");
         mHModelMatrix=GLES20.glGetUniformLocation(mHProgram,"uModelMatrix");
@@ -131,15 +130,130 @@ public class PanoramaSphere {
 
       //  if(shouldResetVRPhoto)
         textureId = createTextureIfAvailable();
+        long start = System.currentTimeMillis();
+        //calculateVertices();
         calculateAttribute();
+        Log.d(TAG, "vr "+id+" create in "+(System.currentTimeMillis() - start));
     }
 
-    private void calculateAttribute(){
+    private static void calculateVertices() {
+        if(isCalculated) return;
+        isCalculated = true;
+
+        int angleSpanInDegree = 2;
+
+        double vAngleInRad = 0;
+        double hAngleInRad = 0;
+
+        int alSize = (180/angleSpanInDegree) * (360/angleSpanInDegree) * (18);
+        int texSize = (180/angleSpanInDegree) * (360/angleSpanInDegree) * (12);
+
+        float[] alVertix = new float[alSize];
+        float[] texVertix = new float[texSize];
+
+        float x0,y0,z0,x1,y1,z1,x2,y2,z2,x3,y3,z3;
+        float s0,s1,t0,t1;
+
+        int alPosition = 0;
+        int texPosition = 0;
+        for (int vAngleDegree = 0; vAngleDegree < 180; vAngleDegree += angleSpanInDegree){
+            vAngleInRad = vAngleDegree/FROM_RADS_TO_DEGS;
+            for (int hAngleDegree = 0; hAngleDegree < 360; hAngleDegree += angleSpanInDegree){
+                hAngleInRad = hAngleDegree/FROM_RADS_TO_DEGS;
+                x0 = (float) (radius* Math.sin(vAngleInRad) * Math.cos(hAngleInRad));
+                y0 = (float) (radius* Math.sin(vAngleInRad) * Math.sin(hAngleInRad));
+                z0 = (float) (radius * Math.cos((vAngleInRad)));
+
+                x1 = (float) (radius* Math.sin(vAngleInRad) * Math.cos(hAngleInRad + angleSpan));
+                y1 = (float) (radius* Math.sin(vAngleInRad) * Math.sin(hAngleInRad + angleSpan));
+                z1 = (float) (radius * Math.cos(vAngleInRad));
+
+                x2 = (float) (radius* Math.sin(vAngleInRad + angleSpan) * Math.cos(hAngleInRad + angleSpan));
+                y2 = (float) (radius* Math.sin(vAngleInRad + angleSpan) * Math.sin(hAngleInRad + angleSpan));
+                z2 = (float) (radius * Math.cos(vAngleInRad + angleSpan));
+
+                x3 = (float) (radius* Math.sin(vAngleInRad + angleSpan) * Math.cos(hAngleInRad));
+                y3 = (float) (radius* Math.sin(vAngleInRad + angleSpan) * Math.sin(hAngleInRad));
+                z3 = (float) (radius * Math.cos(vAngleInRad + angleSpan));
+
+
+                alVertix[alPosition  ] = x1;
+                alVertix[alPosition+1] = y1;
+                alVertix[alPosition+2] = z1;
+                alVertix[alPosition+3] = x0;
+                alVertix[alPosition+4] = y0;
+                alVertix[alPosition+5] = z0;
+                alVertix[alPosition+6] = x3;
+                alVertix[alPosition+7] = y3;
+                alVertix[alPosition+8] = z3;
+
+                // hAngleInRad = hAngleDegree/FROM_RADS_TO_DEGS;
+                // = hAngleDegree/ (180/PI)
+                // = PI * hAngleDegree/180
+                s0 = hAngleDegree/360f;// (float) (hAngleInRad / Math.PI/2); // == hAngleDegree/360
+                s1 = (hAngleDegree + angleSpanInDegree) / 360f ;//(float) ((hAngleInRad + angleSpan)/Math.PI/2);
+                t0 = vAngleDegree/180f; //(float) (vAngleInRad / Math.PI);
+                t1 = (vAngleDegree+ angleSpanInDegree)/ 180f; //(float) ((vAngleInRad + angleSpan) / Math.PI);
+
+
+                texVertix[texPosition  ] = s1;
+                texVertix[texPosition+1] = t0;
+                texVertix[texPosition+2] = s0;
+                texVertix[texPosition+3] = t0;
+                texVertix[texPosition+4] = s0;
+                texVertix[texPosition+5] = t1;
+
+                alVertix[alPosition+ 9] = x1;
+                alVertix[alPosition+10] = y1;
+                alVertix[alPosition+11] = z1;
+                alVertix[alPosition+12] = x3;
+                alVertix[alPosition+13] = y3;
+                alVertix[alPosition+14] = z3;
+                alVertix[alPosition+15] = x2;
+                alVertix[alPosition+16] = y2;
+                alVertix[alPosition+17] = z2;
+
+                texVertix[texPosition+6] = s1; // x1 y1
+                texVertix[texPosition+7] = t0;
+                texVertix[texPosition+8] = s0; // x3 y3
+                texVertix[texPosition+9] = t1;
+                texVertix[texPosition+10] = s1; // x2 y3
+                texVertix[texPosition+11] = t1;
+
+                alPosition+=18;
+                texPosition+=12;
+
+            }
+        }
+
+        vCount = alSize/3;
+
+        posBuffer = ByteBuffer.allocateDirect(alSize*4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(alVertix)
+                .position(0);
+
+        cooBuffer = ByteBuffer.allocateDirect(texSize*4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(texVertix)
+                .position(0);
+    }
+
+    private static void calculateAttribute(){
+        if(isCalculated) return;
+        isCalculated = true;
         ArrayList<Float> alVertix = new ArrayList<>();
         ArrayList<Float> textureVertix = new ArrayList<>();
-        for (double vAngle = 0; vAngle < Math.PI; vAngle = vAngle + angleSpan){
+        float angleSpanDegree = 2; // 2 degree, which mean 180/2 = 90 loop
 
-            for (double hAngle = 0; hAngle < 2*Math.PI; hAngle = hAngle + angleSpan){
+        double vAngle = 0;
+        double hAngle = 0;
+        for (double vAngleDegree = 0; vAngleDegree < 180; vAngleDegree += angleSpanDegree){
+            vAngle = vAngleDegree/FROM_RADS_TO_DEGS;
+            for (double hAngleDegree = 0; hAngleDegree < 360; hAngleDegree += angleSpanDegree){
+                hAngle = hAngleDegree/FROM_RADS_TO_DEGS;
                 float x0 = (float) (radius* Math.sin(vAngle) * Math.cos(hAngle));
                 float y0 = (float) (radius* Math.sin(vAngle) * Math.sin(hAngle));
                 float z0 = (float) (radius * Math.cos((vAngle)));
@@ -201,7 +315,7 @@ public class PanoramaSphere {
         cooBuffer=convertToFloatBuffer(textureVertix);
     }
 
-    private FloatBuffer convertToFloatBuffer(ArrayList<Float> data){
+    private static FloatBuffer convertToFloatBuffer(ArrayList<Float> data){
         float[] d=new float[data.size()];
         for (int i=0;i<d.length;i++){
             d[i]=data.get(i);
@@ -212,6 +326,7 @@ public class PanoramaSphere {
         FloatBuffer ret=buffer.asFloatBuffer();
         ret.put(d);
         ret.position(0);
+
         return ret;
     }
 
@@ -269,20 +384,23 @@ public class PanoramaSphere {
         Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f,0.0f, 0.0f, 0.0f,1f, 0f,1.0f, 0.0f);
         //模型矩阵
         Matrix.setIdentityM(mModelMatrix,0);
+
+
+
+        Log.d(TAG, "vr "+id+" set size");
     }
 
     public void draw(){
         if(shouldResetVRPhoto)
             textureId = createTextureIfAvailable();
-        //GLES20.glClearColor(1,1,1,0);
-        //Log.d(TAG, "draw vrphoto "+id+" with texture is "+((mVRPhoto==null) ? "null": "available")+", texture id = "+textureId+", size = "+w+", "+h);
+        //GLES20.glClearColor(1,1,1,1);
+        Log.d(TAG, "vr "+id+" draw with texture is "+((mVRPhoto==null) ? "null": "available")+", texture id = "+textureId+", size = "+w+", "+h);
         if(textureId!=0) {
-        GLES20.glUseProgram(mHProgram);
-        GLES20.glUniformMatrix4fv(mHProjMatrix,1,false,mProjectMatrix,0);
-        GLES20.glUniformMatrix4fv(mHViewMatrix,1,false,mViewMatrix,0);
-        GLES20.glUniformMatrix4fv(mHModelMatrix,1,false,mModelMatrix,0);
-        GLES20.glUniformMatrix4fv(mHRotateMatrix,1,false, mRotateMatrix,0);
 
+            GLES20.glUniformMatrix4fv(mHProjMatrix,1,false,mProjectMatrix,0);
+            GLES20.glUniformMatrix4fv(mHViewMatrix,1,false,mViewMatrix,0);
+            GLES20.glUniformMatrix4fv(mHModelMatrix,1,false,mModelMatrix,0);
+            GLES20.glUniformMatrix4fv(mHRotateMatrix,1,false, mRotateMatrix,0);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);

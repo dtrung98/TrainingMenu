@@ -11,15 +11,28 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ldt.vrview.model.VRPhoto;
+import com.ldt.vrview.transform.TransformListener;
 
 import java.util.ArrayList;
 
-public class VRView extends FrameLayout implements View.OnClickListener, View.OnLongClickListener {
+public class VRView extends FrameLayout implements View.OnClickListener, View.OnLongClickListener, TransformListener {
 
     public int id = 0;
     public VRView(@NonNull Context context) {
         super(context);
         init(null);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mControlView.onResume();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mControlView.onPause();
+        super.onDetachedFromWindow();
     }
 
     public VRView(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -40,12 +53,14 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
         if(mControlView==null) {
             removeAllViews();
             mControlView = new VRControlView(getContext());
+            mControlView.setTransformListener(this);
             mControlView.getGestureAttacher().setOnClickListener(this);
             mControlView.getGestureAttacher().setOnLongClickListener(this);
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
             addView(mControlView,params);
             View mOptionView = LayoutInflater.from(getContext()).inflate(R.layout.vr_option,this,false);
+            mAlignButton = mOptionView.findViewById(R.id.align_button);
             addView(mOptionView);
         }
     }
@@ -71,6 +86,7 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
     }
 
     protected VRControlView mControlView;
+    private AlignButton mAlignButton;
 
     public void recalibrate() {
         if(mControlView!=null) mControlView.recalibrate();
@@ -100,5 +116,13 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
     public void setViewID(int id) {
         this.id = id;
         mControlView.setViewID(id);
+    }
+
+    @Override
+    public void onTransformChanged(int which, float[] angle3) {
+        if(mAlignButton!=null) {
+            mAlignButton.setRotateDegree(angle3[0]);
+            mAlignButton.setUpDownDegree(angle3[1]);
+        }
     }
 }

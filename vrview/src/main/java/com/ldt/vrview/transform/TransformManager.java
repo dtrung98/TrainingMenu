@@ -6,7 +6,7 @@ import com.ldt.vrview.gesture.ViewGestureAttacher;
 
 import java.util.ArrayList;
 
-public final class TransformManager extends BaseTransformer implements TransformListener{
+public final class TransformManager extends BaseTransformer implements TransformListener {
     private static final String TAG = "TransformManager";
     public static final int GESTURE_TRANSFORMER = 1;
     public static final int SENSOR_TRANSFORMER = 2;
@@ -15,6 +15,7 @@ public final class TransformManager extends BaseTransformer implements Transform
     private ArrayList<BaseTransformer> mTransformers = new ArrayList<>();
     private SensorTransformer mSensorTransformer;
     private GestureTransformer mGestureTransformer;
+
 
     public TransformManager(int id) {
         super(id);

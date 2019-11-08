@@ -47,18 +47,19 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
 
     @Override
     public void onBindViewHolder(@NonNull VRListHolder vrListHolder, int i) {
+        if(i<mData.size())
         vrListHolder.bind(mData.get(i));
+        else vrListHolder.bind(null);
     }
 
     @Override
     public void onViewRecycled(@NonNull VRListHolder holder) {
         holder.mView.setVRPhoto(null);
-        holder.mView.onPause();
     }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mData.size() + 1;
     }
 
     public class VRListHolder extends RecyclerView.ViewHolder {
@@ -66,7 +67,6 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
         VRListHolder(@NonNull View itemView) {
             super(itemView);
             mView = itemView.findViewById(R.id.vr_view);
-            mView.onResume();
 
         }
 
