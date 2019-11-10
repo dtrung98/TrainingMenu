@@ -294,12 +294,16 @@ public class Sphere {
     private float[] angleRotate = new float[3];
 
     private void applyRotate(float[] vectors) {
+        angleRotate[0] = 0;
+        angleRotate[1] = 0;
+        angleRotate[2] = 0;
         for (int i = 0; i < mRotationAngles.size(); i++) {
-            angleRotate[0] = mRotationAngles.get(i).mValues[0];
-            angleRotate[1] = mRotationAngles.get(i).mValues[1];
-            angleRotate[2] = mRotationAngles.get(i).mValues[2];
+            angleRotate[0] += mRotationAngles.get(i).mValues[0];
+            angleRotate[1] += mRotationAngles.get(i).mValues[1];
+            angleRotate[2] += mRotationAngles.get(i).mValues[2];
         }
 
+        SensorManager.getAngleChange(angleChange,currentSensorM,initSensorM);
         float ac2Deg = Math.round(angleChange[2]*FROM_RADS_TO_DEGS*100)/100f;
         float ac1Deg = Math.round(angleChange[1]*FROM_RADS_TO_DEGS*100)/100f;
         Log.d(TAG, "rotate by sensor: ac2 = "+ac2Deg+", ac1 = "+ac1Deg);
@@ -328,8 +332,14 @@ public class Sphere {
             }
         }
         SensorManager.getRotationMatrixFromVector(currentSensorM,vectors);
+        float[] orient = new float[3];
+        SensorManager.getAngleChange(orient,currentSensorM,mCenterMatrix);
+        orient[0]*=FROM_RADS_TO_DEGS;
+        orient[1]*=FROM_RADS_TO_DEGS;
+        orient[2]*=FROM_RADS_TO_DEGS;
+        log3("vector",vectors);
+        log3("angle change ",orient);
 
-      //  SensorManager.getAngleChange(angleChange,currentSensorM,initSensorM);
         applyRotate(vectors);
 
         switch (mOrientation) {
@@ -338,7 +348,7 @@ public class Sphere {
 
                 float[] preResultM = new float[16];
                 Matrix.rotateM(preResultM,0,temp,0,angleRotate[0],0,0,1); // rotate left - right
-                float[] invertInit = new float[16];
+  /*              float[] invertInit = new float[16];
                 Matrix.invertM(invertInit,0,initSensorM,0);
                 float[] transformM = new float[16];
                 Matrix.multiplyMM(transformM,0,currentSensorM,0,invertInit,0);
@@ -346,11 +356,10 @@ public class Sphere {
 
                 Matrix.multiplyMM(resultM,0,transformM,0,preResultM,0);
 
-                float[] formatM = new float[16];
-                //formatMatrix(formatM,resultM);
+                float[] formatM = new float[16];*/
 
                 synchronized (this) {
-                    System.arraycopy(resultM, 0, mRotateMatrix, 0, 16);
+                    System.arraycopy(preResultM, 0, mRotateMatrix, 0, 16);
                 }
 
                 break;

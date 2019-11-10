@@ -8,12 +8,12 @@ import com.ldt.menulayout.ui.AbsMenuActivity;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.fundamental.camera.CameraActivity;
 import com.zalo.trainingmenu.fundamental.camera.CameraXActivity;
+import com.zalo.trainingmenu.fundamental.index.NetworkMenuActivity;
 import com.zalo.trainingmenu.fundamental.index.OpenGLActivity;
 import com.zalo.trainingmenu.fundamental.index.ContentProviderDemoActivity;
 import com.zalo.trainingmenu.fundamental.index.MultithreadingActivity;
 import com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity;
 import com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity;
-import com.zalo.trainingmenu.fundamental.index.NetworkMenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;
