@@ -2,75 +2,84 @@ package com.ldt.vrview;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.Display;
-import android.view.Surface;
 import android.view.WindowManager;
+
+import com.ldt.vrview.gesture.ViewGestureAttacher;
+import com.ldt.vrview.model.VRPhoto;
+import com.ldt.vrview.transform.TransformListener;
+import com.ldt.vrview.transform.TransformManager;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class VRControlView extends GLTextureView implements GLTextureView.Renderer, GLSurfaceView.Renderer, SensorEventListener {
-    private Sphere mSphere;
+public class VRControlView extends GLTextureView implements GLTextureView.Renderer, GLSurfaceView.Renderer, TransformListener {
+    public int id = 0;
+    private PanoramaSphere mSphere;
+    TransformManager mTransformManager = new TransformManager(TransformManager.TRANSFORM_MANAGER);
 
-    private SensorManager mSensorManager;
-    private Sensor mSensorRotation;
+
+    public TransformListener getTransformListener() {
+        return mTransformListener;
+    }
+
+    public void setTransformListener(TransformListener transformListener) {
+        mTransformListener = transformListener;
+    }
+
+    TransformListener mTransformListener;
 
     public VRControlView(Context context) {
         super(context);
         init(null);
     }
 
-
-
     public VRControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs);
     }
 
-   /* public VRControlView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public VRControlView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(attrs);
-    }*/
+    }
 
     public void recalibrate() {
-        if (mSphere != null) mSphere.recalibrate();
+        mTransformManager.reset();
     }
 
     private void init(AttributeSet attrs) {
-        mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-
-        if (mSensorManager != null) {
-            // List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-            //todo 判断是否存在rotation vector sensor
-            mSensorRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        }
-
         setEGLContextClientVersion(2);
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        mSphere = new Sphere(this, getContext(), R.drawable._360sp);
+        mSphere = new PanoramaSphere(this, getContext());
+        Bitmap bitmap = null;
+        try {
+            bitmap = BitmapFactory.decodeResource(getResources(),R.drawable._360sp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mSphere.mBitmap = bitmap;
         onChangeOrientation();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mSensorManager != null)
-            mSensorManager.registerListener(this, mSensorRotation, SensorManager.SENSOR_DELAY_GAME);
-
+        mTransformManager.setTransformListener(this);
+        mTransformManager.attach(this);
     }
 
     @Override
     public void onPause() {
-        if (mSensorManager != null)
-            mSensorManager.unregisterListener(this);
+        mTransformManager.detach();
+        mTransformManager.setTransformListener(null);
         super.onPause();
     }
 
@@ -80,16 +89,22 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_FRONT);
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
     private float w, h;
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
+        GLES20.glViewport(0, 0, width, height);
         mSphere.setSize(width, height);
+        mTransformManager.setViewSize(width,height);
+        float[] textureSize = new float[2];
+        mSphere.getTextureCoordSize(textureSize);
+        mTransformManager.setTextureSize(textureSize[0],textureSize[1]);
         w = width;
         h = height;
-        GLES20.glViewport(0, 0, width, height);
     }
 
     @Override
@@ -101,19 +116,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
 
     @Override
     public void onSurfaceDestroyed(GL10 gl) {
-    }
-
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        //SensorManager.getRotationMatrixFromVector(matrix,event.values);
-        // mSkySphere.setMatrix(matrix,event.values);
-        mSphere.setVector(event.values);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        mSphere.setVRPhoto(null);
     }
 
     @Override
@@ -129,5 +132,32 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
             Display display = wm.getDefaultDisplay();
             mSphere.onChangeOrientation(display.getRotation());
         }
+    }
+
+    public void setVRPhoto(VRPhoto vrio) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mTransformManager.reset();
+                if(mSphere!=null) mSphere.setVRPhoto(vrio);
+            }
+        });
+
+    }
+
+    public ViewGestureAttacher getGestureAttacher() {
+        if(mTransformManager!=null) return mTransformManager.getGestureAttacher();
+        return null;
+    }
+
+    @Override
+    public void onTransformChanged(int which, float[] angle3) {
+        mSphere.setTransformValue(angle3);
+        if(mTransformListener!=null) mTransformListener.onTransformChanged(which, angle3);
+    }
+
+    public void setViewID(int id) {
+        this.id = id;
+      //  mSphere.id = id;
     }
 }

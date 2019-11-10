@@ -5,6 +5,21 @@ import android.view.View;
 import com.ldt.vrview.gesture.ViewAttacher;
 
 public class BaseTransformer implements Transformer, ViewAttacher {
+    private final int mId;
+
+    public TransformListener getTransformListener() {
+        return mTransformListener;
+    }
+
+    public void setTransformListener(TransformListener transformListener) {
+        mTransformListener = transformListener;
+    }
+
+    protected void notifyTransformChanged() {
+        if(mTransformListener != null) mTransformListener.onTransformChanged(mId,mValues);
+    }
+
+    private TransformListener mTransformListener;
     public float[] mValues = new float[] {0,0,0}; // left-right, up-down, and orientation
     public float mScale = 1;
     protected float mViewWidth = 1;
@@ -14,6 +29,10 @@ public class BaseTransformer implements Transformer, ViewAttacher {
     protected float mTextureHeight = 1;
 
     private boolean[] mEnableValues = new boolean[] {true,true,true,true};
+
+    public BaseTransformer(final int id) {
+        mId = id;
+    }
 
     @Override
     public void setViewSize(int width, int height) {
@@ -36,7 +55,6 @@ public class BaseTransformer implements Transformer, ViewAttacher {
 
     @Override
     public void updateTransform() {
-
     }
 
     @Override
@@ -45,39 +63,39 @@ public class BaseTransformer implements Transformer, ViewAttacher {
     }
 
     @Override
-    public synchronized void scrollBy(float x, float y, float z) {
+    public void scrollBy(float x, float y, float z) {
         mValues[0] = x;
         mValues[1] = y;
         mValues[2] = z;
     }
 
     @Override
-    public synchronized void scrollBy(float[] values) {
+    public void scrollBy(float[] values) {
         System.arraycopy(values,0,mValues,0,3);
     }
 
     @Override
-    public synchronized void scrollXBy(float x) {
+    public void scrollXBy(float x) {
         mValues[0] = x;
     }
 
     @Override
-    public synchronized void scrollYBy(float y) {
+    public void scrollYBy(float y) {
         mValues[1] = y;
     }
 
     @Override
-    public synchronized void scrollZBy(float z) {
+    public void scrollZBy(float z) {
         mValues[1] = z;
     }
 
     @Override
-    public synchronized float[] getCurrentScroll() {
+    public float[] getCurrentScroll() {
         return mValues;
     }
 
     @Override
-    public synchronized void reset() {
+    public void reset() {
         mValues[0] = 0;
         mValues[1] = 0;
         mValues[2] = 0;

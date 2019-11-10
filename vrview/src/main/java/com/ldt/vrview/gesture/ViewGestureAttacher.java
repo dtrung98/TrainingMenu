@@ -760,6 +760,7 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
                 mCurrentX = newX;
                 mCurrentY = newY;
                 // Post On animation
+                if(mView!=null)
                 Compat.postOnAnimation(mView, this);
             }
         }

@@ -87,7 +87,8 @@
         <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
         <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"  android:theme="@style/LightAppTheme"/>
-        <activity android:name=".vrsample.VrSampleActivity" android:theme="@style/VRTheme"/>
+        <activity android:name=".vrsample.VrSampleActivity" android:theme="@style/VRTheme" android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
 
 
         <service

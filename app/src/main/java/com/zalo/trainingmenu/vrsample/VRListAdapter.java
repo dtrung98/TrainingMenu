@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ldt.vrview.GLTextureView;
 import com.ldt.vrview.VRControlView;
 import com.ldt.vrview.VRView;
+import com.ldt.vrview.model.VRPhoto;
 import com.zalo.trainingmenu.R;
 
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
 
     }
     private static final String TAG = "VRListAdapter";
-    private ArrayList<Object> mData = new ArrayList<>();
-    public void setData(List<Object> data) {
+    private ArrayList<VRPhoto> mData = new ArrayList<>();
+    public void setData(List<VRPhoto> data) {
         mData.clear();
         if(data!=null) mData.addAll(data);
         notifyDataSetChanged();
@@ -46,29 +47,35 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
 
     @Override
     public void onBindViewHolder(@NonNull VRListHolder vrListHolder, int i) {
-        vrListHolder.bind();
+        if(i<mData.size())
+        vrListHolder.bind(mData.get(i));
+        else vrListHolder.bind(null);
     }
 
+    @Override
+    public void onViewRecycled(@NonNull VRListHolder holder) {
+        holder.mView.setVRPhoto(null);
+    }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mData.size() + 1;
     }
 
-    public static class VRListHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class VRListHolder extends RecyclerView.ViewHolder {
         VRView mView;
         VRListHolder(@NonNull View itemView) {
             super(itemView);
             mView = itemView.findViewById(R.id.vr_view);
-            mView.setOnClickListener(this);
+
         }
 
-        public void bind() {
-        }
-
-        @Override
-        public void onClick(View v) {
-            mView.recalibrate();
+        public void bind(VRPhoto photo) {
+            mView.setViewID(getAdapterPosition());
+          mView.mSampleVRPhotos.clear();
+            mView.mSampleVRPhotos.addAll(mData);
+            mView.curSamplePos = getAdapterPosition();
+            mView.setVRPhoto(photo);
         }
     }
 }
