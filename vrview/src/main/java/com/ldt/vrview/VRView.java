@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.transform.TransformListener;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class VRView extends FrameLayout implements View.OnClickListener, View.OnLongClickListener, TransformListener {
@@ -61,6 +63,7 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
             addView(mControlView,params);
             View mOptionView = LayoutInflater.from(getContext()).inflate(R.layout.vr_option,this,false);
             mAlignButton = mOptionView.findViewById(R.id.align_button);
+            mTextView = mOptionView.findViewById(R.id.text_view);
             addView(mOptionView);
         }
     }
@@ -87,6 +90,7 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
 
     protected VRControlView mControlView;
     private AlignButton mAlignButton;
+    private TextView mTextView;
 
     public void recalibrate() {
         if(mControlView!=null) mControlView.recalibrate();
@@ -117,12 +121,14 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
         this.id = id;
         mControlView.setViewID(id);
     }
-
+    DecimalFormat df = new DecimalFormat("0.00");
     @Override
     public void onTransformChanged(int which, float[] angle3) {
         if(mAlignButton!=null) {
             mAlignButton.setRotateDegree(angle3[0]);
             mAlignButton.setUpDownDegree(angle3[1]);
         }
+
+        if(mTextView!=null) mTextView.setText("transform "+df.format(angle3[0])+", "+df.format(angle3[1]));
     }
 }

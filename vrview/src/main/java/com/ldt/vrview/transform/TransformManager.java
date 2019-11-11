@@ -46,8 +46,6 @@ public final class TransformManager extends BaseTransformer implements Transform
             v[1]+=mTransformers.get(i).mValues[1];
             v[2]+=mTransformers.get(i).mValues[2];
         }
-
-
         System.arraycopy(v,0,mValues,0,3);
 
     }

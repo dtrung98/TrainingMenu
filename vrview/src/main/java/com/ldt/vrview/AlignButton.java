@@ -97,7 +97,7 @@ public class AlignButton extends View {
 
     }
 
-    int centerDotColor = 0x88FFFFFF;
+    int centerDotColor = 0x77f5f5f5;
     int circleBackgroundColor = 0xAA000000;
     int ellipseColor = Color.WHITE;
     int outlineColor = Color.WHITE;
@@ -140,13 +140,16 @@ public class AlignButton extends View {
         float ellipseCenterY = mCenterY - mRadius + mOutMargin + mOutlineWidth + mInMargin + ellipseRadiusHeight/2;
         float ellipseRadiusWidth = (float) Math.sqrt((mRadius- mInMargin - mOutMargin - mOutlineWidth)*(mRadius - mInMargin - mOutMargin - mOutlineWidth) - (mCenterY - ellipseCenterY)*(mCenterY - ellipseCenterY));
 
-        float upDownPercent = mUpDownDegree/180f; // -0.5 -> 0.5
-
+        float upDownPercent = (float)Math.sin(Math.toRadians(mUpDownDegree)); // -0.5 -> 0.5
+        float percent;
+        boolean isFront =
+                (mUpDownDegree >= -90 && mUpDownDegree <=90)
+                || (mUpDownDegree>270))
+        if(mUpDownDegree<-90&&mUpDownDegree>-270)
         upDownPercent = Math.abs(upDownPercent);
 
-        ellipseRadiusHeight = ellipseRadiusHeight + upDownPercent * (ellipseRadiusWidth - ellipseRadiusWidth);
-
-
+        ellipseRadiusHeight = ellipseRadiusHeight + upDownPercent * (ellipseRadiusWidth - ellipseRadiusHeight);
+        ellipseCenterY = ellipseCenterY + upDownPercent*(mCenterY - ellipseCenterY);
         mEllipseRectF.set(
                 mCenterX-ellipseRadiusWidth,
                 ellipseCenterY- ellipseRadiusHeight,
@@ -230,8 +233,12 @@ public class AlignButton extends View {
         return mUpDownDegree;
     }
 
-    public void setUpDownDegree(float upDownDegree) {
+    public void setUpDownDegree(float uDD) {
+        float upDownDegree = uDD;
         upDownDegree%=360;
+
+        //  0  (-270) -> (-180) -> (-90) -> 0 ->90 -> 180 -> 270 -> 360
+        //
         if(upDownDegree!=mUpDownDegree) {
             mUpDownDegree = upDownDegree;
             postInvalidate();
