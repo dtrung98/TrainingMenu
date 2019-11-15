@@ -26,8 +26,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/title"
-            tools:src="@mipmap/ic_launcher"/>
+            app:layout_constraintBottom_toTopOf="@id/title" />
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"

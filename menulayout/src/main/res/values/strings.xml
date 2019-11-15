@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ok_got_it">Ok, got it</string>
+    <string name="ok_got_it">OK, got it</string>
     <string name="app_require_permissions">Permission required</string>
     <string name="access_external_storage">Access External Storage</string>
     <string name="access_camera">Access Camera</string>
     <string name="storage_permission_description">Scanner requires storage permission to run correctly. Just accept the dialog that appears in next screen.</string>
-    <string name="camera_permisison_description">Allow Scanner access camera to take photos. Just accept the dialog that appear in next screen.</string>
+    <string name="camera_permission_description">Allow Scanner access camera to take photos. Just accept the dialog that appear in next screen.</string>
     <string name="permission_description">Scanner requires permission to run correctly. Please accept following dialogs that appear in next screen.</string>
     <string name="note_description">* This message will not display anymore when you pressed Ok button</string>
 </resources>

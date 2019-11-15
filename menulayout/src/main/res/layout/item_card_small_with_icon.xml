@@ -28,7 +28,6 @@
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/title"
-            tools:src="@drawable/ic_pause_black_24dp"
             tools:padding="6dp"
             android:background="@drawable/background_item_image"
             tools:tint="@color/FlatOrange"/>

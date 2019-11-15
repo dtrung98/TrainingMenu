@@ -87,7 +87,7 @@ public class PermissionRequestDialog extends DialogFragment implements View.OnCl
                 break;
             case PermissionActivity.PERMISSION_CAMERA:
                 mPermissionTitle.setText(R.string.access_camera);
-                mPermissionDescription.setText(R.string.camera_permisison_description);
+                mPermissionDescription.setText(R.string.camera_permission_description);
                 mPermissionImage.setImageResource(R.drawable.camera);
                 break;
             default:
