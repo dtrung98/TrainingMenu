@@ -129,7 +129,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
             int padding = (int)(mIcon.getContext().getResources().getDimension(R.dimen.oneDp)*item.getDrawablePadding());
             mIcon.setPadding(padding,padding,padding,padding);
             mIcon.setImageResource(item.getDrawableRes());
-
+            mIcon.setColorFilter(item.getTintColor());
         }
     }
 }

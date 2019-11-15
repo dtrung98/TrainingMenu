@@ -12,6 +12,12 @@ public class Item {
     private final Class<? extends AppCompatActivity> mActivityCls;
     private final int mDrawablePadding;
 
+    public int getTintColor() {
+        return mTintColor;
+    }
+
+    private final int mTintColor;
+
     @DrawableRes
     private Integer mDrawableRes;
 
@@ -28,6 +34,7 @@ public class Item {
 
         private Integer mDrawableRes ;
         private int mDrawablePadding = 0;
+        private int mTintColor = 0;
 
         public Builder setContext(Context context) {
             mContext = context;
@@ -62,6 +69,11 @@ public class Item {
             return this;
         }
 
+        public Builder setTintColor(int color) {
+            mTintColor = color;
+            return this;
+        }
+
         private Builder(Context context) {
             mContext = context;
         }
@@ -73,7 +85,7 @@ public class Item {
 
         public Item get(){
             mContext = null;
-            return new Item(mTitle,mDescription,mActivityCls,mDrawableRes, mDrawablePadding);
+            return new Item(mTitle,mDescription,mActivityCls,mDrawableRes, mDrawablePadding, mTintColor);
         }
     }
 
@@ -81,12 +93,13 @@ public class Item {
         return new Builder(context);
     }
 
-    private Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls, Integer drawableRes, int drawablePadding ) {
+    private Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls, Integer drawableRes, int drawablePadding, int tintColor ) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         mActivityCls = cls;
         mDrawableRes = drawableRes;
         mDrawablePadding = drawablePadding;
+        mTintColor = tintColor;
     }
 
     public String getTitle() {
