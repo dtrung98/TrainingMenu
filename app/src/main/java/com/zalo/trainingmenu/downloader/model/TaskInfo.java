@@ -425,7 +425,7 @@ public class TaskInfo implements Parcelable {
         dest.writeLong(mRunningTime);
         dest.writeString(mPartialListString);
 
-        dest.writeParcelableList(mPartialInfoList,1);
+        //dest.writeParcelableList(mPartialInfoList,1);
         if (mPartialInfoList == null) {
             dest.writeByte((byte) (0x00));
         } else {

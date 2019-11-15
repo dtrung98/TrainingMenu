@@ -31,6 +31,10 @@ android {
             enableSplit = false
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
