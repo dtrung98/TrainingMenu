@@ -1,29 +1,30 @@
 package com.zalo.trainingmenu.vrsample;
 
-import android.opengl.GLSurfaceView;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ldt.vrview.GLTextureView;
-import com.ldt.vrview.VRControlView;
 import com.ldt.vrview.VRView;
-import com.ldt.vrview.model.VRPhoto;
 import com.zalo.trainingmenu.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.zalo.trainingmenu.vrsample.VrSampleActivity.EXTRA_VR_NEWS_FEED;
+
 public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHolder> {
     public VRListAdapter() {
 
     }
+
     private static final String TAG = "VRListAdapter";
-    private ArrayList<VRPhoto> mData = new ArrayList<>();
-    public void setData(List<VRPhoto> data) {
+    private ArrayList<VRNewsFeed> mData = new ArrayList<>();
+    public void setData(List<VRNewsFeed> data) {
         mData.clear();
         if(data!=null) mData.addAll(data);
         notifyDataSetChanged();
@@ -47,9 +48,7 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
 
     @Override
     public void onBindViewHolder(@NonNull VRListHolder vrListHolder, int i) {
-        if(i<mData.size())
         vrListHolder.bind(mData.get(i));
-        else vrListHolder.bind(null);
     }
 
     @Override
@@ -59,23 +58,37 @@ public class VRListAdapter extends RecyclerView.Adapter<VRListAdapter.VRListHold
 
     @Override
     public int getItemCount() {
-        return mData.size() + 1;
+        return mData.size();
     }
 
-    public class VRListHolder extends RecyclerView.ViewHolder {
+    public class VRListHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         VRView mView;
+        TextView mAuthor;
+        TextView mDescription;
+        TextView mContent;
         VRListHolder(@NonNull View itemView) {
             super(itemView);
-            mView = itemView.findViewById(R.id.vr_view);
 
+            mView = itemView.findViewById(R.id.vr_view);
+            mAuthor = itemView.findViewById(R.id.author_text_view);
+            mDescription = itemView.findViewById(R.id.description_text_view);
+            mContent = itemView.findViewById(R.id.content_text_view);
         }
 
-        public void bind(VRPhoto photo) {
+        public void bind(VRNewsFeed newsFeed) {
+            mAuthor.setText(newsFeed.mAuthor);
+            mContent.setText(newsFeed.mDescription);
             mView.setViewID(getAdapterPosition());
-          mView.mSampleVRPhotos.clear();
-            mView.mSampleVRPhotos.addAll(mData);
-            mView.curSamplePos = getAdapterPosition();
-            mView.setVRPhoto(photo);
+            mView.setVRPhoto(newsFeed.getVRPhoto());
+            mView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(v.getContext(),VrSampleActivity.class);
+            intent.setAction(VrSampleActivity.ACTION_VIEW_NEWS_FEED);
+            intent.putExtra(EXTRA_VR_NEWS_FEED,mData.get(getAdapterPosition()));
+            v.getContext().startActivity(intent);
         }
     }
 }

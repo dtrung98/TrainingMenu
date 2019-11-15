@@ -11,8 +11,17 @@ public class VRPhoto {
 
     private float mCurrentScale;
     private final float mStartingScale;
-    private final Bitmap mThumbnailBitmap;
-    private final Bitmap mBitmap;
+    private Bitmap mThumbnailBitmap;
+
+    public void setThumbnailBitmap(Bitmap thumbnailBitmap) {
+        mThumbnailBitmap = thumbnailBitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
+    }
+
+    private Bitmap mBitmap;
 
     public String getPhotoTitle() {
         return mPhotoTitle;

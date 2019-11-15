@@ -1,6 +1,5 @@
 package com.zalo.trainingmenu.newsfeed3d;
 
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
@@ -18,7 +17,7 @@ public class NewsFeed3DActivity extends AbsListActivity {
 
     @Override
     protected int title() {
-        return R.string.photo_3d_list;
+        return R.string.new_feeds;
     }
 
     @Override

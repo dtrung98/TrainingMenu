@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
+
 import com.ldt.vrview.gesture.ViewGestureAttacher;
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.transform.TransformListener;
@@ -50,7 +52,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         init(attrs);
     }
 
-    public void recalibrate() {
+    public void align() {
         mTransformManager.reset();
     }
 
@@ -59,13 +61,6 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         mSphere = new PanoramaSphere(this, getContext());
-        Bitmap bitmap = null;
-        try {
-            bitmap = BitmapFactory.decodeResource(getResources(),R.drawable._360sp);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        mSphere.mBitmap = bitmap;
         onChangeOrientation();
     }
 

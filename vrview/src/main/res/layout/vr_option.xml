@@ -8,11 +8,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textColor="#F5F5F5"
-    android:text="This is VR View created by LDT"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     android:layout_margin="4dp"
-    android:visibility="visible"/>
+    android:visibility="gone"/>
     <com.ldt.vrview.AlignButton
         android:id="@+id/align_button"
         android:layout_width="50dp"

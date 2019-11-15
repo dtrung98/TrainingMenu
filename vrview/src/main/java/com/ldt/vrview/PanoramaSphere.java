@@ -125,7 +125,7 @@ public class PanoramaSphere {
         mHModelMatrix=GLES20.glGetUniformLocation(mHProgram,"uModelMatrix");
         mHRotateMatrix=GLES20.glGetUniformLocation(mHProgram,"uRotateMatrix");
         mHUTexture=GLES20.glGetUniformLocation(mHProgram,"uTexture");
-        mHPosition=GLES20.glGetAttribLocation(mHProgram,"aPosition");
+        mHPosition =GLES20.glGetAttribLocation(mHProgram,"aPosition");
         mHCoordinate=GLES20.glGetAttribLocation(mHProgram,"aCoordinate");
 
       //  if(shouldResetVRPhoto)
@@ -241,7 +241,7 @@ public class PanoramaSphere {
                 .position(0);
     }
 
-    private static void calculateAttribute(){
+    private static synchronized void calculateAttribute(){
         if(isCalculated) return;
         isCalculated = true;
         ArrayList<Float> alVertix = new ArrayList<>();
@@ -349,6 +349,10 @@ public class PanoramaSphere {
         }
 
         if (getBitmap() != null && !getBitmap().isRecycled()) {
+            int[] maxSize = new int[1];
+            //GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
+            //Log.d(TAG, "max possible texture size is "+maxSize[0]);
+
                 //生成纹理
                 GLES20.glGenTextures(1, texture, 0);
                 //生成纹理
@@ -396,22 +400,26 @@ public class PanoramaSphere {
         //GLES20.glClearColor(1,1,1,1);
         Log.d(TAG, "vr "+id+" draw with texture is "+((mVRPhoto==null) ? "null": "available")+", texture id = "+textureId+", size = "+w+", "+h);
         if(textureId!=0) {
+            try {
 
-            GLES20.glUniformMatrix4fv(mHProjMatrix,1,false,mProjectMatrix,0);
-            GLES20.glUniformMatrix4fv(mHViewMatrix,1,false,mViewMatrix,0);
-            GLES20.glUniformMatrix4fv(mHModelMatrix,1,false,mModelMatrix,0);
-            GLES20.glUniformMatrix4fv(mHRotateMatrix,1,false, mRotateMatrix,0);
+                GLES20.glUniformMatrix4fv(mHProjMatrix, 1, false, mProjectMatrix, 0);
+                GLES20.glUniformMatrix4fv(mHViewMatrix, 1, false, mViewMatrix, 0);
+                GLES20.glUniformMatrix4fv(mHModelMatrix, 1, false, mModelMatrix, 0);
+                GLES20.glUniformMatrix4fv(mHRotateMatrix, 1, false, mRotateMatrix, 0);
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
-            GLES20.glEnableVertexAttribArray(mHPosition);
-            GLES20.glVertexAttribPointer(mHPosition, 3, GLES20.GL_FLOAT, false, 0, posBuffer);
-            GLES20.glEnableVertexAttribArray(mHCoordinate);
-            GLES20.glVertexAttribPointer(mHCoordinate, 2, GLES20.GL_FLOAT, false, 0, cooBuffer);
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vCount);
+                GLES20.glEnableVertexAttribArray(mHPosition);
+                GLES20.glVertexAttribPointer(mHPosition, 3, GLES20.GL_FLOAT, false, 0, posBuffer);
+                GLES20.glEnableVertexAttribArray(mHCoordinate);
+                GLES20.glVertexAttribPointer(mHCoordinate, 2, GLES20.GL_FLOAT, false, 0, cooBuffer);
+                GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vCount);
 
-            GLES20.glDisableVertexAttribArray(mHPosition);
+                GLES20.glDisableVertexAttribArray(mHPosition);
+            } catch (Exception ignored) {
+                Log.d(TAG, "exception");
+            }
         }
     }
 
@@ -482,13 +490,13 @@ public class PanoramaSphere {
         }
     }*/
 
-    public void setTransformValue(final float[] value3) {
+    public void setTransformValue(final float[] value4) {
         switch (mOrientation) {
             case Surface.ROTATION_0:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,value3[1],0,1,0); // rotate up - down
+                Matrix.rotateM(temp,0,mCenterMatrix,0,value4[1],0,1,0); // rotate up - down
 
                 float[] preResultM = new float[16];
-                Matrix.rotateM(preResultM,0,temp,0,value3[0],0,0,1); // rotate left - right
+                Matrix.rotateM(preResultM,0,temp,0,value4[0],0,0,1); // rotate left - right
           /*      float[] invertInit = new float[16];
                 Matrix.invertM(invertInit,0,initSensorM,0);
                 float[] transformM = new float[16];
@@ -502,18 +510,22 @@ public class PanoramaSphere {
 
                 System.arraycopy(preResultM, 0, mRotateMatrix, 0, 16);
 
+                float[] tProjectM = new float[16];
+                // 90 to 45;
+                Matrix.perspectiveM(tProjectM,0,90f/value4[3],mTextureAspect,1,300);
+                System.arraycopy(tProjectM,0,mProjectMatrix,0,16);
                 break;
             case Surface.ROTATION_90:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,value3[1]*FROM_RADS_TO_DEGS,0,0,1);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,value3[2]*FROM_RADS_TO_DEGS,0,1,0);
+                Matrix.rotateM(temp,0,mCenterMatrix,0,value4[1]*FROM_RADS_TO_DEGS,0,0,1);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,value4[2]*FROM_RADS_TO_DEGS,0,1,0);
                 break;
             case Surface.ROTATION_180:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,-value3[1]*FROM_RADS_TO_DEGS,0,1,0);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,value3[2]*FROM_RADS_TO_DEGS,0,0,-1);
+                Matrix.rotateM(temp,0,mCenterMatrix,0,-value4[1]*FROM_RADS_TO_DEGS,0,1,0);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,value4[2]*FROM_RADS_TO_DEGS,0,0,-1);
                 break;
             case Surface.ROTATION_270:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,-value3[1]*FROM_RADS_TO_DEGS,0,0,1);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,-value3[2]*FROM_RADS_TO_DEGS,0,1,0);
+                Matrix.rotateM(temp,0,mCenterMatrix,0,-value4[1]*FROM_RADS_TO_DEGS,0,0,1);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,-value4[2]*FROM_RADS_TO_DEGS,0,1,0);
                 break;
         }
     }

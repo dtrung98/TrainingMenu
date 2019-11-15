@@ -108,5 +108,6 @@
     <style name="VRTheme" parent="AppTheme">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowTranslucentNavigation">true</item>
     </style>
 </resources>

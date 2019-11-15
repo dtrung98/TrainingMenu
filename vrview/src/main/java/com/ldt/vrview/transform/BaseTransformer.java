@@ -20,8 +20,7 @@ public class BaseTransformer implements Transformer, ViewAttacher {
     }
 
     private TransformListener mTransformListener;
-    public float[] mValues = new float[] {0,0,0}; // left-right, up-down, and orientation
-    public float mScale = 1;
+    public float[] mValues = new float[] {0, 0, 0, 1}; // left-right, up-down, rotate, and scale
     protected float mViewWidth = 1;
     protected float mViewHeight = 1;
 
@@ -99,6 +98,7 @@ public class BaseTransformer implements Transformer, ViewAttacher {
         mValues[0] = 0;
         mValues[1] = 0;
         mValues[2] = 0;
+        mValues[3] = 1;
     }
 
     @Override
@@ -113,11 +113,11 @@ public class BaseTransformer implements Transformer, ViewAttacher {
 
 
     public float getScale() {
-        return mScale;
+        return mValues[3];
     }
 
     public void setScale(float scale) {
-        mScale = scale;
+        mValues[4] = scale;
     }
 
     @Override

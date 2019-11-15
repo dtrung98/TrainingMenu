@@ -18,7 +18,7 @@
         android:tint="#999"
         android:padding="8dp"/>
     <TextView
-        android:id="@+id/user_text_view"
+        android:id="@+id/author_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="2"
@@ -38,11 +38,11 @@
         android:layout_height="wrap_content"
         android:maxLines="2"
         android:ellipsize="end"
-        app:layout_constraintTop_toTopOf="@id/user_text_view"
+        app:layout_constraintTop_toTopOf="@id/author_text_view"
 
-        app:layout_constraintStart_toEndOf="@id/user_text_view"
-        app:layout_constraintEnd_toStartOf="@id/menu_button"
-        android:text=" added a 3D photo"
+        app:layout_constraintStart_toEndOf="@id/author_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text=" added a 360 photo"
         android:textColor="#0a0a0a"
         />
     <TextView
@@ -51,9 +51,9 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintTop_toBottomOf="@id/user_text_view"
+        app:layout_constraintTop_toBottomOf="@id/author_text_view"
         app:layout_constraintBottom_toBottomOf="@id/avatar_icon"
-        app:layout_constraintStart_toStartOf="@id/user_text_view"
+        app:layout_constraintStart_toStartOf="@id/author_text_view"
         app:layout_constraintEnd_toStartOf="@id/menu_button"
         android:textColor="#0a0a0a"
         android:text="Oct 7 5:30 AM"/>
@@ -76,7 +76,7 @@
         app:layout_constraintStart_toStartOf="@id/avatar_icon"
         app:layout_constraintTop_toBottomOf="@id/avatar_icon"
         app:layout_constraintEnd_toEndOf="@id/menu_button"
-        android:text="@string/learn_how_to_create_3d_photos"
+        tools:text="@string/learn_how_to_create_3d_photos"
         android:textColor="#0a0a0a"
         android:layout_marginTop="16dp"
         />
@@ -88,7 +88,7 @@
         app:layout_constraintTop_toBottomOf="@id/content_text_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="16dp" />
     <View
         android:layout_width="0dp"
         android:layout_height="6dp"

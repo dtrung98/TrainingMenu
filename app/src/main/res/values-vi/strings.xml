@@ -199,7 +199,7 @@
     <string name="cameraX_description">Camera X Api in Support Library</string>
     <string name="cameraKit">CameraKit</string>
     <string name="cameraKit_description">Camera using CameraKit Library</string>
-    <string name="photo_3d_list">New Feeds</string>
+    <string name="new_feeds">New Feeds</string>
     <string name="news_feed_3d">News Feed 3D</string>
     <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
     <string name="vr_sample">VR</string>

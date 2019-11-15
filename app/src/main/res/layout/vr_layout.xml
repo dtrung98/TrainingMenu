@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/root"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@android:color/black"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white">
-<com.ldt.vrview.VRView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:id="@+id/vr_view"/>
-</FrameLayout>
+    android:layout_height="match_parent">
+    <com.ldt.vrview.VRView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/vr_view"
+        tools:visibility="gone"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,8 +20,8 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
 
     private static float DEFAULT_MAX_SCALE = 3.0f;
     private static float DEFAULT_MID_SCALE = 1.75f;
-    private static float DEFAULT_MIN_SCALE = 1.0f;
-    private static int DEFAULT_ZOOM_DURATION = 200;
+    private static float DEFAULT_MIN_SCALE = 0.8f;
+    private static int DEFAULT_ZOOM_DURATION = 225;
 
     private static final int HORIZONTAL_EDGE_NONE = -1;
     private static final int HORIZONTAL_EDGE_LEFT = 0;
@@ -40,10 +40,10 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
     private float mMaxScale = DEFAULT_MAX_SCALE;
 
     private boolean mAllowParentInterceptOnEdge = false;
-    private boolean mBlockParentIntercept = false;
+    private boolean mBlockParentIntercept = true;
 
     private View mView;
-    private final GestureTransformer mTouchRotation;
+    private final GestureTransformer mGestureTransformer;
 
     // Gesture Detectors
     private GestureDetector mGestureDetector;
@@ -85,20 +85,20 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
 
     private void postTranslate(float dx, float dy) {
         Log.d(TAG, "translate only");
-        mTouchRotation.postTranslate(dx,dy);
+        mGestureTransformer.postTranslate(dx,dy);
     }
 
     private void postTranslateByFling(float dx, float dy) {
         Log.d(TAG, "translate with fling");
-        mTouchRotation.postTranslate(dx,dy);
+        mGestureTransformer.postTranslate(dx,dy);
     }
 
     private void postScale(float sX, float sY, float pX, float pY) {
-        mTouchRotation.postScale( sX, sY, pX, pY);
+        mGestureTransformer.postScale( sX, sY, pX, pY);
     }
 
     private void setScale(float sX, float sY, float pX, float pY) {
-        mTouchRotation.setScale(sX,sY,pX,pY);
+        mGestureTransformer.setScale(sX,sY,pX,pY);
     }
 
     private OnGestureListener onGestureListener = new OnGestureListener() {
@@ -151,7 +151,13 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
 
         @Override
         public void onScale(float scaleFactor, float focusX, float focusY) {
+            //onInfiniteScale(scaleFactor, focusX, focusY);
+            onLimitScale(scaleFactor, focusX, focusY);
+        }
+
+        public void onInfiniteScale(float scaleFactor, float focusX, float focusY) {
             if (getScale() < mMaxScale || scaleFactor < 1f) {
+
                 if (mScaleChangeListener != null) {
                     mScaleChangeListener.onScaleChange(scaleFactor, focusX, focusY);
                 }
@@ -159,6 +165,22 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
                 //checkAndDisplayMatrix();
             }
         }
+
+        public void onLimitScale(float scaleFactor, float focusX, float focusY) {
+            float sF = scaleFactor;
+            // scale không được quá min và max
+            float resultScale = scaleFactor*getScale();
+            if(resultScale<mMinScale) sF = mMinScale/getScale();
+            else if(resultScale>mMaxScale) sF = mMaxScale/getScale();
+
+            if (mScaleChangeListener != null) {
+                mScaleChangeListener.onScaleChange(sF, focusX, focusY);
+            }
+            postScale(sF, sF, focusX, focusY);
+            //checkAndDisplayMatrix();
+
+        }
+
     };
 
     public void attach(View view) {
@@ -267,8 +289,8 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
         mGestureDetector = null;
     }
 
-    public ViewGestureAttacher(GestureTransformer touchRotation) {
-        mTouchRotation = touchRotation;
+    public ViewGestureAttacher(GestureTransformer gestureTransformer) {
+        mGestureTransformer = gestureTransformer;
     }
 
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener newOnDoubleTapListener) {
@@ -324,7 +346,7 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
     }
 
     public float getScale() {
-        return mTouchRotation.getScale();
+        return mGestureTransformer.getScale();
     }
 
     @Override

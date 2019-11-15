@@ -1,5 +1,7 @@
 package com.ldt.vrview;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,6 +10,7 @@ import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -35,7 +38,9 @@ public class AlignButton extends View {
 
     private void init(AttributeSet attrs) {
         setWillNotDraw(false);
+        super.setOnClickListener(mSelfOnClickListener);
 
+        keepActive();
         _1dp = getResources().getDimension(R.dimen.oneDp);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     }
@@ -97,7 +102,7 @@ public class AlignButton extends View {
 
     }
 
-    int centerDotColor = 0x77f5f5f5;
+    int centerDotColor = 0x99AAAAAA;
     int circleBackgroundColor = 0xAA000000;
     int ellipseColor = Color.WHITE;
     int outlineColor = Color.WHITE;
@@ -132,6 +137,77 @@ public class AlignButton extends View {
         mLightPath.close();
         return mLightPath;
     }
+    private OnClickListener mOutOnClickListener;
+    private OnClickListener mSelfOnClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            keepActive();
+            if(mOutOnClickListener!=null) mOutOnClickListener.onClick(v);
+        }
+    };
+
+    @Override
+    public final void setOnClickListener(@Nullable OnClickListener l) {
+        mOutOnClickListener = l;
+    }
+
+  /*  private final float mInActiveAlpha = 0.45f;
+    private final float mActiveAlpha = 1f;
+
+    private ValueAnimator mShowHideAnimator = ValueAnimator.ofFloat(0,1);
+
+   */
+
+    private static final int STATE_INACTIVE = 0;
+    private static final int STATE_MOTION_TO_ACTIVE = 1;
+    private static final int STATE_ACTIVE = 2;
+    private static final int STATE_MOTION_TO_INACTIVE = 3;
+    private int mState = STATE_INACTIVE;
+
+
+    /*
+    private float mCurrentAlpha = mActiveAlpha;
+    private void updateActive() {
+
+    }
+
+   */
+
+    public void keepActive() {
+       if(mState==STATE_MOTION_TO_ACTIVE) return;
+
+       if(mState==STATE_INACTIVE)
+       post(mShowAnimateRunnable);
+
+        Log.d(TAG, "keep active call");
+    }
+
+    private Runnable mShowAnimateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mState = STATE_MOTION_TO_ACTIVE;
+            removeCallbacks(mHideAnimateRunnable);
+            AlignButton.this
+                    .animate()
+                    .alpha(1)
+                    .withEndAction(
+                            ()-> {
+                                mState = STATE_ACTIVE;
+                                postDelayed(mHideAnimateRunnable,2000);
+            }).start();
+        }
+    };
+
+    private Runnable mHideAnimateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mState = STATE_MOTION_TO_INACTIVE;
+            AlignButton.this.animate().alpha(0.45f)
+                    .withEndAction(() -> {
+                mState = STATE_INACTIVE;
+            }).start();
+        }
+    };
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -140,16 +216,28 @@ public class AlignButton extends View {
         float ellipseCenterY = mCenterY - mRadius + mOutMargin + mOutlineWidth + mInMargin + ellipseRadiusHeight/2;
         float ellipseRadiusWidth = (float) Math.sqrt((mRadius- mInMargin - mOutMargin - mOutlineWidth)*(mRadius - mInMargin - mOutMargin - mOutlineWidth) - (mCenterY - ellipseCenterY)*(mCenterY - ellipseCenterY));
 
-        float upDownPercent = (float)Math.sin(Math.toRadians(mUpDownDegree)); // -0.5 -> 0.5
-        float percent;
+        float sinUpDown = (float)Math.sin(Math.toRadians(mUpDownDegree)); // 0 khi nhìn ngang, 1 khi hướng lên trên, -1 khi hướng xuống dưới
+        float upDownPercent = sinUpDown; // 0 khi nhìn ngang, 1
         boolean isFront =
                 (mUpDownDegree >= -90 && mUpDownDegree <=90)
-                || (mUpDownDegree>270))
-        if(mUpDownDegree<-90&&mUpDownDegree>-270)
-        upDownPercent = Math.abs(upDownPercent);
+                || (mUpDownDegree>270);
 
-        ellipseRadiusHeight = ellipseRadiusHeight + upDownPercent * (ellipseRadiusWidth - ellipseRadiusHeight);
-        ellipseCenterY = ellipseCenterY + upDownPercent*(mCenterY - ellipseCenterY);
+        Log.d(TAG, "sin upDown "+sinUpDown);
+
+        float ellipsePercent;
+
+       ellipsePercent = Math.abs(upDownPercent);
+
+       // ellipseRadiusHeight = ellipseRadiusHeight*(1 + 0.15f*ellipsePercent);
+       // ellipseRadiusWidth  = ellipseRadiusWidth*(1 + 0.15f*ellipsePercent);
+
+
+        ellipseRadiusHeight = ellipseRadiusHeight +ellipsePercent * (ellipseRadiusWidth - ellipseRadiusHeight);
+
+        //if(isFront)
+        ellipseCenterY = ellipseCenterY - upDownPercent*(mCenterY - ellipseCenterY);
+       // else ellipseCenterY = mCenterY + (mCenterY - ellipseCenterY)  + upDownPercent*(mCenterY - ellipseCenterY);
+
         mEllipseRectF.set(
                 mCenterX-ellipseRadiusWidth,
                 ellipseCenterY- ellipseRadiusHeight,
@@ -237,8 +325,6 @@ public class AlignButton extends View {
         float upDownDegree = uDD;
         upDownDegree%=360;
 
-        //  0  (-270) -> (-180) -> (-90) -> 0 ->90 -> 180 -> 270 -> 360
-        //
         if(upDownDegree!=mUpDownDegree) {
             mUpDownDegree = upDownDegree;
             postInvalidate();

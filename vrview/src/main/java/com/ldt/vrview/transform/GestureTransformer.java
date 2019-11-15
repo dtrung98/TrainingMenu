@@ -1,10 +1,12 @@
 package com.ldt.vrview.transform;
 
+import android.util.Log;
 import android.view.View;
 
 import com.ldt.vrview.gesture.ViewGestureAttacher;
 
 public class GestureTransformer extends BaseTransformer {
+    private static final String TAG = "GestureTransformer";
 
     public ViewGestureAttacher getGestureAttacher() {
         return mAttacher;
@@ -21,11 +23,15 @@ public class GestureTransformer extends BaseTransformer {
         super.reset();
         mXViewTranslate = 0f;
         mYViewTranslate = 0f;
+        mXViewScale = 1;
+        mYViewScale = 1;
         updateTransform();
     }
 
     private float mXViewTranslate = 0f;
     private float mYViewTranslate = 0f;
+    private float mXViewScale = 1;
+    private float mYViewScale = 1;
 
     private float wProjectAngle = 0;
     private float hProjectAngle = 0;
@@ -39,10 +45,22 @@ public class GestureTransformer extends BaseTransformer {
     }
 
     public void postScale(float sX, float sY, float pX, float pY) {
+        //mXViewTranslate+=pX;
+        //mYViewTranslate+=pY;
+
+        mXViewScale *=sX;
+        mYViewScale *=sY;
+
+        //mXViewTranslate +=pX;
+        //mYViewScale +=pY;
+
+        Log.d(TAG, "post scale with sX = "+sX+", sY = "+sY+", pX = "+pX+", pY = "+pY+" => current scale = "+mXViewScale);
         updateTransform();
     }
 
     public void setScale(float sX, float sY, float pX, float pY) {
+        mXViewScale = sX;
+        Log.d(TAG, "set scale with sX = "+sX+", sY = "+sY+", pX = "+pX+", pY = "+pY);
         updateTransform();
     }
 
@@ -64,6 +82,8 @@ public class GestureTransformer extends BaseTransformer {
         mValues[0] = -mXViewTranslate/mViewWidth*wProjectAngle;
         mValues[1] = mYViewTranslate/mViewHeight*hProjectAngle;
         mValues[2] = 0;
+
+        mValues[3] = mXViewScale;
         notifyTransformChanged();
     }
     @Override

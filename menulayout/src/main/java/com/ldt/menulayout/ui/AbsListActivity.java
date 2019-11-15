@@ -22,7 +22,7 @@ public abstract class AbsListActivity extends AbsLocaleActivity{
 
     View mBackButton;
 
-    void back(View v) {
+    protected void back(View v) {
         finish();
     }
 

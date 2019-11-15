@@ -13,11 +13,11 @@ import androidx.annotation.Nullable;
 
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.transform.TransformListener;
+import com.ldt.vrview.transform.TransformManager;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 
-public class VRView extends FrameLayout implements View.OnClickListener, View.OnLongClickListener, TransformListener {
+public class VRView extends FrameLayout implements TransformListener {
 
     public int id = 0;
     public VRView(@NonNull Context context) {
@@ -47,6 +47,19 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
         init(attrs);
     }
 
+    @Override
+    public void setOnLongClickListener(OnLongClickListener l) {
+        if(mControlView!=null)
+        mControlView.getGestureAttacher().setOnLongClickListener(l);
+    }
+
+
+    @Override
+    public void setOnClickListener(@Nullable OnClickListener l) {
+        if(mControlView!=null)
+            mControlView.getGestureAttacher().setOnClickListener(l);
+    }
+
     private void init(AttributeSet attrs) {
      buildLayout();
     }
@@ -56,13 +69,12 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
             removeAllViews();
             mControlView = new VRControlView(getContext());
             mControlView.setTransformListener(this);
-            mControlView.getGestureAttacher().setOnClickListener(this);
-            mControlView.getGestureAttacher().setOnLongClickListener(this);
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
             addView(mControlView,params);
             View mOptionView = LayoutInflater.from(getContext()).inflate(R.layout.vr_option,this,false);
             mAlignButton = mOptionView.findViewById(R.id.align_button);
+            mAlignButton.setOnClickListener((view)-> align());
             mTextView = mOptionView.findViewById(R.id.text_view);
             addView(mOptionView);
         }
@@ -89,22 +101,18 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
     }
 
     protected VRControlView mControlView;
-    private AlignButton mAlignButton;
-    private TextView mTextView;
+    protected AlignButton mAlignButton;
+    protected TextView mTextView;
 
-    public void recalibrate() {
-        if(mControlView!=null) mControlView.recalibrate();
+    public void align() {
+        if(mControlView!=null) mControlView.align();
     }
 
-    @Override
-    public void onClick(View v) {
-        mControlView.recalibrate();
-    }
 
-    public ArrayList<VRPhoto> mSampleVRPhotos = new ArrayList<>();
-    public int curSamplePos = 0;
+    /*public ArrayList<VRPhoto> mSampleVRPhotos = new ArrayList<>();
+    public int curSamplePos = 0;*/
 
-    @Override
+ /*   @Override
     public boolean onLongClick(View v) {
         if(!mSampleVRPhotos.isEmpty()) {
             curSamplePos++;
@@ -115,7 +123,7 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
             }
         }
         return true;
-    }
+    }*/
 
     public void setViewID(int id) {
         this.id = id;
@@ -129,6 +137,15 @@ public class VRView extends FrameLayout implements View.OnClickListener, View.On
             mAlignButton.setUpDownDegree(angle3[1]);
         }
 
-        if(mTextView!=null) mTextView.setText("transform "+df.format(angle3[0])+", "+df.format(angle3[1]));
+        if(which== TransformManager.GESTURE_TRANSFORMER)
+            post(() -> {
+               mAlignButton.keepActive();
+            });
+
+        post(() -> {
+            if (mTextView != null)
+                mTextView.setText("transform " + df.format(angle3[0]) + ", " + df.format(angle3[1]));
+        });
+
     }
 }
