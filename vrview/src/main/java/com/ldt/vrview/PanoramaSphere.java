@@ -38,7 +38,6 @@ public class PanoramaSphere {
 
     private static final float radius=2f;
 
-    private static final double angleSpan = Math.PI/90;// 将球进行单位切分的角度
     private static int vCount = 0;// 顶点个数，先初始化为0
 
     public static final float FROM_RADS_TO_DEGS = 57.2957795f;
@@ -141,6 +140,7 @@ public class PanoramaSphere {
         isCalculated = true;
 
         int angleSpanInDegree = 2;
+        float angleSpan = angleSpanInDegree/FROM_RADS_TO_DEGS;
 
         double vAngleInRad = 0;
         double hAngleInRad = 0;
@@ -247,13 +247,26 @@ public class PanoramaSphere {
         ArrayList<Float> alVertix = new ArrayList<>();
         ArrayList<Float> textureVertix = new ArrayList<>();
         float angleSpanDegree = 2; // 2 degree, which mean 180/2 = 90 loop
+        float angleSpan = angleSpanDegree/FROM_RADS_TO_DEGS;
 
         double vAngle = 0;
         double hAngle = 0;
-        for (double vAngleDegree = 0; vAngleDegree < 180; vAngleDegree += angleSpanDegree){
+        /*
+        Chạy từ dưới cùng lên trên cùng
+         */
+
+        float vFromDeg = 30;
+        float vToDeg = 160;
+        float hFromDeg = 0;
+        float hToDeg = 360;
+        //float vFrom = vFromDeg/FROM_RADS_TO_DEGS;
+        //float vTo = vToDeg/FROM_RADS_TO_DEGS;
+        for (double vAngleDegree = vFromDeg; vAngleDegree < vToDeg; vAngleDegree += angleSpanDegree){
             vAngle = vAngleDegree/FROM_RADS_TO_DEGS;
-            for (double hAngleDegree = 0; hAngleDegree < 360; hAngleDegree += angleSpanDegree){
+            for (double hAngleDegree = hFromDeg; hAngleDegree < hToDeg; hAngleDegree += angleSpanDegree){
                 hAngle = hAngleDegree/FROM_RADS_TO_DEGS;
+
+                // radius là 2, nghĩa là viewport = 1 nửa texture
                 float x0 = (float) (radius* Math.sin(vAngle) * Math.cos(hAngle));
                 float y0 = (float) (radius* Math.sin(vAngle) * Math.sin(hAngle));
                 float z0 = (float) (radius * Math.cos((vAngle)));
@@ -280,10 +293,10 @@ public class PanoramaSphere {
                 alVertix.add(y3);
                 alVertix.add(z3);
 
-                float s0 = (float) (hAngle / Math.PI/2);
-                float s1 = (float) ((hAngle + angleSpan)/Math.PI/2);
-                float t0 = (float) (vAngle / Math.PI);
-                float t1 = (float) ((vAngle + angleSpan) / Math.PI);
+                float s0 = (float) (hAngle / (180/FROM_RADS_TO_DEGS)/2);
+                float s1 = (float) ((hAngle + angleSpan)/ (180/FROM_RADS_TO_DEGS)/2);
+                float t0 = (float) ((vAngleDegree - vFromDeg) / (vToDeg - vFromDeg)); // from 0 to (
+                float t1 = (float) ((vAngleDegree + angleSpanDegree - vFromDeg) / (vToDeg - vFromDeg));
 
                 textureVertix.add(s1);// x1 y1对应纹理坐标
                 textureVertix.add(t0);
