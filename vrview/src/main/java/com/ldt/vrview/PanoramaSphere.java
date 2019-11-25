@@ -293,8 +293,10 @@ public class PanoramaSphere {
                 alVertix.add(y3);
                 alVertix.add(z3);
 
-                float s0 = (float) (hAngle / (180/FROM_RADS_TO_DEGS)/2);
-                float s1 = (float) ((hAngle + angleSpan)/ (180/FROM_RADS_TO_DEGS)/2);
+                float _s0 = (float) (hAngle / (180/FROM_RADS_TO_DEGS)/2);
+                float _s1 = (float) ((hAngle + angleSpan)/ (180/FROM_RADS_TO_DEGS)/2);
+                float s0 = (float) (hAngleDegree - hFromDeg) / ((hToDeg - hFromDeg));
+                float s1 = (float) (hAngleDegree - hFromDeg + angleSpanDegree) / ((hToDeg - hFromDeg));
                 float t0 = (float) ((vAngleDegree - vFromDeg) / (vToDeg - vFromDeg)); // from 0 to (
                 float t1 = (float) ((vAngleDegree + angleSpanDegree - vFromDeg) / (vToDeg - vFromDeg));
 
