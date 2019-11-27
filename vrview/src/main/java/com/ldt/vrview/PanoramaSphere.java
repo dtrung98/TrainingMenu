@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import com.ldt.vrview.model.VRPhoto;
+import com.ldt.vrview.shader.ShaderConstant;
 import com.ldt.vrview.transform.BaseTransformer;
 import com.ldt.vrview.shader.Shader;
 import com.ldt.vrview.util.GlSelfUtil;
@@ -117,7 +118,7 @@ public class PanoramaSphere {
 
     public void create(){
 
-        mHProgram= GlSelfUtil.createGlProgram(Shader.VERTEX,Shader.FRAGMENT);
+        mHProgram= GlSelfUtil.createGlProgram(ShaderConstant.VERTEX, ShaderConstant.FRAGMENT);
         GLES20.glUseProgram(mHProgram);
         mHProjMatrix=GLES20.glGetUniformLocation(mHProgram,"uProjMatrix");
         mHViewMatrix=GLES20.glGetUniformLocation(mHProgram,"uViewMatrix");
