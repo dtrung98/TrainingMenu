@@ -38,6 +38,6 @@ public class VRMenuActivity extends AbsMenuActivity {
 
     @Override
     protected int title() {
-        return R.string.fundamental;
+        return R.string.vr;
     }
 }

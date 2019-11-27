@@ -7,6 +7,9 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
@@ -27,6 +30,7 @@ import androidx.preference.PreferenceManager;
 import com.zalo.trainingmenu.App;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -237,5 +241,16 @@ public final class Util {
             HAD_GOT_SCREEN_SIZE = true;
         }
         return screenSize;
+    }
+
+    public static Bitmap getBitmapWithUri(Context context, Uri selectedimg) throws IOException {
+        //    BitmapFactory.Options options = new BitmapFactory.Options();
+
+        // options.inSampleSize = 2;
+        AssetFileDescriptor fileDescriptor = null;
+        fileDescriptor =
+                context.getContentResolver().openAssetFileDescriptor(selectedimg, "r");
+        Bitmap original = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor());
+        return original;
     }
 }

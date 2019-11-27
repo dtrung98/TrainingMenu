@@ -140,6 +140,14 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
 
     }
 
+    public synchronized void forceUpdateAngles(float vFrom, float vTo, float hFrom, float hTo) {
+        mSphere.forceUpdateAngles(vFrom, vTo, hFrom, hTo);
+    }
+
+    public float[] getAngles() {
+        return mSphere.getAngles();
+    }
+
     public ViewGestureAttacher getGestureAttacher() {
         if(mTransformManager!=null) return mTransformManager.getGestureAttacher();
         return null;

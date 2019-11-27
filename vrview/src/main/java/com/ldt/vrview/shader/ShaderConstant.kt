@@ -26,11 +26,8 @@ object ShaderConstant {
 }
         void main(){ 
         
-        //vec4 color=texture2D(uTexture,vCoordinate);
-        //gl_FragColor=color; 
-
-        gl_FragColor = blur13(uTexture, vCoordinate, vec2(1920,1080), vec2(0,1));
-        
+        gl_FragColor=texture2D(uTexture,vCoordinate);
+        //gl_FragColor = blur13(uTexture, vCoordinate, vec2(1920,1080), vec2(0,1));
         }
         """
 

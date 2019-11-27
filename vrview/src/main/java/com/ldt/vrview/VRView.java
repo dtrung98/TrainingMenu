@@ -93,6 +93,17 @@ public class VRView extends FrameLayout implements TransformListener {
         }
     }
 
+    public synchronized void forceUpdateAngles(float vFrom, float vTo, float hFrom, float hTo) {
+        if(mControlView!=null)
+        mControlView.forceUpdateAngles(vFrom, vTo, hFrom, hTo);
+    }
+
+    public float[] getAngles() {
+        if(mControlView!=null)
+        return mControlView.getAngles();
+        return null;
+    }
+
     public void onPause() {
         if(mControlView!=null) mControlView.onPause();
     }

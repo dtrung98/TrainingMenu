@@ -13,7 +13,6 @@ import android.view.Surface;
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.shader.ShaderConstant;
 import com.ldt.vrview.transform.BaseTransformer;
-import com.ldt.vrview.shader.Shader;
 import com.ldt.vrview.util.GlSelfUtil;
 
 import java.lang.ref.WeakReference;
@@ -96,8 +95,8 @@ public class PanoramaSphere {
     private float[] currentOrient = new float[3];
 
 
-    private static Buffer posBuffer;
-    private static Buffer cooBuffer;
+    private Buffer posBuffer;
+    private Buffer cooBuffer;
     private int vSize;
     private float skyRate=3f;
 
@@ -131,14 +130,28 @@ public class PanoramaSphere {
       //  if(shouldResetVRPhoto)
         textureId = createTextureIfAvailable();
         long start = System.currentTimeMillis();
-        //calculateVertices();
         calculateAttribute();
         Log.d(TAG, "vr "+id+" create in "+(System.currentTimeMillis() - start));
     }
 
-    private static void calculateVertices() {
-        if(isCalculated) return;
-        isCalculated = true;
+    private float mVFromAngle = 65;
+    private float mVToAngle = 125;
+    private float mHFromAngle = 0;
+    private float mHToAngle = 310;
+
+    public synchronized void forceUpdateAngles(float vFrom, float vTo, float hFrom, float hTo) {
+        mVFromAngle = vFrom;
+        mVToAngle = vTo;
+        mHFromAngle = hFrom;
+        mHToAngle = hTo;
+        calculateAttribute();
+    }
+
+    public float[] getAngles() {
+        return new float[] {mVFromAngle, mVToAngle, mHFromAngle, mHToAngle};
+    }
+
+    private void calculateVertices() {
 
         int angleSpanInDegree = 2;
         float angleSpan = angleSpanInDegree/FROM_RADS_TO_DEGS;
@@ -242,9 +255,7 @@ public class PanoramaSphere {
                 .position(0);
     }
 
-    private static synchronized void calculateAttribute(){
-        if(isCalculated) return;
-        isCalculated = true;
+    private synchronized void calculateAttribute(){
         ArrayList<Float> alVertix = new ArrayList<>();
         ArrayList<Float> textureVertix = new ArrayList<>();
         float angleSpanDegree = 2; // 2 degree, which mean 180/2 = 90 loop
@@ -256,15 +267,12 @@ public class PanoramaSphere {
         Chạy từ dưới cùng lên trên cùng
          */
 
-        float vFromDeg = 30;
-        float vToDeg = 160;
-        float hFromDeg = 0;
-        float hToDeg = 360;
+
         //float vFrom = vFromDeg/FROM_RADS_TO_DEGS;
         //float vTo = vToDeg/FROM_RADS_TO_DEGS;
-        for (double vAngleDegree = vFromDeg; vAngleDegree < vToDeg; vAngleDegree += angleSpanDegree){
+        for (double vAngleDegree = mVFromAngle; vAngleDegree < mVToAngle; vAngleDegree += angleSpanDegree){
             vAngle = vAngleDegree/FROM_RADS_TO_DEGS;
-            for (double hAngleDegree = hFromDeg; hAngleDegree < hToDeg; hAngleDegree += angleSpanDegree){
+            for (double hAngleDegree = mHFromAngle; hAngleDegree < mHToAngle; hAngleDegree += angleSpanDegree){
                 hAngle = hAngleDegree/FROM_RADS_TO_DEGS;
 
                 // radius là 2, nghĩa là viewport = 1 nửa texture
@@ -296,10 +304,10 @@ public class PanoramaSphere {
 
                 float _s0 = (float) (hAngle / (180/FROM_RADS_TO_DEGS)/2);
                 float _s1 = (float) ((hAngle + angleSpan)/ (180/FROM_RADS_TO_DEGS)/2);
-                float s0 = (float) (hAngleDegree - hFromDeg) / ((hToDeg - hFromDeg));
-                float s1 = (float) (hAngleDegree - hFromDeg + angleSpanDegree) / ((hToDeg - hFromDeg));
-                float t0 = (float) ((vAngleDegree - vFromDeg) / (vToDeg - vFromDeg)); // from 0 to (
-                float t1 = (float) ((vAngleDegree + angleSpanDegree - vFromDeg) / (vToDeg - vFromDeg));
+                float s0 = (float) (hAngleDegree - mHFromAngle) / ((mHToAngle - mHFromAngle));
+                float s1 = (float) (hAngleDegree - mHFromAngle + angleSpanDegree) / ((mHToAngle - mHFromAngle));
+                float t0 = (float) ((vAngleDegree - mVFromAngle) / (mVToAngle - mVFromAngle)); // from 0 to (
+                float t1 = (float) ((vAngleDegree + angleSpanDegree - mVFromAngle) / (mVToAngle - mVFromAngle));
 
                 textureVertix.add(s1);// x1 y1对应纹理坐标
                 textureVertix.add(t0);
@@ -378,9 +386,9 @@ public class PanoramaSphere {
                 //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
                 GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
                 //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_MIRRORED_REPEAT);
                 //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_MIRRORED_REPEAT);
                 //根据以上指定的参数，生成一个2D纹理
                 GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, getBitmap(), 0);
                 return texture[0];

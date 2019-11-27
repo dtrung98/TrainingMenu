@@ -225,5 +225,10 @@
     <string name="vr_sample_description">Show a fullscreen panorama photo</string>
     <string name="vr_list_description">Show a panorama photos newsfeed</string>
     <string name="learn_how_to_create_3d_photos">Learn how to create 3D photos</string>
+    <string name="vr_viewer">View VR</string>
+    <string name="vr_watch_description">View VR Photos in the gallery</string>
+    <string name="sample_mode">Sample Mode</string>
+    <string name="gallery_chooser_mode">Choose In Gallery Mode</string>
+    <string name="choose_vr_photo">Choose VR Photo</string>
 
 </resources>

@@ -58,6 +58,11 @@ public class OptionBottomSheet extends BottomSheetDialogFragment implements View
     private CallBack mCallBack;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public void onDestroyView() {
         mCallBack = null;
         super.onDestroyView();
