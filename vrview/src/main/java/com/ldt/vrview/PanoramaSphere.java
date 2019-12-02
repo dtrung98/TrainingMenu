@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import static java.lang.Math.sqrt;
 
 public class PanoramaSphere {
+    private static final String TAG = "PanoramaSphere";
     private static int nextID =1;
     private static int getNextID() {
        return nextID++;
     }
     public int id = getNextID();
-    private static final String TAG = "Sphere";
 
     private static final float UNIT_SIZE = 1f;// 单位尺寸
     private float r = 2f; // 球的半径
@@ -111,9 +111,12 @@ public class PanoramaSphere {
     public void setVRPhoto(VRPhoto photo) {
         shouldResetVRPhoto = true;
         mVRPhoto = photo;
+        float[] angles = mVRPhoto.getAngleAreas();
+        mHFromAngle = angles[0];
+        mVFromAngle = angles[1];
+        mHToAngle = angles[0] + angles[2];
+        mVToAngle = angles[1] + angles[3];
     }
-
-    private static boolean isCalculated = false;
 
     public void create(){
 
@@ -134,12 +137,12 @@ public class PanoramaSphere {
         Log.d(TAG, "vr "+id+" create in "+(System.currentTimeMillis() - start));
     }
 
-    private float mVFromAngle = 65;
-    private float mVToAngle = 125;
+    private float mVFromAngle = 0;
+    private float mVToAngle = 180;
     private float mHFromAngle = 0;
-    private float mHToAngle = 310;
+    private float mHToAngle = 360;
 
-    public synchronized void forceUpdateAngles(float vFrom, float vTo, float hFrom, float hTo) {
+    public synchronized void overrideAreaAngles(float vFrom, float vTo, float hFrom, float hTo) {
         mVFromAngle = vFrom;
         mVToAngle = vTo;
         mHFromAngle = hFrom;
@@ -256,6 +259,7 @@ public class PanoramaSphere {
     }
 
     private synchronized void calculateAttribute(){
+        Log.d(TAG, "calculate attribute with angle: hFrom = "+mVFromAngle+", vFrom = "+mHFromAngle+", hTo = "+mHToAngle+", vTo = "+mVToAngle);
         ArrayList<Float> alVertix = new ArrayList<>();
         ArrayList<Float> textureVertix = new ArrayList<>();
         float angleSpanDegree = 2; // 2 degree, which mean 180/2 = 90 loop
@@ -419,8 +423,10 @@ public class PanoramaSphere {
     }
 
     public void draw(){
-        if(shouldResetVRPhoto)
+        if(shouldResetVRPhoto) {
             textureId = createTextureIfAvailable();
+            calculateAttribute();
+        }
         //GLES20.glClearColor(1,1,1,1);
         Log.d(TAG, "vr "+id+" draw with texture is "+((mVRPhoto==null) ? "null": "available")+", texture id = "+textureId+", size = "+w+", "+h);
         if(textureId!=0) {

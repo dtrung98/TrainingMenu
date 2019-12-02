@@ -13,6 +13,7 @@ public final class PreferenceUtil {
     public static final String SAVED_FRAGMENT_SHADER = "saved_fragment_shader";
     public static final String SAVED_ORIGINAL_3D_PHOTO = "saved_original_3d_photo";
     public static final String SAVED_DEPTH_PHOTO = "saved_depth_photo";
+    public static final String SAVED_VR_SOURCE = "saved_vr_source";
     private static PreferenceUtil sInstance;
     private final SharedPreferences mPreferences;
 
@@ -62,11 +63,18 @@ public final class PreferenceUtil {
         mPreferences.edit().putString(SAVED_ORIGINAL_3D_PHOTO,path).apply();
     }
 
-    public String  getSavedDepthPhoto() {
+    public String getSavedDepthPhoto() {
         return mPreferences.getString(SAVED_DEPTH_PHOTO,null);
     }
 
     public void setSavedDepthPhoto(String path) {
         mPreferences.edit().putString(SAVED_DEPTH_PHOTO,path).apply();
+    }
+
+    public String getSavedVRSource() {
+        return mPreferences.getString(SAVED_VR_SOURCE,null);
+    }
+    public void saveVRSource(String source) {
+        mPreferences.edit().putString(SAVED_VR_SOURCE,source).apply();
     }
 }

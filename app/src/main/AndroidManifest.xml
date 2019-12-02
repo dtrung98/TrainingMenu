@@ -84,7 +84,6 @@
         <activity android:name=".fundamental.index.OpenGLActivity" />
         <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderSetActivity" android:theme="@style/FullScreenTheme"/>
         <activity android:name=".fundamental.camera.CameraActivity" android:theme="@style/CompletelyFullscreenTheme"/>
-        <activity android:name=".fundamental.camera.CameraXActivity" android:theme="@style/CompletelyFullscreenTheme"/>
         <activity android:name=".fundamental.camera.CameraKitActivity" />
         <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"  android:theme="@style/LightAppTheme"/>
         <activity android:name=".vrsample.VrSampleActivity" android:theme="@style/VRTheme" android:screenOrientation="portrait"

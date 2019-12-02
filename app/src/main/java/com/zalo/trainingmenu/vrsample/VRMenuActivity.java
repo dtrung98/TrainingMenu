@@ -18,7 +18,8 @@ public class VRMenuActivity extends AbsMenuActivity {
     @Override
     protected List<Item> onRefreshDataList() {
         ArrayList<Item> list = new ArrayList<>();
-        list.add(Item.with(this).setTitle(R.string.vr_sample).setDescription(R.string.vr_sample_description).setDestinationActivityClass(VrSampleActivity.class).get());
+        list.add(Item.with(this).setTitle(R.string.vr_sample).setDescription(R.string.vr_sample_description).setDestinationActivityClass(VrSampleActivity.class).setAction(VrSampleActivity.ACTION_VIEW_SAMPLE).get());
+        list.add(Item.with(this).setTitle(R.string.choose_in_gallery).setDescription(R.string.choose_vr_photo_description).setDestinationActivityClass(VrSampleActivity.class).setAction(VrSampleActivity.ACTION_VIEW_FROM_GALLERY).get());
         list.add(Item.with(this).setTitle(R.string.vr_list_sample).setDescription(R.string.vr_list_description).setDestinationActivityClass(VRListActivity.class).get());
         return list;
     }

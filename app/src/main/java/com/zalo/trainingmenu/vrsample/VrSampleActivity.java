@@ -1,12 +1,16 @@
 package com.zalo.trainingmenu.vrsample;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,24 +18,35 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.adobe.internal.xmp.XMPIterator;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.properties.XMPPropertyInfo;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.xmp.XmpDirectory;
 import com.ldt.menulayout.ui.AbsLocaleActivity;
 import com.ldt.vrview.VRView;
 import com.ldt.vrview.model.VRPhoto;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.ui.base.OptionBottomSheet;
-import com.zalo.trainingmenu.util.Util;
+import com.zalo.trainingmenu.util.PreferenceUtil;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
 public class VrSampleActivity extends AbsLocaleActivity {
-    private static final String TAG = "VrContextActivity";
+    private static final String TAG = "VrSampleActivity";
 
     public static final String ACTION_VIEW_NEWS_FEED = "view_news_feed";
     public static final String EXTRA_VR_NEWS_FEED = "vr_news_feed";
     public static final String ACTION_PICK_PHOTO_FROM_GALLERY = "ACTION_PICK_PHOTO_FROM_GALLERY";
+
+    public static final String ACTION_VIEW_SAMPLE = "action_view_example";
+    public static final String ACTION_VIEW_FROM_GALLERY = "action_view_from_gallery";
     public static final int REQUEST_CODE_PICK_FROM_GALLERY = 1;
 
     private VRView mVRView;
@@ -56,6 +71,7 @@ public class VrSampleActivity extends AbsLocaleActivity {
             root.addView(mFullScreenView);
         }
     }
+
 
     private void updateMode(int mode) {
         if(mode!=mMode) {
@@ -83,10 +99,9 @@ public class VrSampleActivity extends AbsLocaleActivity {
         super.onRequestPermissionsResult(intent, permissionType, granted);
         if(intent!=null&&ACTION_PICK_PHOTO_FROM_GALLERY.equals(intent.getAction())&&granted) {
             try {
-                Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                pickIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                pickIntent.setType("image/*");
-                startActivityForResult(pickIntent, REQUEST_CODE_PICK_FROM_GALLERY);
+               Intent i = new Intent(Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, REQUEST_CODE_PICK_FROM_GALLERY);
             } catch (Exception e) {
                 Toasty.error(this,"Something went wrong!").show();
             }
@@ -101,24 +116,133 @@ public class VrSampleActivity extends AbsLocaleActivity {
         }
     }
 
+    private float[] getAreaAnglesFromMetadata(String path) {
+        InputStream inputStream;
+        String message = "";
+        try {
+            inputStream = new FileInputStream(path);
+        } catch (Exception e) {
+            inputStream = null;
+            message = "Exception: "+ e.getMessage();
+        }
+
+        if(message.isEmpty()) {
+            if (inputStream != null) {
+                try {
+                    Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
+                    for (XmpDirectory xmpDirectory : metadata.getDirectoriesOfType(XmpDirectory.class)) {
+                        XMPMeta xmpMeta = xmpDirectory.getXMPMeta();
+                        XMPIterator itr = xmpMeta.iterator();
+                        boolean isEquirectangular = false;
+                        boolean isPropertiesValid = true;
+                        float[]  properties = new float[] {-1,-1,-1,-1, -1,-1}; // full-width, full-height, left, top, width, height
+
+                        String name;
+                        String value;
+                        while (itr.hasNext()) {
+                            XMPPropertyInfo property = (XMPPropertyInfo) itr.next();
+                            Log.d(TAG, "property: " + property.getPath() + " => " + property.getValue());
+                            name = property.getPath();
+                            value = property.getValue();
+                            if(name!=null&&!name.isEmpty()&&value!=null&&!value.isEmpty())
+                            switch (name) {
+                                case VRPhoto.GPANO_PROJECTION_TYPE:
+                                    isEquirectangular = "equirectangular".equals(value);
+                                    break;
+                                case VRPhoto.GPANO_FULL_PANO_WIDTH_PIXELS:
+                                    properties[0] = Float.parseFloat(value);
+                                    break;
+                                case VRPhoto.GPANO_FULL_PANO_HEIGHT_PIXELS:
+                                    properties[1] = Float.parseFloat(value);
+                                    break;
+                                case VRPhoto.GPANO_CROPPED_AREA_LEFT_PIXELS:
+                                    properties[2] = Float.parseFloat(value);
+                                    break;
+                                case VRPhoto.GPANO_CROPPED_AREA_TOP_PIXELS:
+                                    properties[3] = Float.parseFloat(value);
+                                    break;
+                                case VRPhoto.GPANO_CROPPED_AREA_IMAGE_WIDTH_PIXELS:
+                                    properties[4] = Float.parseFloat(value);
+                                    break;
+                                case VRPhoto.GPANO_CROPPED_AREA_IMAGE_HEIGHT_PIXELS:
+                                    properties[5] = Float.parseFloat(value);
+                            }
+                        }
+
+                        for (float p: properties) {
+                            if(p<0) {
+                                isPropertiesValid = false;
+                                break;
+                            }
+                        }
+
+                        if(isEquirectangular&&isPropertiesValid) {
+                            // valid
+                            float[] areaAngles = new float[4]; // left, top, width, height in degree angle
+                            areaAngles[0] = (properties[2] / properties[0])*360;
+                            areaAngles[1] = (properties[3] / properties[1])*180;
+                            areaAngles[2] = (properties[4] / properties[0])*360;
+                            areaAngles[3] = (properties[5] / properties[1])*180;
+                            return areaAngles;
+                        }
+                    }
+                } catch (Exception e) {
+                    message = "Exception: "+e.getMessage();
+                }
+            } else message = "InputStream is null";
+        }
+
+        Log.d(TAG,"get metadata with message: ["+message+"]");
+        return null;
+    }
+
+    private void setVRPhotoWithPath(String path) {
+        boolean valid = true;
+        Bitmap bitmap = null;
+        float[] area = null;
+        if(path==null) valid = false;
+        else {
+            area = getAreaAnglesFromMetadata(path);
+            try {
+                bitmap = BitmapFactory.decodeFile(path);
+            } catch (Exception ignored) {
+            }
+        }
+        if(bitmap==null) valid = false;
+        if(!valid)
+            Toasty.error(App.getInstance(),"Image is unavailable").show();
+        else {
+            if(area!=null&&area.length>=4)
+            Log.d(TAG, "set vr photo with area :"+area[0]+", "+area[1]+", "+area[2]+", "+area[3]);
+            else Log.d(TAG, "set vr photo with null area");
+            mVRView.setVRPhoto(VRPhoto.with(this).setBitmap(bitmap).setAreaAngles(area).get());
+            PreferenceUtil.getInstance().saveVRSource(path);
+        }
+    }
+
     private void setVRPhotoWithUri(Uri data) {
         boolean valid = true;
         if(data==null) valid = false;
-        Bitmap bitmap = null;
+        String path = null;
         if(valid)
         try {
-            bitmap = Util.getBitmapWithUri(this,data);
+            String[] fileCols = {MediaStore.Images.Media.DATA};
+            Cursor c = getContentResolver().query(data,fileCols,null,null,null);
+            if(c!=null) {
+                c.moveToFirst();
+                int index = c.getColumnIndex(fileCols[0]);
+                path = c.getString(index);
+               // Log.d(TAG, "onActivityResult: " + path);
+                c.close();
+            }
         } catch (Exception e) {
             valid = false;
         }
 
-        if(bitmap==null) valid = false;
-
-        if(!valid)
-            Toasty.error(App.getInstance(),"Image is unavailable").show();
+        if(!valid) setVRPhotoWithPath(null);
         else {
             // valid
-            mVRView.setVRPhoto(VRPhoto.with(this).setBitmap(bitmap).get());
+            setVRPhotoWithPath(path);
         }
     }
 
@@ -185,12 +309,26 @@ public class VrSampleActivity extends AbsLocaleActivity {
                 });
             }
 
-        } else
+        } else {
+            int mode;
+            if(intent!=null&&ACTION_VIEW_FROM_GALLERY.equals(intent.getAction())) {
+                mode = MODE_GALLERY;
+            } else mode = MODE_SAMPLE;
+            updateMode(mode);
             buildSample();
+        }
     }
 
     ArrayList<VRPhoto> mVRPhotos;
     private int mCurrentPos = 0;
+
+    private void setVRPhotoSample(int posInExample) {
+        if(posInExample!=-1) {
+            mVRView.setVRPhoto(mVRPhotos.get(posInExample));
+            PreferenceUtil.getInstance().setSavedDepthPhoto("sample_"+posInExample);
+        }
+        else mVRView.setVRPhoto(null);
+    }
 
     private void buildSample() {
         mVRView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -198,10 +336,10 @@ public class VrSampleActivity extends AbsLocaleActivity {
             public boolean onLongClick(View v) {
                 if(!mVRPhotos.isEmpty()&&mMode==MODE_SAMPLE) {
                     mCurrentPos++;
-                    if(mCurrentPos == mVRPhotos.size()) mVRView.setVRPhoto(null);
+                    if(mCurrentPos == mVRPhotos.size()) setVRPhotoSample(-1);
                     else {
                         if(mCurrentPos == mVRPhotos.size()+1) mCurrentPos = 0;
-                        mVRView.setVRPhoto(mVRPhotos.get(mCurrentPos));
+                        setVRPhotoSample(mCurrentPos);
                     }
                 }
                 return true;
@@ -216,7 +354,31 @@ public class VrSampleActivity extends AbsLocaleActivity {
             mVRPhotos.add(createPhoto(R.drawable.down1));
             mVRPhotos.add(createPhoto(R.drawable.down2));
             mVRView.post(() -> {
-                mVRView.setVRPhoto(mVRPhotos.get(0));
+                String savedVR = PreferenceUtil.getInstance().getSavedVRSource();
+                if(savedVR==null) setVRPhotoSample(0);
+                else
+                switch (savedVR) {
+                    case "sample_0":
+                        setVRPhotoSample(0);
+                    break;
+                    case "sample_1":
+                        setVRPhotoSample(1);
+                    break;
+                    case "sample_2":
+                        setVRPhotoSample(2);
+                    break;
+                    case "sample_3":
+                        setVRPhotoSample(3);
+                    break;
+                    case "sample_4":
+                        setVRPhotoSample(4);
+                    break;
+                    case "sample_5":
+                        setVRPhotoSample(5);
+                        break;
+                    default:
+                        setVRPhotoWithPath(savedVR);
+                }
             });
         });
     }

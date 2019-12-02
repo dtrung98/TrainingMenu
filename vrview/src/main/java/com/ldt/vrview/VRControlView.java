@@ -2,16 +2,12 @@ package com.ldt.vrview;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.WindowManager;
-
-import androidx.annotation.Nullable;
 
 import com.ldt.vrview.gesture.ViewGestureAttacher;
 import com.ldt.vrview.model.VRPhoto;
@@ -141,7 +137,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     }
 
     public synchronized void forceUpdateAngles(float vFrom, float vTo, float hFrom, float hTo) {
-        mSphere.forceUpdateAngles(vFrom, vTo, hFrom, hTo);
+        mSphere.overrideAreaAngles(vFrom, vTo, hFrom, hTo);
     }
 
     public float[] getAngles() {

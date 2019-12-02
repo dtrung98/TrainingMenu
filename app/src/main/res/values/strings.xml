@@ -220,7 +220,7 @@
     <string name="news_feed_3d_description">News feed likely with photo 3D item</string>
     <string name="vr_sample">VR Sample</string>
     <string name="vr_list_sample">VR Sample List</string>
-    <string name="vr">VR</string>
+    <string name="vr">VR Photography</string>
     <string name="vr_description">View some panorama photos</string>
     <string name="vr_sample_description">Show a fullscreen panorama photo</string>
     <string name="vr_list_description">Show a panorama photos newsfeed</string>
@@ -230,5 +230,7 @@
     <string name="sample_mode">Sample Mode</string>
     <string name="gallery_chooser_mode">Choose In Gallery Mode</string>
     <string name="choose_vr_photo">Choose VR Photo</string>
+    <string name="choose_vr_photo_description">View vr photo in the gallery</string>
+    <string name="choose_in_gallery">Choose in gallery</string>
 
 </resources>

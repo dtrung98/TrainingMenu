@@ -5,13 +5,26 @@ import android.graphics.Bitmap;
 
 public class VRPhoto {
     private static final String TAG = "VRImageObject";
+    public static final String GPANO_FULL_PANO_HEIGHT_PIXELS = "GPano:FullPanoHeightPixels";
+    public static final String GPANO_FULL_PANO_WIDTH_PIXELS = "GPano:FullPanoWidthPixels";
+    public static final String GPANO_CROPPED_AREA_IMAGE_WIDTH_PIXELS = "GPano:CroppedAreaImageWidthPixels";
+    public static final String GPANO_CROPPED_AREA_IMAGE_HEIGHT_PIXELS = "GPano:CroppedAreaImageHeightPixels";
+    public static final String GPANO_CROPPED_AREA_TOP_PIXELS = "GPano:CroppedAreaTopPixels";
+    public static final String GPANO_CROPPED_AREA_LEFT_PIXELS = "GPano:CroppedAreaLeftPixels";
+    public static final String GPANO_PROJECTION_TYPE = "GPano:ProjectionType";
 
-    private final float[] mStartingVector;
-    private float[] mCurrentVector = new float[3];
+    private final float[] mStartingAngles;
+    private float[] mCurrentAngles = new float[3];
 
     private float mCurrentScale;
     private final float mStartingScale;
     private Bitmap mThumbnailBitmap;
+
+    public float[] getAngleAreas() {
+        return mAngleAreas;
+    }
+
+    private final float[] mAngleAreas = new float[] {0,0,360,180};
 
     public void setThumbnailBitmap(Bitmap thumbnailBitmap) {
         mThumbnailBitmap = thumbnailBitmap;
@@ -37,10 +50,11 @@ public class VRPhoto {
     public VRPhoto(Builder builder) {
         mThumbnailBitmap = builder.mThumbnailBitmap;
         mBitmap = builder.mBitmap;
-        mCurrentVector = mStartingVector = builder.mStartingVector;
+        mCurrentAngles = mStartingAngles = builder.mStartingVector;
         mCurrentScale = mStartingScale = builder.mStartingScale;
         mPhotoTitle = builder.mPhotoTitle;
         mPhotoDescription = builder.mPhotoDescription;
+        System.arraycopy(builder.mAreaAngles,0,mAngleAreas,0,4);
     }
 
     public float getCurrentScale() {
@@ -57,29 +71,29 @@ public class VRPhoto {
 
 
     public VRPhoto setStartingVector(float x, float y, float z) {
-        mStartingVector[0] = x;
-        mStartingVector[1] = y;
-        mStartingVector[2] = z;
+        mStartingAngles[0] = x;
+        mStartingAngles[1] = y;
+        mStartingAngles[2] = z;
         return this;
     }
 
     public VRPhoto setCurrentVector(float x, float y, float z) {
-        mCurrentVector[0] = x;
-        mCurrentVector[1] = y;
-        mCurrentVector[2] = z;
+        mCurrentAngles[0] = x;
+        mCurrentAngles[1] = y;
+        mCurrentAngles[2] = z;
         return this;
     }
 
 
-    public float[] getStartingVector() {
+    public float[] getStartingAngles() {
         float[] temp = new float[3];
-        System.arraycopy(mStartingVector,0,temp,0,3);
+        System.arraycopy(mStartingAngles,0,temp,0,3);
         return temp;
     }
 
-    public float[] getCurrentVector() {
+    public float[] getCurrentAngles() {
         float[] temp = new float[3];
-        System.arraycopy(mCurrentVector,0,temp,0,3);
+        System.arraycopy(mCurrentAngles,0,temp,0,3);
         return temp;
     }
 
@@ -108,6 +122,22 @@ public class VRPhoto {
         private Bitmap mThumbnailBitmap;
         private Bitmap mBitmap;
         private String mPhotoTitle = "";
+
+        public Builder setAreaAngles(float[] areaAngles) {
+            if(areaAngles!=null&&areaAngles.length>=4)
+            System.arraycopy(areaAngles,0,mAreaAngles,0,4);
+            return this;
+        }
+
+        public Builder setAreaAngles(float leftAngle, float topAngle, float horizontalAngle, float verticalAngle) {
+            mAreaAngles[0] = leftAngle;
+            mAreaAngles[1] = topAngle;
+            mAreaAngles[2] = horizontalAngle;
+            mAreaAngles[3] = verticalAngle;
+            return this;
+        }
+
+        private float[] mAreaAngles = new float[]{0,0,360,180};
 
         public Builder setPhotoDescription(String photoDescription) {
             mPhotoDescription = photoDescription;

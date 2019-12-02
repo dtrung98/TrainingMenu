@@ -97,7 +97,7 @@
         android:padding="15dp"
         android:textSize="15sp"
         android:textStyle="bold"
-        android:textColor="@color/FlatWhite"
+        android:textColor="@color/FlatBlue"
         android:layout_marginStart="32dp"
         android:layout_marginBottom="66dp"
         android:layout_marginEnd="32dp"

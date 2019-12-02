@@ -36,7 +36,10 @@ public abstract class AbsMenuActivity extends AbsListActivity implements MenuAda
     public final void onEventItemClick(Item item) {
         Class<? extends AppCompatActivity> cls = item.getDestinationActivityClass();
         if(cls!=null) {
-            startActivity(new Intent(this, cls));
+            Intent i = new Intent(this,cls);
+            if(item.getAction()!=null)
+                i.setAction(item.getAction());
+            startActivity(i);
         } else if(item.getTitle()!=null&&!item.getTitle().isEmpty()) Toasty.normal(this,item.getTitle() +" is coming soon!").show();
         else Toasty.normal(this,"Coming soon!").show();
     }
