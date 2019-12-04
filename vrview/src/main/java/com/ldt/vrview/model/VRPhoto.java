@@ -12,6 +12,9 @@ public class VRPhoto {
     public static final String GPANO_CROPPED_AREA_TOP_PIXELS = "GPano:CroppedAreaTopPixels";
     public static final String GPANO_CROPPED_AREA_LEFT_PIXELS = "GPano:CroppedAreaLeftPixels";
     public static final String GPANO_PROJECTION_TYPE = "GPano:ProjectionType";
+    public static float[] getDefaultAngleAreas( ){
+        return new float[] {0,0,360,180};
+    }
 
     private final float[] mStartingAngles;
     private float[] mCurrentAngles = new float[3];

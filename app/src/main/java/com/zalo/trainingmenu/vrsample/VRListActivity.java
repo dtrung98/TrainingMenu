@@ -51,15 +51,15 @@ public class VRListActivity extends AbsListActivity {
                 list.add(createNewsFeed(
                         "Pano History",
                         "There are several practical sphere-to-plane mappings. Two are widely used: Equirectangular is a latitude/longitude map, 360 degrees wide x 180 degrees high. The 2:1 aspect ratio is often used as a clue by 360-aware software. ",
-                        R.drawable.down1));
+                        R.drawable.down1, new float[]{0,0,320,180}));
                 list.add(createNewsFeed(
                         "VR Enjoy",
                         "360 panoramas can be saved in regular bitmap file types (bmp, jpg, png, …etc) that are distorted in some areas of the image (according the projection method used).",
-                        R.drawable.down2));
-                list.add(createNewsFeed(
+                        R.drawable.down2, new float[]{0,30,360,120}));
+           /*     list.add(createNewsFeed(
                         "Reda Maged",
                         "This is an example of a 360 panorama done using spherical projection method. You can see the stretching resulted in the lower and upper parts and the compression in the middle.",
-                        R.drawable.rural));
+                        R.drawable.rural));*/
                 list.add(createNewsFeed("Countryside",
                                 "I like living in the countryside because of some reasons. Environmentally speaking, it is a peaceful place. The air is fresh. The space is quiet. We can enjoy healthy natural conditions without worrying much about environmental pollution.\n" +
                                 "\n" +
@@ -99,6 +99,10 @@ public class VRListActivity extends AbsListActivity {
     }
 
     private VRNewsFeed createNewsFeed(String author,String content, int resId) {
+        return createNewsFeed(author,content,resId, VRPhoto.getDefaultAngleAreas());
+    }
+
+    private VRNewsFeed createNewsFeed(String author,String content, int resId, float[] area) {
         VRNewsFeed newsFeed = new VRNewsFeed(author, content);
         newsFeed.mDrawableID = resId;
         Bitmap bitmap = null;
@@ -107,7 +111,7 @@ public class VRListActivity extends AbsListActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        newsFeed.mVRPhoto = VRPhoto.with(this).setBitmap(bitmap).get();
+        newsFeed.mVRPhoto = VRPhoto.with(this).setBitmap(bitmap).setAreaAngles(area).get();
         return newsFeed;
     }
 }

@@ -36,9 +36,9 @@ public class PanoramaSphere {
     private static final float UNIT_SIZE = 1f;// 单位尺寸
     private float r = 2f; // 球的半径
 
-    private static final float radius=2f;
+    private final float radius=2f;
 
-    private static int vCount = 0;// 顶点个数，先初始化为0
+    private int vCount = 0;// 顶点个数，先初始化为0
 
     public static final float FROM_RADS_TO_DEGS = 57.2957795f;
     private Resources res;
@@ -111,11 +111,17 @@ public class PanoramaSphere {
     public void setVRPhoto(VRPhoto photo) {
         shouldResetVRPhoto = true;
         mVRPhoto = photo;
-        float[] angles = mVRPhoto.getAngleAreas();
+        float[] angles;
+
+        if(mVRPhoto!=null) {
+            angles = mVRPhoto.getAngleAreas();
+        } else angles = VRPhoto.getDefaultAngleAreas();
+
         mHFromAngle = angles[0];
         mVFromAngle = angles[1];
         mHToAngle = angles[0] + angles[2];
         mVToAngle = angles[1] + angles[3];
+
     }
 
     public void create(){
@@ -306,8 +312,6 @@ public class PanoramaSphere {
                 alVertix.add(y3);
                 alVertix.add(z3);
 
-                float _s0 = (float) (hAngle / (180/FROM_RADS_TO_DEGS)/2);
-                float _s1 = (float) ((hAngle + angleSpan)/ (180/FROM_RADS_TO_DEGS)/2);
                 float s0 = (float) (hAngleDegree - mHFromAngle) / ((mHToAngle - mHFromAngle));
                 float s1 = (float) (hAngleDegree - mHFromAngle + angleSpanDegree) / ((mHToAngle - mHFromAngle));
                 float t0 = (float) ((vAngleDegree - mVFromAngle) / (mVToAngle - mVFromAngle)); // from 0 to (
@@ -340,7 +344,7 @@ public class PanoramaSphere {
         }
         vCount = alVertix.size() / 3;
         posBuffer = convertToFloatBuffer(alVertix);
-        cooBuffer=convertToFloatBuffer(textureVertix);
+        cooBuffer = convertToFloatBuffer(textureVertix);
     }
 
     private static FloatBuffer convertToFloatBuffer(ArrayList<Float> data){

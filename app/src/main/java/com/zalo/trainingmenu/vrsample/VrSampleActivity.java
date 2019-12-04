@@ -331,51 +331,56 @@ public class VrSampleActivity extends AbsLocaleActivity {
     }
 
     private void buildSample() {
-        mVRView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if(!mVRPhotos.isEmpty()&&mMode==MODE_SAMPLE) {
-                    mCurrentPos++;
-                    if(mCurrentPos == mVRPhotos.size()) setVRPhotoSample(-1);
-                    else {
-                        if(mCurrentPos == mVRPhotos.size()+1) mCurrentPos = 0;
-                        setVRPhotoSample(mCurrentPos);
-                    }
+        mVRView.setOnLongClickListener(v -> {
+            if(!mVRPhotos.isEmpty()&&mMode==MODE_SAMPLE) {
+                mCurrentPos++;
+                if(mCurrentPos == mVRPhotos.size()) setVRPhotoSample(-1);
+                else {
+                    if(mCurrentPos == mVRPhotos.size()+1) mCurrentPos = 0;
+                    setVRPhotoSample(mCurrentPos);
                 }
-                return true;
             }
+            return true;
         });
 
-        if(mVRPhotos==null) mVRPhotos = new ArrayList<>(4);
+        if(mVRPhotos==null) mVRPhotos = new ArrayList<>();
         AsyncTask.execute(() -> {
             mVRPhotos.add(createPhoto(R.drawable._360sp));
             mVRPhotos.add(createPhoto(R.drawable._360x));
             mVRPhotos.add(createPhoto(R.drawable.rural));
-            mVRPhotos.add(createPhoto(R.drawable.down1));
-            mVRPhotos.add(createPhoto(R.drawable.down2));
+            mVRPhotos.add(createPhoto(R.drawable.down1, new float[]{0,0,320,180}));
+            mVRPhotos.add(createPhoto(R.drawable.down2, new float[]{0,30,360,120}));
             mVRView.post(() -> {
                 String savedVR = PreferenceUtil.getInstance().getSavedVRSource();
+                Log.d(TAG, "saved: "+savedVR);
                 if(savedVR==null) setVRPhotoSample(0);
+
                 else
                 switch (savedVR) {
                     case "sample_0":
                         setVRPhotoSample(0);
                     break;
+
                     case "sample_1":
                         setVRPhotoSample(1);
                     break;
+
                     case "sample_2":
                         setVRPhotoSample(2);
                     break;
+
                     case "sample_3":
                         setVRPhotoSample(3);
                     break;
+
                     case "sample_4":
                         setVRPhotoSample(4);
                     break;
+
                     case "sample_5":
                         setVRPhotoSample(5);
                         break;
+
                     default:
                         setVRPhotoWithPath(savedVR);
                 }
@@ -384,13 +389,17 @@ public class VrSampleActivity extends AbsLocaleActivity {
     }
 
     private VRPhoto createPhoto(int resId) {
+        return createPhoto(resId, VRPhoto.getDefaultAngleAreas());
+    }
+
+        private VRPhoto createPhoto(int resId, float[] area) {
         Bitmap bitmap = null;
         try {
             bitmap = BitmapFactory.decodeResource(getResources(),resId);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return VRPhoto.with(this).setBitmap(bitmap).get();
+        return VRPhoto.with(this).setBitmap(bitmap).setAreaAngles(area).get();
     }
 
     @Override
