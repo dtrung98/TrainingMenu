@@ -2,6 +2,7 @@ package com.ldt.vrview.transform;
 
 import android.view.View;
 
+import com.ldt.vrview.VRControlView;
 import com.ldt.vrview.gesture.ViewAttacher;
 
 public class BaseTransformer implements Transformer, ViewAttacher {
@@ -13,6 +14,7 @@ public class BaseTransformer implements Transformer, ViewAttacher {
 
     public void setTransformListener(TransformListener transformListener) {
         mTransformListener = transformListener;
+        updateTransformZone();
     }
 
     protected void notifyTransformChanged() {
@@ -21,6 +23,7 @@ public class BaseTransformer implements Transformer, ViewAttacher {
 
     private TransformListener mTransformListener;
     public float[] mValues = new float[] {0, 0, 0, 1}; // left-right, up-down, rotate, and scale
+    public float[] mTransformZone = new float[] {0,360,0,180,0,360,1,3};
     protected float mViewWidth = 1;
     protected float mViewHeight = 1;
 
@@ -99,6 +102,15 @@ public class BaseTransformer implements Transformer, ViewAttacher {
         mValues[1] = 0;
         mValues[2] = 0;
         mValues[3] = 1;
+        updateTransformZone();
+    }
+
+    public void updateTransformZone() {
+        if(getTransformListener()!=null) {
+            getTransformListener().getTransformZone(mTransformZone);
+        } else {
+            VRControlView.getDefaultTransformZone(mTransformZone);
+        }
     }
 
     @Override

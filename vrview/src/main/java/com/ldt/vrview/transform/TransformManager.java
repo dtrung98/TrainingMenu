@@ -146,9 +146,14 @@ public final class TransformManager extends BaseTransformer implements Transform
     }
 
     @Override
-    public void onTransformChanged(int which, float[] values4) {
+    public void onTransformChanged(int which, float[] value4) {
         updateTransform();
         notifyTransformChanged(which);
+    }
+
+    @Override
+    public void getTransformZone(float[] value8) {
+        getTransformListener().getTransformZone(value8);
     }
 
     public void notifyTransformChanged(int which) {

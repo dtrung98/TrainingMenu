@@ -141,12 +141,13 @@ public class VRView extends FrameLayout implements TransformListener {
         this.id = id;
         mControlView.setViewID(id);
     }
+
     DecimalFormat df = new DecimalFormat("0.00");
     @Override
-    public void onTransformChanged(int which, float[] angle3) {
+    public void onTransformChanged(int which, float[] value4) {
         if(mAlignButton!=null) {
-            mAlignButton.setRotateDegree(angle3[0]);
-            mAlignButton.setUpDownDegree(angle3[1]);
+            mAlignButton.setRotateDegree(value4[0]);
+            mAlignButton.setUpDownDegree(value4[1]);
         }
 
         if(which== TransformManager.GESTURE_TRANSFORMER)
@@ -156,8 +157,13 @@ public class VRView extends FrameLayout implements TransformListener {
 
         post(() -> {
             if (mTextView != null)
-                mTextView.setText("transform " + df.format(angle3[0]) + ", " + df.format(angle3[1]));
+                mTextView.setText("transform " + df.format(value4[0]) + ", " + df.format(value4[1]));
         });
 
+    }
+
+    @Override
+    public void getTransformZone(float[] value8) {
+        // not use
     }
 }

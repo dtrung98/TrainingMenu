@@ -85,8 +85,10 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
 
     private void postTranslate(float dx, float dy) {
         Log.d(TAG, "translate only");
+
         mGestureTransformer.postTranslate(dx,dy);
     }
+
 
     private void postTranslateByFling(float dx, float dy) {
         Log.d(TAG, "translate with fling");
@@ -111,7 +113,6 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
                 mOnViewDragListener.onDrag(dx, dy);
             }
             postTranslate(dx,dy);
-            //checkAndDisplayMatrix();
 
             /*
              * Here we decide whether to let the ImageView's parent to start taking

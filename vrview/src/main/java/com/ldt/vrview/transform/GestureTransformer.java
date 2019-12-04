@@ -21,24 +21,31 @@ public class GestureTransformer extends BaseTransformer {
     @Override
     public void reset() {
         super.reset();
-        mXViewTranslate = 0f;
-        mYViewTranslate = 0f;
+        mXTranslatePixels = 0f;
+        mYTranslatePixels = 0f;
         mXViewScale = 1;
         mYViewScale = 1;
         updateTransform();
     }
 
-    private float mXViewTranslate = 0f;
-    private float mYViewTranslate = 0f;
+    private float mXTranslatePixels = 0f;
+    private float mYTranslatePixels = 0f;
     private float mXViewScale = 1;
     private float mYViewScale = 1;
 
     private float wProjectAngle = 0;
     private float hProjectAngle = 0;
 
+
+    private float mXMinTranslatePixels = 0;
+    private float mXMaxTranslatePixels = 0;
+
+    private float mYMinTranslatePixels = 0;
+    private float mYMaxTranslatePixels = 0;
+
     public void postTranslate(float dx, float dy) {
-        mXViewTranslate+=dx;
-        mYViewTranslate+=dy;
+        mXTranslatePixels +=dx;
+        mYTranslatePixels +=dy;
 
         // convert ra goc hay convert ra gia tri ?
         updateTransform();
@@ -72,15 +79,15 @@ public class GestureTransformer extends BaseTransformer {
         hProjectAngle = 90f;
        // wProjectAngle = (float) (FROM_RADS_TO_DEGS* Math.asin(ratio/1));
         wProjectAngle = 90f*ratio;
-        mAttacher.setRangeScroll((int)(720f*mViewWidth/wProjectAngle),(int)(720f*mViewHeight/hProjectAngle));
+        mAttacher.setRangeScroll((int)(120f*mViewWidth/wProjectAngle),(int)(120f*mViewHeight/hProjectAngle));
         mAttacher.setOverScrollRange((int)(15*mViewWidth/wProjectAngle));
     }
 
     @Override
     public void updateTransform() {
         // left right, up down, and rotation
-        mValues[0] = -mXViewTranslate/mViewWidth*wProjectAngle;
-        mValues[1] = mYViewTranslate/mViewHeight*hProjectAngle;
+        mValues[0] = -mXTranslatePixels /mViewWidth*wProjectAngle;
+        mValues[1] = mYTranslatePixels /mViewHeight*hProjectAngle;
         mValues[2] = 0;
 
         mValues[3] = mXViewScale;

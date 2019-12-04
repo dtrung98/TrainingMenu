@@ -53,6 +53,7 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     }
 
     private void init(AttributeSet attrs) {
+        System.arraycopy(sDefaultTransformZone,0,mTransformZone,0,8);
         setEGLContextClientVersion(2);
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
@@ -129,8 +130,13 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
+                // reset transform zone
+                updateTransformZone(vrio);
+
                 mTransformManager.reset();
-                if(mSphere!=null) mSphere.setVRPhoto(vrio);
+                if(mSphere!=null) {
+                    mSphere.setVRPhoto(vrio);
+                }
             }
         });
 
@@ -150,9 +156,41 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     }
 
     @Override
-    public void onTransformChanged(int which, float[] angle3) {
-        mSphere.setTransformValue(angle3);
-        if(mTransformListener!=null) mTransformListener.onTransformChanged(which, angle3);
+    public void onTransformChanged(int which, float[] value4) {
+        mSphere.setTransformValue(value4);
+        if(mTransformListener!=null) mTransformListener.onTransformChanged(which, value4);
+    }
+
+    private static float[] sDefaultTransformZone = new float[] {
+            0,360,
+            0,180,
+            0,360,
+            1,3
+    };
+
+    public static void getDefaultTransformZone(float[] value8) {
+        System.arraycopy(sDefaultTransformZone,0,value8,0,8);
+    }
+
+    private final float[] mTransformZone = new float[8];
+
+    private void updateTransformZone(VRPhoto photo) {
+        synchronized (mTransformZone) {
+            if (photo == null) {
+                System.arraycopy(sDefaultTransformZone, 0, mTransformZone, 0, 8);
+            } else {
+                float[] value4 = photo.getAngleAreas();
+                mTransformZone[0] = value4[0];
+                mTransformZone[1] = value4[2];
+                mTransformZone[2] = value4[1];
+                mTransformZone[3] = value4[3];
+            }
+        }
+    }
+
+    @Override
+    public void getTransformZone(float[] value8) {
+        System.arraycopy(mTransformZone,0,value8,0,8);
     }
 
     public void setViewID(int id) {

@@ -16,6 +16,7 @@ public class VRPhoto {
         return new float[] {0,0,360,180};
     }
 
+
     private final float[] mStartingAngles;
     private float[] mCurrentAngles = new float[3];
 
