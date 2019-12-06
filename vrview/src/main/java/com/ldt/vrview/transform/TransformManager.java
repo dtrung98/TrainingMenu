@@ -1,31 +1,33 @@
 package com.ldt.vrview.transform;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 
 import com.ldt.vrview.gesture.ViewGestureAttacher;
+import com.ldt.vrview.transform.base.BaseTransformer;
+import com.ldt.vrview.transform.base.ChildTransformer;
+import com.ldt.vrview.transform.base.TrackingTransformListener;
 
 import java.util.ArrayList;
-import java.util.logging.LogRecord;
 
-public final class TransformManager extends BaseTransformer implements TransformListener {
+public final class TransformManager extends BaseTransformer implements TrackingTransformListener {
     private static final String TAG = "TransformManager";
     public static final int GESTURE_TRANSFORMER = 1;
     public static final int SENSOR_TRANSFORMER = 2;
     public static final int TRANSFORM_MANAGER = 3;
 
-    private ArrayList<BaseTransformer> mTransformers = new ArrayList<>();
+    private ArrayList<ChildTransformer> mTransformers = new ArrayList<>();
     private SensorTransformer mSensorTransformer;
     private GestureTransformer mGestureTransformer;
     private ValueAnimator mResetAnimator;
 
     public TransformManager(int id) {
         super(id);
+        System.arraycopy(sDefaultTransformZone,0,mTransformZone,0,8);
         mGestureTransformer = new GestureTransformer(GESTURE_TRANSFORMER);
         mSensorTransformer = new SensorTransformer(SENSOR_TRANSFORMER);
         mTransformers.add(mGestureTransformer);
@@ -40,19 +42,16 @@ public final class TransformManager extends BaseTransformer implements Transform
         mResetAnimator = ValueAnimator.ofFloat(0,1);
         mResetAnimator.setDuration(550);
         //mResetAnimator.setInterpolator(new AccelerateInterpolator());
-        mResetAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float animated = (float)animation.getAnimatedValue();
-                mValues[0] = mSavedValues[0] *(1 - animated);
-                mValues[1] = mSavedValues[1] *(1 - animated);
-                mValues[2] = mSavedValues[2] *(1 - animated);
+        mResetAnimator.addUpdateListener(animation -> {
+            float animated = (float)animation.getAnimatedValue();
+            mValues[0] = mSavedValues[0] *(1 - animated);
+            mValues[1] = mSavedValues[1] *(1 - animated);
+            mValues[2] = mSavedValues[2] *(1 - animated);
 
-                // scale
-                mValues[3] = 1 + (1- animated)*(mSavedValues[3] - 1);
-                notifyTransformChanged();
+            // scale
+            mValues[3] = 1 + (1- animated)*(mSavedValues[3] - 1);
+            notifyTransformChanged();
 
-            }
         });
 
         mResetAnimator.addListener(new Animator.AnimatorListener() {
@@ -151,12 +150,36 @@ public final class TransformManager extends BaseTransformer implements Transform
         notifyTransformChanged(which);
     }
 
-    @Override
-    public void getTransformZone(float[] value8) {
-        getTransformListener().getTransformZone(value8);
-    }
-
     public void notifyTransformChanged(int which) {
         if(getTransformListener() != null) getTransformListener().onTransformChanged(which,mValues);
+    }
+
+    @Override
+    public void getTransformZone(float[] value8) {
+        System.arraycopy(mTransformZone,0,value8,0,8);
+    }
+
+    private static float[] sDefaultTransformZone = new float[] {
+            -180,180,
+            -90,90,
+            -180,180,
+            1,3
+    };
+
+    public synchronized void setTransformZone(float[] value8) {
+        if(value8.length>=8)
+        System.arraycopy(value8,0,mTransformZone,0,8);
+        Log.d(TAG, "transform zone: minX = "+mTransformZone[0]+", maxX = "+mTransformZone[1]+", minY = "+mTransformZone[2]+", maxY = "+mTransformZone[3]);
+    }
+
+    public static void getDefaultTransformZone(float[] value8) {
+        System.arraycopy(sDefaultTransformZone,0,value8,0,8);
+    }
+
+    private final float[] mTransformZone = new float[8];
+
+    @Override
+    public void getCurrentTransform(float[] value4) {
+        System.arraycopy(mValues,0,value4,0,4);
     }
 }

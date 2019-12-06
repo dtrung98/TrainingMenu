@@ -12,7 +12,7 @@ import android.view.Surface;
 
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.shader.ShaderConstant;
-import com.ldt.vrview.transform.BaseTransformer;
+import com.ldt.vrview.transform.base.BaseTransformer;
 import com.ldt.vrview.util.GlSelfUtil;
 
 import java.lang.ref.WeakReference;

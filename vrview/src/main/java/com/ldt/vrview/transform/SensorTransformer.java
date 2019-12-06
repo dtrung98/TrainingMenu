@@ -7,7 +7,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
 
-public class SensorTransformer extends BaseTransformer implements SensorEventListener{
+import com.ldt.vrview.transform.base.BaseTransformer;
+import com.ldt.vrview.transform.base.ChildTransformer;
+
+public class SensorTransformer extends ChildTransformer implements SensorEventListener{
     private static final String TAG = "SensorTransformer";
     public static final float FROM_RADS_TO_DEGS = 57.2957795f;
 

@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ldt.menulayout.ui.AbsListActivity;
@@ -13,6 +14,11 @@ import com.ldt.vrview.model.VRPhoto;
 import com.zalo.trainingmenu.R;
 
 import java.util.ArrayList;
+
+import butterknife.BindDimen;
+import butterknife.BindDrawable;
+import butterknife.BindView;
+import butterknife.OnClick;
 
 public class VRListActivity extends AbsListActivity {
     VRListAdapter mAdapter;
@@ -22,8 +28,10 @@ public class VRListActivity extends AbsListActivity {
         return R.string.new_feeds;
     }
 
+
     @Override
     protected void onInitRecyclerView() {
+
          findViewById(R.id.root).setBackgroundColor(Color.WHITE);
         ((ImageView)findViewById(R.id.back_button)).setColorFilter(0xff0a0a0a);
         findViewById(R.id.back_button).setBackgroundResource(R.drawable.circle_background_support_touch_inverse);

@@ -11,7 +11,7 @@ import android.view.WindowManager;
 
 import com.ldt.vrview.gesture.ViewGestureAttacher;
 import com.ldt.vrview.model.VRPhoto;
-import com.ldt.vrview.transform.TransformListener;
+import com.ldt.vrview.transform.base.TransformListener;
 import com.ldt.vrview.transform.TransformManager;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -53,7 +53,6 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     }
 
     private void init(AttributeSet attrs) {
-        System.arraycopy(sDefaultTransformZone,0,mTransformZone,0,8);
         setEGLContextClientVersion(2);
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
@@ -161,36 +160,19 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
         if(mTransformListener!=null) mTransformListener.onTransformChanged(which, value4);
     }
 
-    private static float[] sDefaultTransformZone = new float[] {
-            0,360,
-            0,180,
-            0,360,
-            1,3
-    };
-
-    public static void getDefaultTransformZone(float[] value8) {
-        System.arraycopy(sDefaultTransformZone,0,value8,0,8);
-    }
-
-    private final float[] mTransformZone = new float[8];
-
     private void updateTransformZone(VRPhoto photo) {
-        synchronized (mTransformZone) {
+        float[] value8 = new float[8];
             if (photo == null) {
-                System.arraycopy(sDefaultTransformZone, 0, mTransformZone, 0, 8);
+                TransformManager.getDefaultTransformZone(value8);
             } else {
                 float[] value4 = photo.getAngleAreas();
-                mTransformZone[0] = value4[0];
-                mTransformZone[1] = value4[2];
-                mTransformZone[2] = value4[1];
-                mTransformZone[3] = value4[3];
+                value8[0] = -(180 - value4[0]);
+                value8[1] = value4[2] - 180 ;
+                value8[2] = -(90-value4[1]);
+                value8[3] =  value4[3] - 90;
             }
-        }
-    }
 
-    @Override
-    public void getTransformZone(float[] value8) {
-        System.arraycopy(mTransformZone,0,value8,0,8);
+                mTransformManager.setTransformZone(value8);
     }
 
     public void setViewID(int id) {

@@ -1,6 +1,5 @@
 package com.ldt.vrview;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -13,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ldt.vrview.model.VRPhoto;
-import com.ldt.vrview.transform.TransformListener;
+import com.ldt.vrview.transform.base.TransformListener;
 import com.ldt.vrview.transform.TransformManager;
 
 import java.text.DecimalFormat;
@@ -160,10 +159,5 @@ public class VRView extends FrameLayout implements TransformListener {
                 mTextView.setText("transform " + df.format(value4[0]) + ", " + df.format(value4[1]));
         });
 
-    }
-
-    @Override
-    public void getTransformZone(float[] value8) {
-        // not use
     }
 }

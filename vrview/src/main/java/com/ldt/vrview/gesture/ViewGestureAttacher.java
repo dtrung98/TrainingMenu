@@ -54,6 +54,7 @@ public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, V
         mRangeScrollY = y;
         Log.d(TAG, "range : x = "+ x +", y = "+ y);
     }
+
     public void setOverScrollRange(int value) {
         mOverScrollRange = value;
     }

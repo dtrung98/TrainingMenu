@@ -26,8 +26,8 @@ public class VRMenuActivity extends AbsMenuActivity {
 
     @Override
     protected void back(View v) {
-        finish();
         startActivity(new Intent(this, MenuActivity.class));
+        finish();
     }
 
 
