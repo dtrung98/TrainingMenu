@@ -115,7 +115,9 @@ public class VRListActivity extends AbsListActivity {
         newsFeed.mDrawableID = resId;
         Bitmap bitmap = null;
         try {
-            bitmap = BitmapFactory.decodeResource(getResources(),resId);
+            BitmapFactory.Options bitmapLoadingOptions = new BitmapFactory.Options();
+            bitmapLoadingOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+            bitmap = BitmapFactory.decodeResource(getResources(),resId,bitmapLoadingOptions);
         } catch (Exception e) {
             e.printStackTrace();
         }

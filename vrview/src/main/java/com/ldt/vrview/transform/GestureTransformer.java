@@ -47,7 +47,7 @@ public class GestureTransformer extends ChildTransformer {
         }
             getTransformListener().getTransformZone(mParentTransformZone); // minX, maxX, minY, maxY,
 
-        halfScreenXAngle = 30;//convertPixelToAngleX(mViewWidth/2);
+        halfScreenXAngle = convertPixelToAngleX(mViewWidth/2);
         halfScreenYAngle = convertPixelToAngleY(mViewHeight/2);
 
         mParentTransformZone[0] += halfScreenXAngle;
@@ -135,7 +135,6 @@ public class GestureTransformer extends ChildTransformer {
     }
 
     public float convertPixelToAngleX(float dx) {
-
         // false
         return dx/mViewWidth*wProjectAngle; // == dx /mViewWidth * 90 *mViewWidth /mViewHeight == dx / mViewHeight * 90
     }

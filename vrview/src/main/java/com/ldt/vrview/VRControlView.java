@@ -126,16 +126,13 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
     }
 
     public void setVRPhoto(VRPhoto vrio) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                // reset transform zone
-                updateTransformZone(vrio);
+        AsyncTask.execute(() -> {
+            // reset transform zone
+            updateTransformZone(vrio);
 
-                mTransformManager.reset();
-                if(mSphere!=null) {
-                    mSphere.setVRPhoto(vrio);
-                }
+            mTransformManager.reset();
+            if(mSphere!=null) {
+                mSphere.setVRPhoto(vrio);
             }
         });
 

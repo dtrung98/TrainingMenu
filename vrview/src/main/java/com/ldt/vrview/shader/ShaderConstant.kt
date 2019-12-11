@@ -4,7 +4,7 @@ object ShaderConstant {
 
     // language=glsl
     const val FRAGMENT = """
-        precision highp float;
+        precision mediump float;
         uniform sampler2D uTexture;
         varying vec2 vCoordinate;
         

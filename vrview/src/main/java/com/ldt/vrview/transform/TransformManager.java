@@ -40,7 +40,7 @@ public final class TransformManager extends BaseTransformer implements TrackingT
     private void initResetAnimator() {
         if(mResetAnimator!=null) return;
         mResetAnimator = ValueAnimator.ofFloat(0,1);
-        mResetAnimator.setDuration(550);
+        mResetAnimator.setDuration(750);
         //mResetAnimator.setInterpolator(new AccelerateInterpolator());
         mResetAnimator.addUpdateListener(animation -> {
             float animated = (float)animation.getAnimatedValue();

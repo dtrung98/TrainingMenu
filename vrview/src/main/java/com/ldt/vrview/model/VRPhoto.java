@@ -155,7 +155,6 @@ public class VRPhoto {
             return this;
         }
 
-
         public Builder setStartingScale(float value) {
             mStartingScale = value;
             return this;
