@@ -10,8 +10,12 @@ import android.opengl.Matrix;
 import android.util.Log;
 import android.view.Surface;
 
+import androidx.constraintlayout.widget.ConstraintSet;
+
 import com.ldt.vrview.model.VRPhoto;
 import com.ldt.vrview.shader.ShaderConstant;
+import com.ldt.vrview.transform.TransformManager;
+import com.ldt.vrview.transform.Transformer;
 import com.ldt.vrview.transform.base.BaseTransformer;
 import com.ldt.vrview.util.GlSelfUtil;
 
@@ -415,13 +419,12 @@ public class PanoramaSphere {
         //Matrix.frustumM(mProjectMatrix, 0, -ratio*skyRate, ratio*skyRate, -1*skyRate, 1*skyRate, 1, 300);
         //透视投影矩阵/视锥
 
-        Matrix.perspectiveM(mProjectMatrix,0,90f,mTextureAspect,1,300);
+        //Matrix.perspectiveM(mProjectMatrix,0,90f,mTextureAspect,1,300);
+        updateTransformValue();
         //设置相机位置
         Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f,0.0f, 0.0f, 0.0f,1f, 0f,1.0f, 0.0f);
         //模型矩阵
         Matrix.setIdentityM(mModelMatrix,0);
-
-
 
         Log.d(TAG, "vr "+id+" set size");
     }
@@ -524,13 +527,51 @@ public class PanoramaSphere {
         }
     }*/
 
+    public final float[] mTransformValue = new float[] {0,0,0,1};
+
     public void setTransformValue(final float[] value4) {
+        if(value4!=null&&value4.length>=4) {
+            synchronized (mTransformValue) {
+                System.arraycopy(value4,0,mTransformValue,0,4);
+            }
+            updateTransformValue();
+        }
+    }
+
+    public static void perspectiveM(float[] m, int offset,
+                                    float f, float aspect, float zNear, float zFar) {
+       // float f = 1.0f / (float) Math.tan(fovy * (Math.PI / 360.0));
+        float rangeReciprocal = 1.0f / (zNear - zFar);
+
+        m[offset + 0] = f / aspect;
+        m[offset + 1] = 0.0f;
+        m[offset + 2] = 0.0f;
+        m[offset + 3] = 0.0f;
+
+        m[offset + 4] = 0.0f;
+        m[offset + 5] = f;
+        m[offset + 6] = 0.0f;
+        m[offset + 7] = 0.0f;
+
+        m[offset + 8] = 0.0f;
+        m[offset + 9] = 0.0f;
+        m[offset + 10] = (zFar + zNear) * rangeReciprocal;
+        m[offset + 11] = -1.0f;
+
+        m[offset + 12] = 0.0f;
+        m[offset + 13] = 0.0f;
+        m[offset + 14] = 2.0f * zFar * zNear * rangeReciprocal;
+        m[offset + 15] = 0.0f;
+    }
+
+    public void updateTransformValue() {
         switch (mOrientation) {
             case Surface.ROTATION_0:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,value4[1],0,1,0); // rotate up - down
+            default:
+                Matrix.rotateM(temp,0,mCenterMatrix,0,mTransformValue[1],0,1,0); // rotate up - down
 
                 float[] preResultM = new float[16];
-                Matrix.rotateM(preResultM,0,temp,0,value4[0],0,0,1); // rotate left - right
+                Matrix.rotateM(preResultM,0,temp,0,mTransformValue[0],0,0,1); // rotate left - right
           /*      float[] invertInit = new float[16];
                 Matrix.invertM(invertInit,0,initSensorM,0);
                 float[] transformM = new float[16];
@@ -545,22 +586,23 @@ public class PanoramaSphere {
                 System.arraycopy(preResultM, 0, mRotateMatrix, 0, 16);
 
                 float[] tProjectM = new float[16];
-                // 90 to 45;
-                Matrix.perspectiveM(tProjectM,0,90f/value4[3],mTextureAspect,1,300);
+
+                // the value should be smaller than 142 degree
+                perspectiveM(tProjectM,0,mTransformValue[3],mTextureAspect,0.1f,4); // do not change value 1 & 300
                 System.arraycopy(tProjectM,0,mProjectMatrix,0,16);
                 break;
-            case Surface.ROTATION_90:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,value4[1]*FROM_RADS_TO_DEGS,0,0,1);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,value4[2]*FROM_RADS_TO_DEGS,0,1,0);
+      /*      case Surface.ROTATION_90:
+                Matrix.rotateM(temp,0,mCenterMatrix,0,mTransformValue[1]*FROM_RADS_TO_DEGS,0,0,1);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,mTransformValue[2]*FROM_RADS_TO_DEGS,0,1,0);
                 break;
             case Surface.ROTATION_180:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,-value4[1]*FROM_RADS_TO_DEGS,0,1,0);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,value4[2]*FROM_RADS_TO_DEGS,0,0,-1);
+                Matrix.rotateM(temp,0,mCenterMatrix,0,-mTransformValue[1]*FROM_RADS_TO_DEGS,0,1,0);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,mTransformValue[2]*FROM_RADS_TO_DEGS,0,0,-1);
                 break;
             case Surface.ROTATION_270:
-                Matrix.rotateM(temp,0,mCenterMatrix,0,-value4[1]*FROM_RADS_TO_DEGS,0,0,1);
-                Matrix.rotateM(mRotateMatrix,0,temp,0,-value4[2]*FROM_RADS_TO_DEGS,0,1,0);
-                break;
+                Matrix.rotateM(temp,0,mCenterMatrix,0,-mTransformValue[1]*FROM_RADS_TO_DEGS,0,0,1);
+                Matrix.rotateM(mRotateMatrix,0,temp,0,-mTransformValue[2]*FROM_RADS_TO_DEGS,0,1,0);
+                break;*/
         }
     }
 

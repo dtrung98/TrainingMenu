@@ -128,10 +128,10 @@ public class GestureTransformer extends ChildTransformer {
     public void updateSize() {
         ratio=mViewWidth/mViewHeight;
         hProjectAngle = 90f;
-       // wProjectAngle = (float) (FROM_RADS_TO_DEGS* Math.asin(ratio/1));
-        wProjectAngle = 90f*ratio;
+        wProjectAngle = (float) (2 * Math.toDegrees(Math.atan(mViewWidth/mViewHeight)));
         mAttacher.setRangeScroll((int)(720f*mViewWidth/wProjectAngle),(int)(720f*mViewHeight/hProjectAngle));
         mAttacher.setOverScrollRange((int)(15*mViewWidth/wProjectAngle));
+       // mAttacher.setMinimumScale((float) (Math.sqrt(ratio*ratio + 1) * 3/4));
     }
 
     public float convertPixelToAngleX(float dx) {
@@ -149,8 +149,7 @@ public class GestureTransformer extends ChildTransformer {
 
         mValues[3] = mXViewScale;
         notifyTransformChanged();
-    }
-    @Override
+    }    @Override
     public void attach(View view) {
         if(isAttached) detach();
         isAttached = true;

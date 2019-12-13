@@ -168,7 +168,6 @@ public class VRControlView extends GLTextureView implements GLTextureView.Render
                 value8[2] = -(90-value4[1]);
                 value8[3] =  value4[3] - 90;
             }
-
                 mTransformManager.setTransformZone(value8);
     }
 

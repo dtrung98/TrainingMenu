@@ -22,6 +22,13 @@ public class BaseTransformer<T extends TransformListener> implements Transformer
     }
 
     private T mTransformListener;
+
+    private static float[] sDefaultValue = new float[] {0,0,0,1};
+    public static void getDefaultValue(float[] value4) {
+        if(value4!=null&&value4.length>=4)
+            System.arraycopy(sDefaultValue,0,value4,0,4);
+    }
+
     public float[] mValues = new float[] {0, 0, 0, 1}; // left-right, up-down, rotate, and scale
     protected float mViewWidth = 1;
     protected float mViewHeight = 1;

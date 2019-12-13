@@ -18,10 +18,10 @@ import com.ldt.vrview.util.Util;
 public class ViewGestureAttacher implements ViewAttacher,View.OnTouchListener, View.OnLayoutChangeListener {
     private static final String TAG = "ViewGestureAttacher";
 
-    private static float DEFAULT_MAX_SCALE = 3.0f;
-    private static float DEFAULT_MID_SCALE = 1.75f;
-    private static float DEFAULT_MIN_SCALE = 0.8f;
-    private static int DEFAULT_ZOOM_DURATION = 225;
+    public static final float DEFAULT_MAX_SCALE = 3.0f;
+    public static final float DEFAULT_MID_SCALE = 1.75f;
+    public static final float DEFAULT_MIN_SCALE = 0.5f;
+    public static final int DEFAULT_ZOOM_DURATION = 225;
 
     private static final int HORIZONTAL_EDGE_NONE = -1;
     private static final int HORIZONTAL_EDGE_LEFT = 0;
