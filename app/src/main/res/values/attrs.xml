@@ -9,5 +9,6 @@
         <attr name="animateOnChanged" format="boolean"/>
         <attr name="connections" format="integer"/>
         <attr name="randomPercentages" format="boolean"/>
+
     </declare-styleable>
 </resources>

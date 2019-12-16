@@ -232,5 +232,7 @@
     <string name="choose_vr_photo">Choose VR Photo</string>
     <string name="choose_vr_photo_description">View vr photo in the gallery</string>
     <string name="choose_in_gallery">Choose in gallery</string>
+    <string name="air_hockey">Air Hockey</string>
+    <string name="air_hockey_description">Simple game using OpenGL</string>
 
 </resources>

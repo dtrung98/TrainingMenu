@@ -1,6 +1,6 @@
 package com.ldt.vrview.shader;
 
-public final class Shader {
+public final class ShaderJava {
     // language=glsl
     public static String FRAGMENT =
             "precision highp float;" +

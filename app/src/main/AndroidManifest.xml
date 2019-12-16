@@ -38,57 +38,87 @@
             android:name="com.zalo.trainingmenu.fundamental.servicedemo.ServiceDemoActivity"
             />
         <activity android:name=".vrsample.VRListActivity" android:theme="@style/LightAppTheme"/>
+
         <activity android:name=".vrsample.VRMenuActivity" >
             <intent-filter android:label="@string/menu">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:label="@string/content_provider"
             android:name="com.zalo.trainingmenu.fundamental.index.ContentProviderDemoActivity" />
+
         <activity
             android:label="@string/notes"
             android:name="com.zalo.trainingmenu.fundamental.noteapp.DemoNoteActivity" />
+
         <activity
             android:label="@string/notes"
             android:name="com.zalo.trainingmenu.fundamental.noteapp.NoteDetailActivity" />
+
         <activity
             android:label="@string/network"
             android:name="com.zalo.trainingmenu.fundamental.index.NetworkMenuActivity" />
+
         <activity
             android:label="@string/weather"
             android:name="com.zalo.trainingmenu.fundamental.weather.DemoWeatherApp" />
+
         <activity
             android:label="@string/users"
             android:name="com.zalo.trainingmenu.fundamental.userlist.UserDataListActivity" />
+
         <activity
             android:label="@string/users"
             android:name="com.zalo.trainingmenu.fundamental.userlist.UserProfileActivity" />
+
         <activity
             android:label="@string/multithreading"
             android:name="com.zalo.trainingmenu.fundamental.index.MultithreadingActivity" />
         <activity android:name="com.zalo.trainingmenu.fundamental.pipe.PipeExampleActivity" />
+
         <activity
             android:label="@string/downloader"
             android:launchMode="singleTop"
             android:name="com.zalo.trainingmenu.downloader.ui.main.DownloadActivity" />
+
         <activity android:name="com.zalo.trainingmenu.fundamental.FundamentalActivity"
             android:label="@string/fundamental"/>
+
         <activity android:name="com.zalo.trainingmenu.downloader.ui.detail.TaskDetailActivity" />
+
         <activity android:name="com.zalo.trainingmenu.downloader.ui.setting.SettingActivity"
             android:theme="@style/PreferenceAppTheme"/>
+
         <activity android:name=".fundamental.opengl.SimpleBitmapActivity"
             android:theme="@style/FullScreenTheme"/>
-        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.Photo3DActivity" android:theme="@style/FullScreenTheme" />
+
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.Photo3DActivity"
+            android:theme="@style/FullScreenTheme" />
+
         <activity android:name=".fundamental.index.OpenGLActivity" />
-        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderSetActivity" android:theme="@style/FullScreenTheme"/>
-        <activity android:name=".fundamental.camera.CameraActivity" android:theme="@style/CompletelyFullscreenTheme"/>
+
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.photo3d.ShaderSetActivity"
+            android:theme="@style/FullScreenTheme"/>
+
+        <activity android:name=".fundamental.camera.CameraActivity"
+            android:theme="@style/CompletelyFullscreenTheme"/>
+
         <activity android:name=".fundamental.camera.CameraKitActivity" />
-        <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"  android:theme="@style/LightAppTheme"/>
-        <activity android:name=".vrsample.VrSampleActivity" android:theme="@style/VRTheme"
+
+        <activity android:name="com.zalo.trainingmenu.newsfeed3d.NewsFeed3DActivity"
+            android:theme="@style/LightAppTheme"/>
+
+        <activity android:name=".vrsample.VrSampleActivity"
+            android:theme="@style/VRTheme"
             tools:ignore="LockedOrientationActivity" />
+
         <activity android:name=".vrsample.VrViewActivity" />
+
+        <activity android:name=".fundamental.opengl.airhockey.AirHockeyActivity"
+            android:theme="@style/FullScreenTheme"/>
 
         <service
             android:label="@string/time_track_service"

@@ -1,6 +1,6 @@
 package com.ldt.vrview.shader
 
-object ShaderConstant {
+object ShaderKt {
 
     // language=glsl
     const val FRAGMENT = """
@@ -22,12 +22,21 @@ object ShaderConstant {
         color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;
         color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;
         color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;
-        return color;
-}
-        void main(){ 
+        return color; 
+        }
         
-        gl_FragColor=texture2D(uTexture,vCoordinate);
-        //gl_FragColor = blur13(uTexture, vCoordinate, vec2(1920,1080), vec2(0,1));
+        vec4 bw2(vec4 tc) { 
+        
+        float _bw = 0.2126 * tc.r + 0.7152 * tc.g + 0.0722 * tc.b;
+        return vec4(vec3(_bw*mix(12.92, 1.055, step( 0.0031308, _bw))),1.0); 
+        
+        }
+        
+        void main() { 
+        
+        vec4 tx = (texture2D(uTexture,vCoordinate));
+                  //   blur13(uTexture, vCoordinate, vec2(1920,1080), vec2(0,1));
+        gl_FragColor= tx;
         }
         """
 
