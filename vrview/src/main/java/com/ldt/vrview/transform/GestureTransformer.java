@@ -52,8 +52,8 @@ public class GestureTransformer extends ChildTransformer {
 
         mParentTransformZone[0] += halfScreenXAngle;
         mParentTransformZone[1] -= halfScreenXAngle;
-        mParentTransformZone[2] += halfScreenYAngle;
-        mParentTransformZone[3] -= halfScreenYAngle;
+        //mParentTransformZone[2] += halfScreenYAngle;
+        //mParentTransformZone[3] -= halfScreenYAngle;
         Log.d(TAG, "halfScreenXAngle = "+halfScreenXAngle+", halfScreenYAngle = "+halfScreenYAngle +" when w = "+mViewWidth+", h = "+mViewHeight+", ratio = "+ratio);
             Log.d(TAG, "transform after combined with screen: minX = "+mParentTransformZone[0]+", maxX = "+mParentTransformZone[1]+", minY = "+mParentTransformZone[2]+", maxY = "+mParentTransformZone[3]);
 

@@ -93,10 +93,16 @@ public class AirHockeyRenderer implements GLTextureView.Renderer {
         glUseProgram(programId);
 
 
+        // biến color
         uColorLocation = glGetUniformLocation(programId, U_COLOR);
+
+        // attribute position
         aPositionLocation = glGetAttribLocation(programId, A_POSITION);
         vertexData.position(0);
+        // ê, tao có một đống đỉnh này, mỗi đỉnh có size = 2 nha, tự biết mà tính ra các đỉnh nha
         glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT, false, 0, vertexData);
+
+        // kích hoạt giùm tao luôn
         glEnableVertexAttribArray(aPositionLocation);
 
     }
@@ -110,8 +116,10 @@ public class AirHockeyRenderer implements GLTextureView.Renderer {
     public void onDrawFrame(GL10 gl) {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw rectangle
+        // gán lại màu
         glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+
+        // ê vẽ tam giác nha, 6 điểm thì 2 tam giác, xài trong
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glUniform4f(uColorLocation, 1.0f, 0.0f, 1f, 1.0f);

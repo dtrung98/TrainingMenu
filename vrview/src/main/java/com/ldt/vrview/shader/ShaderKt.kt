@@ -3,10 +3,31 @@ package com.ldt.vrview.shader
 object ShaderKt {
 
     // language=glsl
+    const val VERTEX = """
+      uniform mat4 uProjMatrix;
+      uniform mat4 uViewMatrix;
+      uniform mat4 uModelMatrix;
+      uniform mat4 uRotateMatrix;
+      
+      attribute vec3 aPosition;
+      attribute vec2 aCoordinate;
+      varying vec2 vCoordinate; //
+      
+      uniform vec4 aEdgeCoord; // left, top, right, bottom
+      varying vec4 vEdgeCoord; // left, top, right, bottom
+      
+      void main(){ 
+      gl_Position=uProjMatrix*uRotateMatrix*uViewMatrix*uModelMatrix*vec4(aPosition,1);
+      vCoordinate = vec2(aCoordinate.x, 1.0 - aCoordinate.y);
+      }
+    """
+
+    // language=glsl
     const val FRAGMENT = """
         precision mediump float;
         uniform sampler2D uTexture;
         varying vec2 vCoordinate;
+        varying vec4 vEdgeCoord; // left, top, right, bottom
         
         vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) { 
         
@@ -34,26 +55,9 @@ object ShaderKt {
         
         void main() { 
         
-        vec4 tx = (texture2D(uTexture,vCoordinate));
+        vec4 tx = texture2D(uTexture,vCoordinate);
                   //   blur13(uTexture, vCoordinate, vec2(1920,1080), vec2(0,1));
         gl_FragColor= tx;
         }
         """
-
-    // language=glsl
-    const val VERTEX = """
-      uniform mat4 uProjMatrix;
-      uniform mat4 uViewMatrix;
-      uniform mat4 uModelMatrix;
-      uniform mat4 uRotateMatrix;
-      
-      attribute vec3 aPosition;
-      attribute vec2 aCoordinate;
-      varying vec2 vCoordinate;
-      
-      void main(){ 
-      gl_Position=uProjMatrix*uRotateMatrix*uViewMatrix*uModelMatrix*vec4(aPosition,1);
-      vCoordinate = vec2(aCoordinate.x, 1.0 - aCoordinate.y);
-      }
-    """
 }

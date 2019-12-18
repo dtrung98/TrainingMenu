@@ -51,6 +51,7 @@ public class PanoramaSphere {
     private int mHRotateMatrix;
     private int mHPosition;
     private int mHCoordinate;
+    private int mHEdgeCoord;
 
     private int textureId = 0;
 
@@ -133,6 +134,8 @@ public class PanoramaSphere {
         mHModelMatrix=GLES20.glGetUniformLocation(mHProgram,"uModelMatrix");
         mHRotateMatrix=GLES20.glGetUniformLocation(mHProgram,"uRotateMatrix");
         mHUTexture=GLES20.glGetUniformLocation(mHProgram,"uTexture");
+        mHEdgeCoord = GLES20.glGetUniformLocation(mHProgram,"aEdgeCoord");
+
         mHPosition =GLES20.glGetAttribLocation(mHProgram,"aPosition");
         mHCoordinate=GLES20.glGetAttribLocation(mHProgram,"aCoordinate");
 
@@ -280,9 +283,9 @@ public class PanoramaSphere {
 
         //float vFrom = vFromDeg/FROM_RADS_TO_DEGS;
         //float vTo = vToDeg/FROM_RADS_TO_DEGS;
-        for (double vAngleDegree = mVFromAngle; vAngleDegree < mVToAngle; vAngleDegree += angleSpanDegree){
+        for (double vAngleDegree = 0; vAngleDegree < 180; vAngleDegree += angleSpanDegree){
             vAngle = vAngleDegree/FROM_RADS_TO_DEGS;
-            for (double hAngleDegree = mHFromAngle; hAngleDegree < mHToAngle; hAngleDegree += angleSpanDegree){
+            for (double hAngleDegree = mHFromAngle; hAngleDegree < 360; hAngleDegree += angleSpanDegree){
                 hAngle = hAngleDegree/FROM_RADS_TO_DEGS;
 
                 // radius là 2, nghĩa là viewport = 1 nửa texture
@@ -435,21 +438,33 @@ public class PanoramaSphere {
         if(textureId!=0) {
             try {
 
+                // cập nhật transform matrix mới nhất
                 GLES20.glUniformMatrix4fv(mHProjMatrix, 1, false, mProjectMatrix, 0);
                 GLES20.glUniformMatrix4fv(mHViewMatrix, 1, false, mViewMatrix, 0);
                 GLES20.glUniformMatrix4fv(mHModelMatrix, 1, false, mModelMatrix, 0);
                 GLES20.glUniformMatrix4fv(mHRotateMatrix, 1, false, mRotateMatrix, 0);
 
+                GLES20.glUniform4f(mHEdgeCoord,0,0,0,0);
+
+
+                // kích hoạt texture
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
-                GLES20.glEnableVertexAttribArray(mHPosition);
+                // kích hoạt
                 GLES20.glVertexAttribPointer(mHPosition, 3, GLES20.GL_FLOAT, false, 0, posBuffer);
-                GLES20.glEnableVertexAttribArray(mHCoordinate);
+                GLES20.glEnableVertexAttribArray(mHPosition);
+
+
                 GLES20.glVertexAttribPointer(mHCoordinate, 2, GLES20.GL_FLOAT, false, 0, cooBuffer);
+                GLES20.glEnableVertexAttribArray(mHCoordinate);
+
+                // xài vCount từng này điểm trong 2 cái buffer trên kia
                 GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vCount);
 
+                // vô hiệu hóa 2 cái buffer đó đi
                 GLES20.glDisableVertexAttribArray(mHPosition);
+                GLES20.glDisableVertexAttribArray(mHCoordinate);
             } catch (Exception ignored) {
                 Log.d(TAG, "exception");
             }
@@ -457,11 +472,10 @@ public class PanoramaSphere {
     }
 
 
-    private void calculateBasedOnGravity(float[] vectors) {
+  /*  private void calculateBasedOnGravity(float[] vectors) {
         SensorManager.getRotationMatrixFromVector(mRotateMatrix,vectors);
     }
 
-    private float[] temp = new float[16];
 
     private void formatMatrix(float[] M, float[] in) {
         System.arraycopy(in,0,M,0,16);
@@ -471,7 +485,7 @@ public class PanoramaSphere {
         M[0]/=xLen; M[1]/=xLen; M[2]=0; // Set the x column
         M[4]/=yLen; M[5]/=yLen; M[6]=0; // Set the y column
         M[8]=0; M[9]=0; M[10]=1;        // Set the z column
-    }
+    }*/
 
     /*private void calculateV4(float[] vectors) {
         if(!mIsInitSensor) {
@@ -539,7 +553,7 @@ public class PanoramaSphere {
        // float f = 1.0f / (float) Math.tan(fovy * (Math.PI / 360.0));
         float rangeReciprocal = 1.0f / (zNear - zFar);
 
-        m[offset + 0] = f / aspect;
+        m[offset] = f / aspect;
         m[offset + 1] = 0.0f;
         m[offset + 2] = 0.0f;
         m[offset + 3] = 0.0f;
@@ -559,6 +573,8 @@ public class PanoramaSphere {
         m[offset + 14] = 2.0f * zFar * zNear * rangeReciprocal;
         m[offset + 15] = 0.0f;
     }
+
+    private float[] temp = new float[16];
 
     public void updateTransformValue() {
         switch (mOrientation) {
@@ -602,7 +618,7 @@ public class PanoramaSphere {
         }
     }
 
-    private void calculateV3(float[] vectors) {
+  /*  private void calculateV3(float[] vectors) {
 
         if(!mIsInitSensor) {
             mIsInitSensor = true;
@@ -624,9 +640,9 @@ public class PanoramaSphere {
         //  float[] temp1 = new float[16];
         //   Matrix.rotateM(temp1,0,temp,0,currentOrient[1],1,0,0);
         Matrix.rotateM(mRotateMatrix,0,temp,0, currentOrient[2],0,0,-1);
-    }
+    }*/
 
-    private void retrieveOrientationType2(float[] vectors, float[] outYPR) {
+    /*private void retrieveOrientationType2(float[] vectors, float[] outYPR) {
         float[] rotationMatrix = new float[9];
         SensorManager.getRotationMatrixFromVector(rotationMatrix, vectors);
         int worldAxisX = SensorManager.AXIS_X;
@@ -662,15 +678,11 @@ public class PanoramaSphere {
 
     private void log3(String name, float[] xyz) {
         Log.d(TAG, "report "+name+": x = "+df.format(xyz[0])+", y = "+ df.format(xyz[1])+", z = " + df.format(xyz[2]));
-    }
+    }*/
 
     private int mOrientation = Surface.ROTATION_0;
     public void onChangeOrientation(int o) {
         mOrientation = o;
-    }
-
-    public void recalibrate() {
-        mIsInitSensor = false;
     }
 
 }

@@ -16,7 +16,7 @@ import com.ldt.menulayout.model.Item;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder> {
+public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder> implements OnItemClickListener {
     private static final String TAG = "CircleEventTypeAdapter";
 
     public static final int ICON_MENU_ITEM = 1;
@@ -29,9 +29,12 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
         return mData;
     }
 
-    public interface OnItemClickListener {
-        void onEventItemClick(Item item);
+    @Override
+    public void onEventItemClick(Item item, int position) {
+        if(mListener!=null) mListener.onEventItemClick(item , position);
     }
+
+
 
     private OnItemClickListener mListener;
     public void setListener(OnItemClickListener listener) {
@@ -57,8 +60,8 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         if(viewType==ICON_MENU_ITEM)
-         return new IconMenuItemHolder(inflater.inflate(R.layout.item_card_with_icon,parent,false));
-        else return new MenuItemHolder(inflater.inflate(R.layout.item_card,parent,false));
+         return new IconMenuItemHolder(inflater.inflate(R.layout.item_card_with_icon,parent,false),this);
+        else return new MenuItemHolder(inflater.inflate(R.layout.item_card,parent,false),this);
 
     }
 
@@ -78,9 +81,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
         return mData.size();
     }
 
-
-
-    public class MenuItemHolder extends RecyclerView.ViewHolder {
+    public static class MenuItemHolder extends RecyclerView.ViewHolder {
 
         TextView mTitle;
 
@@ -88,17 +89,28 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
 
         public MenuItemHolder(View itemView) {
             super(itemView);
-
             mTitle = itemView.findViewById(R.id.title);
             mDescription = itemView.findViewById(R.id.description);
             itemView.findViewById(R.id.constraint_root).setOnClickListener(this::clickPanel);
         }
 
+        public MenuItemHolder(View itemView, OnItemClickListener listener) {
+            super(itemView);
+            mListener = listener;
+            mTitle = itemView.findViewById(R.id.title);
+            mDescription = itemView.findViewById(R.id.description);
+            itemView.findViewById(R.id.constraint_root).setOnClickListener(this::clickPanel);
+        }
+
+        OnItemClickListener mListener;
+        Item mItem;
+
         void clickPanel(View ignored) {
-            if(mListener!=null) mListener.onEventItemClick(mData.get(getAdapterPosition()));
+            if(mListener!=null) mListener.onEventItemClick(mItem, getAdapterPosition());
         }
 
         public void bind(Item item) {
+            mItem = item;
             mTitle.setText(item.getTitle());
 
 
@@ -113,17 +125,18 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuItemHolder
         }
     }
 
-    public class IconMenuItemHolder extends MenuItemHolder {
+    public static class IconMenuItemHolder extends MenuItemHolder {
 
         ImageView mIcon;
 
-        public IconMenuItemHolder(View itemView) {
-            super(itemView);
+        public IconMenuItemHolder(View itemView, OnItemClickListener listener) {
+            super(itemView, listener);
             mIcon = itemView.findViewById(R.id.icon);
         }
 
 
         public void bind(Item item) {
+            mItem = item;
             mTitle.setText(item.getTitle());
             mDescription.setVisibility(View.GONE);
             int padding = (int)(mIcon.getContext().getResources().getDimension(R.dimen.oneDp)*item.getDrawablePadding());

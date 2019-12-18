@@ -16,7 +16,7 @@ public class DetailAdapter extends MenuAdapter {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         if(viewType==ICON_MENU_ITEM)
-            return new IconMenuItemHolder(inflater.inflate(R.layout.item_card_small_with_icon,parent,false));
+            return new IconMenuItemHolder(inflater.inflate(R.layout.item_card_small_with_icon,parent,false),this);
         else return new MenuItemHolder(inflater.inflate(R.layout.item_card_for_field,parent,false));
 
     }

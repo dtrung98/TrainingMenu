@@ -10,7 +10,7 @@ import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
-public abstract class AbsMenuActivity extends AbsListActivity implements MenuAdapter.OnItemClickListener {
+public abstract class AbsMenuActivity extends AbsListActivity implements OnItemClickListener {
     private static final String TAG = "AbsMenuActivity";
 
     protected MenuAdapter mAdapter;
@@ -33,7 +33,7 @@ public abstract class AbsMenuActivity extends AbsListActivity implements MenuAda
     protected abstract List<Item> onRefreshDataList();
 
     @Override
-    public final void onEventItemClick(Item item) {
+    public final void onEventItemClick(Item item, int position) {
         Class<? extends AppCompatActivity> cls = item.getDestinationActivityClass();
         if(cls!=null) {
             Intent i = new Intent(this,cls);

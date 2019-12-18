@@ -234,5 +234,13 @@
     <string name="choose_in_gallery">Choose in gallery</string>
     <string name="air_hockey">Air Hockey</string>
     <string name="air_hockey_description">Simple game using OpenGL</string>
+    <string name="notes_detail">Notes</string>
+    <string name="fullscreen_vr_view">Fullscreen VR</string>
+    <string name="navigate_activity">Navigate Activity</string>
+    <string name="extension">Extension</string>
+    <string name="index_list">Index List</string>
+    <string name="index_list_description">The index list of all activites</string>
+    <string name="set_launcher_actitivy">Set Launcher Activity</string>
+    <string name="set_launcher_description">Choose the startup activity</string>
 
 </resources>

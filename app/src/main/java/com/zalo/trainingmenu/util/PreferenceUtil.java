@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.zalo.trainingmenu.App;
+import com.zalo.trainingmenu.R;
 
 public final class PreferenceUtil {
     public static final String SAVED_VERTEX_SHADER = "saved_vertex_shader";
@@ -14,6 +15,8 @@ public final class PreferenceUtil {
     public static final String SAVED_ORIGINAL_3D_PHOTO = "saved_original_3d_photo";
     public static final String SAVED_DEPTH_PHOTO = "saved_depth_photo";
     public static final String SAVED_VR_SOURCE = "saved_vr_source";
+    public static final String SAVED_LAUNCHING_ACTIVITY_ID = "saved_launching_activity_id";
+    public static final String SAVED_LAUNCHING_ACTIVITY_TITLE = "saved_launching_activity_title";
     private static PreferenceUtil sInstance;
     private final SharedPreferences mPreferences;
 
@@ -76,5 +79,21 @@ public final class PreferenceUtil {
     }
     public void saveVRSource(String source) {
         mPreferences.edit().putString(SAVED_VR_SOURCE,source).apply();
+    }
+
+    public int getSavedLaunchingActivityId() {
+        return mPreferences.getInt(SAVED_LAUNCHING_ACTIVITY_ID,R.string.menu);
+    }
+
+    public String getSavedLaunchingActivityTitle() {
+        return mPreferences.getString(SAVED_LAUNCHING_ACTIVITY_TITLE,"");
+    }
+
+    public void saveLaunchingActivityId(int id) {
+        mPreferences.edit().putInt(SAVED_LAUNCHING_ACTIVITY_ID,id).apply();
+    }
+
+    public void saveLaunchingActivityTitle(String title) {
+        mPreferences.edit().putString(SAVED_LAUNCHING_ACTIVITY_TITLE, title).apply();
     }
 }

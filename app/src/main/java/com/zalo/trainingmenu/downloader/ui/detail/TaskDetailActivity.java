@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.ldt.menulayout.model.Item;
 import com.ldt.menulayout.ui.MenuAdapter;
+import com.ldt.menulayout.ui.OnItemClickListener;
 import com.zalo.trainingmenu.App;
 import com.zalo.trainingmenu.R;
 import com.zalo.trainingmenu.downloader.base.BaseTask;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnItemClickListener {
+public class TaskDetailActivity extends BaseActivity implements OnItemClickListener {
     private static final String TAG = "TaskDetailActivity";
     DetailAdapter mAdapter;
     public static final String VIEW_TASK_DETAIL ="view_task_detail";
@@ -160,7 +161,7 @@ public class TaskDetailActivity extends BaseActivity implements MenuAdapter.OnIt
     }
 
     @Override
-    public void onEventItemClick(Item item) {
+    public void onEventItemClick(Item item, int position) {
         if(item.getDrawableRes()==null) {
             // Property
             if(Util.setClipboard(App.getInstance().getApplicationContext(),item.getTitle(), item.getDescription()))

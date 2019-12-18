@@ -18,6 +18,7 @@ public class Item {
 
     private final String mAction;
     private final int mDrawablePadding;
+    private final Object mTag;
 
     public int getTintColor() {
         return mTintColor;
@@ -28,11 +29,21 @@ public class Item {
     @DrawableRes
     private Integer mDrawableRes;
 
+    public Object getTag() {
+        return mTag;
+    }
+
     public static class Builder {
         public Context mContext;
         private String mTitle = "";
         private String mDescription = "";
         private Class<? extends AppCompatActivity> mActivityCls;
+        private Object mTag;
+
+        public Builder setTag(Object tag) {
+            mTag = tag;
+            return this;
+        }
 
         public Builder setDrawableRes(Integer drawableRes) {
             mDrawableRes = drawableRes;
@@ -99,7 +110,7 @@ public class Item {
 
         public Item get(){
             mContext = null;
-            return new Item(mTitle,mDescription,mActivityCls,mAction,mDrawableRes, mDrawablePadding, mTintColor);
+            return new Item(mTitle,mDescription,mActivityCls,mAction,mDrawableRes, mDrawablePadding, mTintColor, mTag);
         }
     }
 
@@ -107,7 +118,7 @@ public class Item {
         return new Builder(context);
     }
 
-    private Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls,String action, Integer drawableRes, int drawablePadding, int tintColor ) {
+    private Item(String mTitle, String mDescription, Class<? extends AppCompatActivity> cls,String action, Integer drawableRes, int drawablePadding, int tintColor, Object tag) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mAction = action;
@@ -115,6 +126,7 @@ public class Item {
         mDrawableRes = drawableRes;
         mDrawablePadding = drawablePadding;
         mTintColor = tintColor;
+        mTag = tag;
     }
 
     public String getTitle() {
